@@ -3,1002 +3,1169 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="سامانه مدیریت وظایف و زمان‌بندی پروژه‌ها">
-    <title>سامانه مدیریت وظایف</title>
-    <style>
-
-* {
-    box-sizing: border-box;
-}
-
-:root {
-    font-family: Tahoma, Arial, sans-serif;
-    color: #243247;
-    background: #f3f6fb;
-}
-
-body {
-    margin: 0;
-    line-height: 1.8;
-}
-
-button, input, textarea, select {
-    font: inherit;
-}
-
-button {
-    cursor: pointer;
-}
-
-.topbar {
-    background: #172b4d;
-    color: white;
-    padding: 22px 28px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 16px;
-}
-
-.topbar h1 {
-    font-size: 24px;
-    margin: 0;
-}
-
-.topbar p {
-    margin: 4px 0 0;
-    color: #d7e3f4;
-}
-
-.user-label {
-    border: 1px solid #8296b4;
-    border-radius: 20px;
-    padding: 5px 14px;
-    white-space: nowrap;
-}
-
-.layout {
-    display: grid;
-    grid-template-columns: 220px minmax(0, 1fr);
-    min-height: calc(100vh - 150px);
-}
-
-.sidebar {
-    background: white;
-    padding: 20px 14px;
-    border-left: 1px solid #e0e7f0;
-}
-
-.sidebar h2 {
-    font-size: 17px;
-    margin: 0 8px 14px;
-}
-
-.nav-btn {
-    display: block;
-    width: 100%;
-    text-align: right;
-    border: 0;
-    background: transparent;
-    padding: 11px 12px;
-    border-radius: 8px;
-    margin-bottom: 5px;
-    color: #40516a;
-}
-
-.nav-btn:hover,
-.nav-btn.active {
-    background: #eaf1ff;
-    color: #1749a2;
-}
-
-.content {
-    padding: 28px;
-    min-width: 0;
-}
-
-.page {
-    display: none;
-}
-
-.page.active {
-    display: block;
-}
-
-.content h2 {
-    margin-top: 0;
-}
-
-.content > .page > p {
-    color: #6c7a90;
-}
-
-.stats {
-    display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 14px;
-    margin: 24px 0;
-}
-
-.stat-card,
-.panel {
-    background: white;
-    border: 1px solid #e3e9f2;
-    border-radius: 12px;
-    padding: 20px;
-    box-shadow: 0 3px 12px rgba(25, 45, 75, 0.04);
-}
-
-.stat-card span {
-    display: block;
-    color: #6b7890;
-    font-size: 14px;
-}
-
-.stat-card strong {
-    display: block;
-    font-size: 28px;
-    margin-top: 8px;
-    color: #1749a2;
-}
-
-.panel {
-    margin: 18px 0;
-}
-
-.panel h3 {
-    margin-top: 0;
-}
-
-.form-grid {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 16px;
-}
-
-label {
-    display: block;
-    font-size: 14px;
-    font-weight: bold;
-    margin-bottom: 14px;
-}
-
-input,
-textarea,
-select {
-    display: block;
-    width: 100%;
-    margin-top: 6px;
-    border: 1px solid #cdd6e3;
-    border-radius: 7px;
-    padding: 10px;
-    background: white;
-    color: #243247;
-}
-
-input:focus,
-textarea:focus,
-select:focus {
-    outline: 2px solid #a9c4ff;
-    border-color: #376bd6;
-}
-
-textarea {
-    resize: vertical;
-}
-
-.full-width {
-    grid-column: 1 / -1;
-}
-
-.form-actions {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-}
-
-.primary-btn,
-.secondary-btn,
-.action-btn,
-.delete-btn {
-    border: 0;
-    border-radius: 7px;
-    padding: 9px 15px;
-}
-
-.primary-btn {
-    background: #2458bd;
-    color: white;
-}
-
-.primary-btn:hover {
-    background: #17449a;
-}
-
-.secondary-btn {
-    background: #e9eef6;
-    color: #354660;
-}
-
-.action-btn {
-    background: #e6efff;
-    color: #1749a2;
-    margin: 2px;
-}
-
-.delete-btn {
-    background: #ffebeb;
-    color: #a32222;
-    margin: 2px;
-}
-
-.section-heading {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 14px;
-    flex-wrap: wrap;
-}
-
-.section-heading input {
-    max-width: 280px;
-    margin: 0;
-}
-
-.table-wrap {
-    overflow-x: auto;
-}
-
-table {
-    width: 100%;
-    border-collapse: collapse;
-    min-width: 550px;
-}
-
-th,
-td {
-    padding: 12px 10px;
-    border-bottom: 1px solid #e8edf4;
-    text-align: right;
-}
-
-th {
-    background: #f6f8fc;
-    font-size: 13px;
-}
-
-.status {
-    display: inline-block;
-    border-radius: 20px;
-    padding: 3px 9px;
-    font-size: 12px;
-    white-space: nowrap;
-}
-
-.status.pending {
-    background: #fff2d8;
-    color: #805600;
-}
-
-.status.progress {
-    background: #e4efff;
-    color: #1749a2;
-}
-
-.status.done {
-    background: #dcf7e7;
-    color: #17643a;
-}
-
-.empty-state,
-.muted {
-    color: #758198;
-    font-size: 14px;
-}
-
-.warning {
-    color: #8b4c00;
-    background: #fff5e3;
-    border-radius: 8px;
-    padding: 12px;
-}
-
-.gantt-row {
-    display: grid;
-    grid-template-columns: minmax(120px, 1fr) 2fr;
-    gap: 14px;
-    align-items: center;
-    margin: 12px 0;
-}
-
-.gantt-track {
-    background: #edf1f7;
-    min-height: 18px;
-    border-radius: 8px;
-    overflow: hidden;
-}
-
-.gantt-bar {
-    background: #4779d1;
-    min-height: 18px;
-    border-radius: 8px;
-    min-width: 8px;
-}
-
-footer {
-    padding: 18px;
-    text-align: center;
-    color: #7b879a;
-    font-size: 13px;
-}
-
-@media (max-width: 800px) {
-    .layout {
-        grid-template-columns: 1fr;
-    }
-
-    .sidebar {
-        border-left: 0;
-        border-bottom: 1px solid #e0e7f0;
-    }
-
-    .sidebar button {
-        display: inline-block;
-        width: auto;
-    }
-
-    .content {
-        padding: 16px;
-    }
-
-    .stats {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-}
-
-@media (max-width: 480px) {
-    .topbar {
-        padding: 18px;
-        align-items: flex-start;
-        flex-direction: column;
-    }
-
-    .topbar h1 {
-        font-size: 20px;
-    }
-
-    .form-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .full-width {
-        grid-column: auto;
-    }
-
-    .stat-card,
-    .panel {
-        padding: 14px;
-    }
-
-    .gantt-row {
-        grid-template-columns: 1fr;
-        gap: 5px;
-    }
-}
-
-</style>
+    <meta name="description" content="سامانه مدیریت وظایف، پروژه‌ها، تأییدات و گزارش‌های سازمانی">
+    <title>سامانه مدیریت وظایف سازمانی</title>
+    <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
-    <header class="topbar">
+
+<header class="topbar">
+    <div class="brand">
+
+        <div class="brand-image">
+            <svg viewBox="0 0 100 100">
+                <rect x="15" y="13" width="70" height="74" rx="12"></rect>
+                <path d="M30 35h40M30 50h28M30 65h20"></path>
+                <path d="M65 61l7 7 13-16"></path>
+            </svg>
+        </div>
+
         <div>
             <h1>سامانه مدیریت وظایف</h1>
-            <p>مدیریت پروژه‌ها، وظایف و گزارش‌ها</p>
+            <p>مدیریت پروژه‌ها، وظایف، تأییدات و گزارش‌های سازمانی</p>
         </div>
-        <span class="user-label">پنل کاربری</span>
-    </header>
 
-    <div class="layout">
-        <aside class="sidebar">
-            <h2>منوی سامانه</h2>
-            <button class="nav-btn active" data-page="dashboard">داشبورد</button>
-            <button class="nav-btn" data-page="tasks">مرکز وظایف</button>
-            <button class="nav-btn" data-page="charter">منشور پروژه</button>
-            <button class="nav-btn" data-page="schedule">زمان‌بندی پروژه</button>
-            <button class="nav-btn" data-page="reports">گزارش‌های تجمیعی</button>
-            <button class="nav-btn" data-page="admin">مدیریت سامانه</button>
-        </aside>
-
-        <main class="content">
-            <section class="page active" id="dashboard">
-                <h2>داشبورد</h2>
-                <p>خلاصه‌ای از وضعیت وظایف سامانه</p>
-
-                <div class="stats">
-                    <article class="stat-card">
-                        <span>کل وظایف</span>
-                        <strong id="totalCount">۰</strong>
-                    </article>
-                    <article class="stat-card">
-                        <span>در انتظار انجام</span>
-                        <strong id="pendingCount">۰</strong>
-                    </article>
-                    <article class="stat-card">
-                        <span>در حال انجام</span>
-                        <strong id="progressCount">۰</strong>
-                    </article>
-                    <article class="stat-card">
-                        <span>تکمیل‌شده</span>
-                        <strong id="doneCount">۰</strong>
-                    </article>
-                </div>
-
-                <div class="panel">
-                    <h3>آخرین وظایف</h3>
-                    <div id="recentTasks" class="empty-state">
-                        هنوز وظیفه‌ای ثبت نشده است.
-                    </div>
-                </div>
-            </section>
-
-            <section class="page" id="tasks">
-                <h2>مرکز وظایف</h2>
-                <p>ثبت، مشاهده و پیگیری وظایف</p>
-
-                <div class="panel">
-                    <h3 id="formTitle">ایجاد وظیفه جدید</h3>
-                    <form id="taskForm">
-                        <input type="hidden" id="taskId">
-
-                        <div class="form-grid">
-                            <label>
-                                عنوان وظیفه *
-                                <input id="title" required maxlength="150"
-                                       placeholder="عنوان وظیفه را وارد کنید">
-                            </label>
-
-                            <label>
-                                وضعیت
-                                <select id="status">
-                                    <option value="pending">در انتظار انجام</option>
-                                    <option value="progress">در حال انجام</option>
-                                    <option value="done">تکمیل‌شده</option>
-                                </select>
-                            </label>
-
-                            <label class="full-width">
-                                شرح وظیفه
-                                <textarea id="description" rows="3"
-                                          placeholder="توضیحات وظیفه"></textarea>
-                            </label>
-
-                            <label>
-                                تاریخ شروع
-                                <input id="startDate" type="date">
-                            </label>
-
-                            <label>
-                                تاریخ پایان
-                                <input id="endDate" type="date">
-                            </label>
-
-                            <label>
-                                متولی
-                                <input id="responsible" placeholder="مسئول اجرا">
-                            </label>
-
-                            <label>
-                                مالک
-                                <input id="owner" placeholder="مالک وظیفه">
-                            </label>
-
-                            <label>
-                                ناظر
-                                <input id="supervisor" placeholder="ناظر وظیفه">
-                            </label>
-
-                            <label>
-                                تأییدکننده
-                                <input id="approver" placeholder="تأییدکننده">
-                            </label>
-
-                            <label class="full-width">
-                                آخرین شرح وضعیت
-                                <textarea id="latestStatus" rows="2"
-                                          placeholder="آخرین پیشرفت یا مانع کار"></textarea>
-                            </label>
-
-                            <label class="full-width">
-                                نام یا نشانی سند
-                                <input id="documentName"
-                                       placeholder="مثلاً گزارش-ماهانه.pdf">
-                            </label>
-                        </div>
-
-                        <div class="form-actions">
-                            <button class="primary-btn" type="submit">ذخیره وظیفه</button>
-                            <button class="secondary-btn" type="button" id="cancelEdit">
-                                انصراف از ویرایش
-                            </button>
-                        </div>
-                        <p id="formMessage" role="status" aria-live="polite"></p>
-                    </form>
-                </div>
-
-                <div class="panel">
-                    <div class="section-heading">
-                        <h3>فهرست وظایف</h3>
-                        <input id="searchTasks" placeholder="جست‌وجوی وظیفه...">
-                    </div>
-                    <div class="table-wrap">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>عنوان</th>
-                                    <th>متولی</th>
-                                    <th>پایان</th>
-                                    <th>وضعیت</th>
-                                    <th>عملیات</th>
-                                </tr>
-                            </thead>
-                            <tbody id="taskTableBody"></tbody>
-                        </table>
-                    </div>
-                    <p id="taskListMessage" class="empty-state">
-                        هنوز وظیفه‌ای ثبت نشده است.
-                    </p>
-                </div>
-            </section>
-
-            <section class="page" id="charter">
-                <h2>منشور پروژه</h2>
-                <p>اطلاعات اصلی پروژه را ثبت کن.</p>
-                <div class="panel">
-                    <form id="charterForm">
-                        <label>
-                            نام پروژه
-                            <input id="projectName" required placeholder="نام پروژه">
-                        </label>
-                        <label>
-                            هدف پروژه
-                            <textarea id="projectGoal" rows="4"
-                                      placeholder="هدف و نتیجه مورد انتظار"></textarea>
-                        </label>
-                        <label>
-                            مدیر پروژه
-                            <input id="projectManager" placeholder="نام مدیر پروژه">
-                        </label>
-                        <button class="primary-btn" type="submit">ذخیره منشور</button>
-                        <p id="charterMessage" role="status"></p>
-                    </form>
-                </div>
-            </section>
-
-            <section class="page" id="schedule">
-                <h2>زمان‌بندی پروژه</h2>
-                <p>برنامه‌ریزی اولیه بر اساس تاریخ وظایف ثبت‌شده</p>
-
-                <div class="panel">
-                    <h3>ساختار شکست کار (WBS)</h3>
-                    <p class="muted">در این نسخه هر وظیفه به‌عنوان یک فعالیت نمایش داده می‌شود.</p>
-                    <div id="wbsList" class="empty-state">هنوز فعالیتی وجود ندارد.</div>
-                </div>
-
-                <div class="panel">
-                    <h3>نمای ساده گانت</h3>
-                    <p class="muted">این نما فقط تاریخ‌های ثبت‌شده را نشان می‌دهد و هنوز وابستگی فعالیت‌ها را محاسبه نمی‌کند.</p>
-                    <div id="ganttList" class="gantt-list">
-                        هنوز فعالیت زمان‌بندی‌شده‌ای وجود ندارد.
-                    </div>
-                </div>
-            </section>
-
-            <section class="page" id="reports">
-                <h2>گزارش‌های تجمیعی</h2>
-                <p>گزارش خلاصه از وظایف ثبت‌شده</p>
-                <div class="panel">
-                    <div id="reportSummary"></div>
-                    <div class="table-wrap">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>وضعیت</th>
-                                    <th>تعداد</th>
-                                </tr>
-                            </thead>
-                            <tbody id="reportTableBody"></tbody>
-                        </table>
-                    </div>
-                </div>
-            </section>
-
-            <section class="page" id="admin">
-                <h2>مدیریت سامانه</h2>
-                <div class="panel">
-                    <h3>اطلاعات نسخه فعلی</h3>
-                    <p>این نسخه آزمایشی است و هنوز ورود کاربران، نقش‌های واقعی و کنترل دسترسی سمت سرور ندارد.</p>
-                    <p>RBS و سطح دسترسی کاربران باید در مرحله بعد بر اساس ساختار سازمان تعریف شوند.</p>
-                    <p class="warning">
-                        اطلاعات این نسخه در مرورگر ذخیره می‌شود. از اطلاعات محرمانه یا واقعی سازمانی استفاده نکن.
-                    </p>
-                </div>
-            </section>
-        </main>
     </div>
 
-    <footer>نسخه اولیه سامانه مدیریت وظایف</footer>
-    <script>
+    <div class="topbar-left">
+        <span class="version-badge">نسخه سازمانی</span>
+        <span class="user-label">پنل کاربری</span>
+    </div>
+</header>
 
-const $ = (id) => document.getElementById(id);
 
-const statusNames = {
-    pending: "در انتظار انجام",
-    progress: "در حال انجام",
-    done: "تکمیل‌شده"
-};
+<div class="layout">
 
-let tasks = [];
-let editingId = null;
+    <aside class="sidebar">
 
-// خواندن وظایف ذخیره‌شده در مرورگر
-try {
-    tasks = JSON.parse(localStorage.getItem("taskManagerTasks") || "[]");
-    if (!Array.isArray(tasks)) tasks = [];
-} catch {
-    tasks = [];
-}
+        <div class="sidebar-title">
+            <span class="menu-icon">☰</span>
 
-function saveTasks() {
-    localStorage.setItem("taskManagerTasks", JSON.stringify(tasks));
-}
-
-// جلوگیری از اجرای کدهای ناخواسته در متن واردشده
-function escapeHTML(value) {
-    return String(value ?? "").replace(/[&<>"']/g, (char) => ({
-        "&": "&amp;",
-        "<": "&lt;",
-        ">": "&gt;",
-        '"': "&quot;",
-        "'": "&#39;"
-    })[char]);
-}
-
-// جابه‌جایی بین صفحات سامانه
-function showPage(pageId) {
-    document.querySelectorAll(".page").forEach((page) => {
-        page.classList.toggle("active", page.id === pageId);
-    });
-
-    document.querySelectorAll(".nav-btn").forEach((button) => {
-        button.classList.toggle("active", button.dataset.page === pageId);
-    });
-
-    if (pageId === "schedule") renderSchedule();
-    if (pageId === "reports") renderReports();
-}
-
-document.querySelectorAll(".nav-btn").forEach((button) => {
-    button.addEventListener("click", () => showPage(button.dataset.page));
-});
-
-// دریافت اطلاعات فرم وظیفه
-function getFormTask() {
-    return {
-        title: $("title").value.trim(),
-        description: $("description").value.trim(),
-        startDate: $("startDate").value,
-        endDate: $("endDate").value,
-        responsible: $("responsible").value.trim(),
-        owner: $("owner").value.trim(),
-        supervisor: $("supervisor").value.trim(),
-        approver: $("approver").value.trim(),
-        latestStatus: $("latestStatus").value.trim(),
-        documentName: $("documentName").value.trim(),
-        status: $("status").value
-    };
-}
-
-// خالی کردن فرم
-function resetTaskForm() {
-    $("taskForm").reset();
-    $("taskId").value = "";
-    editingId = null;
-    $("formTitle").textContent = "ایجاد وظیفه جدید";
-    $("formMessage").textContent = "";
-}
-
-// ثبت وظیفه جدید یا ذخیره ویرایش
-$("taskForm").addEventListener("submit", (event) => {
-    event.preventDefault();
-
-    const task = getFormTask();
-
-    if (!task.title) {
-        $("formMessage").textContent = "لطفاً عنوان وظیفه را وارد کن.";
-        return;
-    }
-
-    if (task.startDate && task.endDate && task.endDate < task.startDate) {
-        $("formMessage").textContent =
-            "تاریخ پایان نمی‌تواند قبل از تاریخ شروع باشد.";
-        return;
-    }
-
-    if (editingId !== null) {
-        tasks = tasks.map((item) =>
-            item.id === editingId ? { ...item, ...task } : item
-        );
-    } else {
-        tasks.unshift({
-            id: Date.now().toString(),
-            ...task,
-            createdAt: new Date().toISOString()
-        });
-    }
-
-    saveTasks();
-    renderAll();
-    resetTaskForm();
-    showPage("tasks");
-    $("formMessage").textContent = "تغییرات با موفقیت ذخیره شد.";
-});
-
-$("cancelEdit").addEventListener("click", resetTaskForm);
-
-// نمایش فهرست وظایف و جست‌وجو
-function renderTaskTable() {
-    const query = $("searchTasks").value.trim().toLowerCase();
-
-    const filtered = tasks.filter((task) =>
-        [
-            task.title,
-            task.responsible,
-            task.owner,
-            task.status
-        ].some((value) =>
-            String(value ?? "").toLowerCase().includes(query)
-        )
-    );
-
-    $("taskTableBody").innerHTML = filtered.map((task) => `
-        <tr>
-            <td>${escapeHTML(task.title)}</td>
-            <td>${escapeHTML(task.responsible || "—")}</td>
-            <td>${escapeHTML(task.endDate || "—")}</td>
-            <td>
-                <span class="status ${escapeHTML(task.status)}">
-                    ${escapeHTML(statusNames[task.status] || task.status)}
-                </span>
-            </td>
-            <td>
-                <button class="action-btn"
-                    data-action="edit"
-                    data-id="${escapeHTML(task.id)}">
-                    ویرایش
-                </button>
-                <button class="delete-btn"
-                    data-action="delete"
-                    data-id="${escapeHTML(task.id)}">
-                    حذف
-                </button>
-            </td>
-        </tr>
-    `).join("");
-
-    $("taskListMessage").hidden = filtered.length > 0;
-
-    if (filtered.length === 0) {
-        $("taskListMessage").textContent = query
-            ? "وظیفه‌ای با این عبارت پیدا نشد."
-            : "هنوز وظیفه‌ای ثبت نشده است.";
-    }
-}
-
-$("searchTasks").addEventListener("input", renderTaskTable);
-
-// عملیات ویرایش و حذف
-$("taskTableBody").addEventListener("click", (event) => {
-    const button = event.target.closest("button[data-action]");
-    if (!button) return;
-
-    const task = tasks.find((item) => item.id === button.dataset.id);
-    if (!task) return;
-
-    if (button.dataset.action === "edit") {
-        editingId = task.id;
-        $("taskId").value = task.id;
-
-        const fields = {
-            title: task.title,
-            description: task.description,
-            startDate: task.startDate,
-            endDate: task.endDate,
-            responsible: task.responsible,
-            owner: task.owner,
-            supervisor: task.supervisor,
-            approver: task.approver,
-            latestStatus: task.latestStatus,
-            documentName: task.documentName,
-            status: task.status
-        };
-
-        Object.entries(fields).forEach(([id, value]) => {
-            $(id).value = value || "";
-        });
-
-        $("formTitle").textContent = "ویرایش وظیفه";
-        $("formMessage").textContent = "";
-        showPage("tasks");
-        $("taskForm").scrollIntoView({
-            behavior: "smooth",
-            block: "start"
-        });
-    }
-
-    if (button.dataset.action === "delete") {
-        if (!confirm(`وظیفه «${task.title}» حذف شود؟`)) return;
-
-        tasks = tasks.filter((item) => item.id !== task.id);
-        saveTasks();
-        renderAll();
-    }
-});
-
-// به‌روزرسانی داشبورد
-function renderDashboard() {
-    $("totalCount").textContent = tasks.length;
-    $("pendingCount").textContent =
-        tasks.filter((t) => t.status === "pending").length;
-    $("progressCount").textContent =
-        tasks.filter((t) => t.status === "progress").length;
-    $("doneCount").textContent =
-        tasks.filter((t) => t.status === "done").length;
-
-    const recent = tasks.slice(0, 5);
-
-    $("recentTasks").innerHTML = recent.length
-        ? recent.map((task) => `
-            <p>
-                <strong>${escapeHTML(task.title)}</strong>
-                — ${escapeHTML(statusNames[task.status] || task.status)}
-            </p>
-        `).join("")
-        : "هنوز وظیفه‌ای ثبت نشده است.";
-}
-
-// نمایش ساختار شکست کار و نمودار ساده گانت
-function renderSchedule() {
-    $("wbsList").innerHTML = tasks.length
-        ? tasks.map((task, index) => `
-            <p>
-                ${index + 1}. ${escapeHTML(task.title)}
-                <span class="muted">
-                    (${escapeHTML(statusNames[task.status] || task.status)})
-                </span>
-            </p>
-        `).join("")
-        : "هنوز فعالیتی وجود ندارد.";
-
-    const datedTasks = tasks.filter(
-        (task) => task.startDate || task.endDate
-    );
-
-    if (!datedTasks.length) {
-        $("ganttList").textContent =
-            "برای نمایش فعالیت‌ها، تاریخ شروع یا پایان ثبت کن.";
-        return;
-    }
-
-    const dates = datedTasks.flatMap((task) =>
-        [task.startDate, task.endDate]
-            .filter(Boolean)
-            .map((date) =>
-                new Date(date + "T00:00:00").getTime()
-            )
-    );
-
-    const minDate = Math.min(...dates);
-    const maxDate = Math.max(...dates);
-    const range = Math.max(maxDate - minDate, 86400000);
-
-    $("ganttList").innerHTML = datedTasks.map((task) => {
-        const start = task.startDate
-            ? new Date(task.startDate + "T00:00:00").getTime()
-            : new Date(task.endDate + "T00:00:00").getTime();
-
-        const end = task.endDate
-            ? new Date(task.endDate + "T00:00:00").getTime()
-            : start;
-
-        const right = Math.max(0, ((start - minDate) / range) * 100);
-        const width = Math.max(2, ((end - start) / range) * 100);
-        const safeWidth = Math.min(width, 100 - right);
-
-        return `
-            <div class="gantt-row">
-                <div>
-                    <strong>${escapeHTML(task.title)}</strong>
-                    <div class="muted">
-                        ${escapeHTML(task.startDate || "—")}
-                        تا ${escapeHTML(task.endDate || "—")}
-                    </div>
-                </div>
-                <div class="gantt-track">
-                    <div class="gantt-bar"
-                        title="${escapeHTML(task.title)}"
-                        style="margin-right:${right}%;width:${safeWidth}%">
-                    </div>
-                </div>
+            <div>
+                <strong>منوی سامانه</strong>
+                <small>Task Management</small>
             </div>
-        `;
-    }).join("");
-}
+        </div>
 
-// گزارش تجمیعی وظایف
-function renderReports() {
-    const counts = {
-        pending: tasks.filter((t) => t.status === "pending").length,
-        progress: tasks.filter((t) => t.status === "progress").length,
-        done: tasks.filter((t) => t.status === "done").length
-    };
 
-    $("reportSummary").textContent =
-        `تعداد کل وظایف: ${tasks.length}`;
+        <nav>
 
-    $("reportTableBody").innerHTML = Object.entries(counts).map(
-        ([status, count]) => `
-            <tr>
-                <td>${escapeHTML(statusNames[status])}</td>
-                <td>${count}</td>
-            </tr>
-        `
-    ).join("");
-}
+            <button class="nav-btn active" data-page="dashboard">
+                <span>▦</span>
+                <span>داشبورد و گزارشات</span>
+            </button>
 
-// ثبت اطلاعات منشور پروژه
-$("charterForm").addEventListener("submit", (event) => {
-    event.preventDefault();
+            <button class="nav-btn" data-page="projects">
+                <span>▣</span>
+                <span>ایجاد پروژه</span>
+            </button>
 
-    const charter = {
-        projectName: $("projectName").value.trim(),
-        projectGoal: $("projectGoal").value.trim(),
-        projectManager: $("projectManager").value.trim()
-    };
+            <button class="nav-btn" data-page="tasks">
+                <span>✓</span>
+                <span>مرکز وظایف</span>
+            </button>
 
-    localStorage.setItem(
-        "taskManagerCharter",
-        JSON.stringify(charter)
-    );
+            <button class="nav-btn" data-page="approvals">
+                <span>◉</span>
+                <span>مرکز تأییدات</span>
+            </button>
 
-    $("charterMessage").textContent =
-        "منشور پروژه در این مرورگر ذخیره شد.";
-});
+            <button class="nav-btn" data-page="schedule">
+                <span>◫</span>
+                <span>زمان‌بندی پروژه</span>
+            </button>
 
-// بارگذاری منشور ذخیره‌شده
-function loadCharter() {
-    try {
-        const charter = JSON.parse(
-            localStorage.getItem("taskManagerCharter") || "{}"
-        );
+            <button class="nav-btn" data-page="admin">
+                <span>⚙</span>
+                <span>مدیریت سامانه</span>
+            </button>
 
-        $("projectName").value = charter.projectName || "";
-        $("projectGoal").value = charter.projectGoal || "";
-        $("projectManager").value = charter.projectManager || "";
-    } catch {
-        // اگر اطلاعات قابل خواندن نبود، فرم خالی می‌ماند.
-    }
-}
+        </nav>
 
-// به‌روزرسانی تمام بخش‌های سامانه
-function renderAll() {
-    renderTaskTable();
-    renderDashboard();
-    renderSchedule();
-    renderReports();
-}
 
-loadCharter();
-renderAll();
+        <div class="sidebar-footer">
+            <span class="online-dot"></span>
+            سامانه فعال است
+        </div>
 
-</script>
+    </aside>
+
+
+    <main class="content">
+
+
+        <!-- ================= داشبورد ================= -->
+
+        <section class="page active" id="dashboard">
+
+            <div class="page-header">
+
+                <div>
+                    <span class="eyebrow">OVERVIEW</span>
+
+                    <h2>داشبورد و گزارشات</h2>
+
+                    <p>
+                        نمای کلی از وضعیت پروژه‌ها، وظایف و تأییدات
+                    </p>
+                </div>
+
+                <button class="primary-btn" type="button" data-go="projects">
+                    ＋ ایجاد پروژه
+                </button>
+
+            </div>
+
+
+            <div class="stats">
+
+                <article class="stat-card">
+                    <div class="stat-icon">▣</div>
+
+                    <div>
+                        <span>پروژه‌ها</span>
+                        <strong id="projectCount">۰</strong>
+                    </div>
+                </article>
+
+
+                <article class="stat-card">
+                    <div class="stat-icon">✓</div>
+
+                    <div>
+                        <span>کل وظایف</span>
+                        <strong id="totalCount">۰</strong>
+                    </div>
+                </article>
+
+
+                <article class="stat-card">
+                    <div class="stat-icon">◷</div>
+
+                    <div>
+                        <span>در حال انجام</span>
+                        <strong id="progressCount">۰</strong>
+                    </div>
+                </article>
+
+
+                <article class="stat-card">
+                    <div class="stat-icon">◎</div>
+
+                    <div>
+                        <span>نیازمند تأیید</span>
+                        <strong id="approvalCount">۰</strong>
+                    </div>
+                </article>
+
+            </div>
+
+
+            <div class="dashboard-grid">
+
+                <div class="panel">
+
+                    <div class="section-heading">
+
+                        <div>
+                            <h3>گزارش وضعیت وظایف</h3>
+                            <p class="muted">
+                                توزیع وظایف بر اساس وضعیت
+                            </p>
+                        </div>
+
+                    </div>
+
+
+                    <div class="report-bars">
+
+                        <div class="report-row">
+
+                            <div>
+                                <span>در انتظار انجام</span>
+                                <strong id="pendingCount">۰</strong>
+                            </div>
+
+                            <div class="progress-track">
+                                <i id="pendingBar"></i>
+                            </div>
+
+                        </div>
+
+
+                        <div class="report-row">
+
+                            <div>
+                                <span>در حال انجام</span>
+                                <strong id="progressReportCount">۰</strong>
+                            </div>
+
+                            <div class="progress-track">
+                                <i id="progressBar"></i>
+                            </div>
+
+                        </div>
+
+
+                        <div class="report-row">
+
+                            <div>
+                                <span>تکمیل‌شده</span>
+                                <strong id="doneCount">۰</strong>
+                            </div>
+
+                            <div class="progress-track">
+                                <i id="doneBar"></i>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="panel">
+
+                    <div class="section-heading">
+
+                        <div>
+                            <h3>آخرین وظایف</h3>
+
+                            <p class="muted">
+                                آخرین موارد ثبت یا ویرایش‌شده
+                            </p>
+                        </div>
+
+                        <button class="link-btn" type="button" data-go="tasks">
+                            مشاهده همه
+                        </button>
+
+                    </div>
+
+                    <div id="recentTasks" class="recent-list"></div>
+
+                </div>
+
+            </div>
+
+
+            <div class="panel">
+
+                <div class="section-heading">
+
+                    <div>
+                        <h3>گزارش تجمیعی پروژه‌ها</h3>
+
+                        <p class="muted">
+                            خلاصه‌ای از تعداد وظایف هر پروژه
+                        </p>
+                    </div>
+
+                </div>
+
+
+                <div class="table-wrap scroll-table">
+
+                    <table>
+
+                        <thead>
+
+                            <tr>
+                                <th>پروژه</th>
+                                <th>تعداد وظایف</th>
+                                <th>تکمیل‌شده</th>
+                                <th>در حال انجام</th>
+                                <th>در انتظار</th>
+                            </tr>
+
+                        </thead>
+
+                        <tbody id="projectReportBody"></tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- ================= ایجاد پروژه ================= -->
+
+        <section class="page" id="projects">
+
+            <div class="page-header">
+
+                <div>
+
+                    <span class="eyebrow">
+                        PROJECT CENTER
+                    </span>
+
+                    <h2>ایجاد پروژه</h2>
+
+                    <p>
+                        ثبت اطلاعات پایه پروژه و آماده‌سازی آن برای تعریف وظایف
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="panel form-panel">
+
+                <div class="panel-title">
+
+                    <div class="title-icon">▣</div>
+
+                    <div>
+
+                        <h3>اطلاعات پروژه</h3>
+
+                        <p>
+                            فیلدهای ستاره‌دار الزامی هستند.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <form id="projectForm">
+
+                    <input type="hidden" id="projectId">
+
+
+                    <div class="form-grid">
+
+                        <label>
+                            نام پروژه *
+
+                            <input
+                                id="projectName"
+                                required
+                                maxlength="150"
+                                placeholder="نام پروژه را وارد کنید"
+                            >
+                        </label>
+
+
+                        <label>
+                            مدیر پروژه
+
+                            <input
+                                id="projectManager"
+                                placeholder="نام مدیر پروژه"
+                            >
+                        </label>
+
+
+                        <label>
+                            تاریخ شروع
+
+                            <div class="date-input-wrap">
+
+                                <input
+                                    id="projectStartDate"
+                                    class="jalali-input"
+                                    inputmode="numeric"
+                                    placeholder="۱۴۰۵/۰۸/۰۱"
+                                >
+
+                                <small>
+                                    فرمت: ۱۴۰۵/۰۸/۰۱
+                                </small>
+
+                            </div>
+
+                        </label>
+
+
+                        <label>
+                            تاریخ پایان
+
+                            <div class="date-input-wrap">
+
+                                <input
+                                    id="projectEndDate"
+                                    class="jalali-input"
+                                    inputmode="numeric"
+                                    placeholder="۱۴۰۵/۱۰/۳۰"
+                                >
+
+                                <small>
+                                    فرمت: ۱۴۰۵/۱۰/۳۰
+                                </small>
+
+                            </div>
+
+                        </label>
+
+
+                        <label class="full-width">
+
+                            شرح پروژه
+
+                            <textarea
+                                id="projectDescription"
+                                rows="4"
+                                placeholder="شرح مختصر پروژه و نتیجه مورد انتظار"
+                            ></textarea>
+
+                        </label>
+
+                    </div>
+
+
+                    <div class="form-actions">
+
+                        <button class="primary-btn" type="submit">
+                            ذخیره پروژه
+                        </button>
+
+                        <button
+                            class="secondary-btn"
+                            type="button"
+                            id="cancelProjectEdit"
+                        >
+                            پاک کردن فرم
+                        </button>
+
+                    </div>
+
+
+                    <p
+                        id="projectMessage"
+                        class="form-message"
+                        role="status"
+                    ></p>
+
+                </form>
+
+            </div>
+
+
+
+            <div class="panel">
+
+                <div class="section-heading">
+
+                    <div>
+
+                        <h3>فهرست پروژه‌ها</h3>
+
+                        <p class="muted">
+                            پروژه‌های ثبت‌شده در سامانه
+                        </p>
+
+                    </div>
+
+                    <input
+                        id="searchProjects"
+                        class="compact-search"
+                        placeholder="جست‌وجوی پروژه..."
+                    >
+
+                </div>
+
+
+                <div class="table-wrap scroll-table">
+
+                    <table>
+
+                        <thead>
+
+                            <tr>
+                                <th>نام پروژه</th>
+                                <th>مدیر پروژه</th>
+                                <th>شروع</th>
+                                <th>پایان</th>
+                                <th>تعداد وظایف</th>
+                                <th>عملیات</th>
+                            </tr>
+
+                        </thead>
+
+                        <tbody id="projectTableBody"></tbody>
+
+                    </table>
+
+                </div>
+
+
+                <p
+                    id="projectListMessage"
+                    class="empty-state"
+                ></p>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- ================= مرکز وظایف ================= -->
+
+        <section class="page" id="tasks">
+
+            <div class="page-header">
+
+                <div>
+
+                    <span class="eyebrow">
+                        TASK CENTER
+                    </span>
+
+                    <h2>مرکز وظایف</h2>
+
+                    <p>
+                        ثبت، مشاهده، ویرایش و پیگیری وظایف پروژه‌ها
+                    </p>
+
+                </div>
+
+
+                <button
+                    class="secondary-btn"
+                    type="button"
+                    data-go="projects"
+                >
+                    ＋ ایجاد پروژه
+                </button>
+
+            </div>
+
+
+
+            <div class="panel form-panel">
+
+                <div class="panel-title">
+
+                    <div class="title-icon">✓</div>
+
+                    <div>
+
+                        <h3 id="formTitle">
+                            ایجاد وظیفه جدید
+                        </h3>
+
+                        <p>
+                            اطلاعات وظیفه و مسئولیت‌های مرتبط را ثبت کنید.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <form id="taskForm">
+
+                    <input type="hidden" id="taskId">
+
+
+                    <div class="form-grid">
+
+
+                        <label>
+                            پروژه *
+
+                            <select
+                                id="taskProject"
+                                required
+                            ></select>
+
+                        </label>
+
+
+                        <label>
+                            عنوان وظیفه *
+
+                            <input
+                                id="title"
+                                required
+                                maxlength="150"
+                                placeholder="عنوان وظیفه را وارد کنید"
+                            >
+
+                        </label>
+
+
+                        <label>
+                            وضعیت
+
+                            <select id="status">
+
+                                <option value="pending">
+                                    در انتظار انجام
+                                </option>
+
+                                <option value="progress">
+                                    در حال انجام
+                                </option>
+
+                                <option value="done">
+                                    تکمیل‌شده
+                                </option>
+
+                            </select>
+
+                        </label>
+
+
+                        <label>
+                            متولی
+
+                            <input
+                                id="responsible"
+                                placeholder="مسئول اجرا"
+                            >
+
+                        </label>
+
+
+                        <label>
+                            مالک
+
+                            <input
+                                id="owner"
+                                placeholder="مالک وظیفه"
+                            >
+
+                        </label>
+
+
+                        <label>
+                            ناظر
+
+                            <input
+                                id="supervisor"
+                                placeholder="ناظر وظیفه"
+                            >
+
+                        </label>
+
+
+                        <label>
+                            تأییدکننده
+
+                            <input
+                                id="approver"
+                                placeholder="تأییدکننده"
+                            >
+
+                        </label>
+
+
+                        <label>
+                            تاریخ شروع
+
+                            <div class="date-input-wrap">
+
+                                <input
+                                    id="startDate"
+                                    class="jalali-input"
+                                    inputmode="numeric"
+                                    placeholder="۱۴۰۵/۰۸/۰۱"
+                                >
+
+                                <small>
+                                    فرمت: ۱۴۰۵/۰۸/۰۱
+                                </small>
+
+                            </div>
+
+                        </label>
+
+
+                        <label>
+                            تاریخ پایان
+
+                            <div class="date-input-wrap">
+
+                                <input
+                                    id="endDate"
+                                    class="jalali-input"
+                                    inputmode="numeric"
+                                    placeholder="۱۴۰۵/۰۸/۳۰"
+                                >
+
+                                <small>
+                                    فرمت: ۱۴۰۵/۰۸/۳۰
+                                </small>
+
+                            </div>
+
+                        </label>
+
+
+                        <label class="full-width">
+
+                            شرح وظیفه
+
+                            <textarea
+                                id="description"
+                                rows="3"
+                                placeholder="توضیحات و شرح وظیفه"
+                            ></textarea>
+
+                        </label>
+
+
+                        <label class="full-width">
+
+                            آخرین شرح وضعیت
+
+                            <textarea
+                                id="latestStatus"
+                                rows="2"
+                                placeholder="آخرین پیشرفت، مانع یا توضیح وضعیت"
+                            ></textarea>
+
+                        </label>
+
+
+                        <label class="full-width">
+
+                            نام یا نشانی سند
+
+                            <input
+                                id="documentName"
+                                placeholder="مثلاً گزارش-ماهانه.pdf"
+                            >
+
+                        </label>
+
+                    </div>
+
+
+                    <div class="form-actions">
+
+                        <button
+                            class="primary-btn"
+                            type="submit"
+                        >
+                            ذخیره وظیفه
+                        </button>
+
+
+                        <button
+                            class="secondary-btn"
+                            type="button"
+                            id="cancelEdit"
+                        >
+                            انصراف از ویرایش
+                        </button>
+
+                    </div>
+
+
+                    <p
+                        id="formMessage"
+                        class="form-message"
+                        role="status"
+                    ></p>
+
+                </form>
+
+            </div>
+
+
+
+            <div class="panel">
+
+                <div class="section-heading">
+
+                    <div>
+
+                        <h3>فهرست وظایف</h3>
+
+                        <p class="muted">
+                            برای مشاهده جزئیات بیشتر روی «جزئیات» بزنید.
+                        </p>
+
+                    </div>
+
+
+                    <input
+                        id="searchTasks"
+                        class="compact-search"
+                        placeholder="جست‌وجوی وظیفه..."
+                    >
+
+                </div>
+
+
+                <div class="table-wrap scroll-table">
+
+                    <table>
+
+                        <thead>
+
+                            <tr>
+                                <th>عنوان</th>
+                                <th>پروژه</th>
+                                <th>متولی</th>
+                                <th>پایان</th>
+                                <th>وضعیت</th>
+                                <th>عملیات</th>
+                            </tr>
+
+                        </thead>
+
+                        <tbody id="taskTableBody"></tbody>
+
+                    </table>
+
+                </div>
+
+
+                <p
+                    id="taskListMessage"
+                    class="empty-state"
+                ></p>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- ================= مرکز تأییدات ================= -->
+
+        <section class="page" id="approvals">
+
+            <div class="page-header">
+
+                <div>
+
+                    <span class="eyebrow">
+                        APPROVAL CENTER
+                    </span>
+
+                    <h2>مرکز تأییدات</h2>
+
+                    <p>
+                        مدیریت وظایفی که نیاز به بررسی و تأیید دارند
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="approval-stats">
+
+                <div class="mini-card">
+
+                    <span>
+                        در انتظار بررسی
+                    </span>
+
+                    <strong id="waitingApprovalCount">
+                        ۰
+                    </strong>
+
+                </div>
+
+
+                <div class="mini-card">
+
+                    <span>
+                        تأییدشده
+                    </span>
+
+                    <strong id="approvedCount">
+                        ۰
+                    </strong>
+
+                </div>
+
+
+                <div class="mini-card">
+
+                    <span>
+                        ردشده
+                    </span>
+
+                    <strong id="rejectedCount">
+                        ۰
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+            <div class="panel">
+
+                <div class="section-heading">
+
+                    <div>
+
+                        <h3>
+                            فهرست تأییدات
+                        </h3>
+
+                        <p class="muted">
+                            هر وظیفه‌ای که تأییدکننده داشته باشد
+                            در این بخش نمایش داده می‌شود.
+                        </p>
+
+                    </div>
+
+
+                    <select
+                        id="approvalFilter"
+                        class="compact-select"
+                    >
+
+                        <option value="all">
+                            همه
+                        </option>
+
+                        <option value="pending">
+                            در انتظار بررسی
+                        </option>
+
+                        <option value="approved">
+                            تأییدشده
+                        </option>
+
+                        <option value="rejected">
+                            ردشده
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <div class="table-wrap scroll-table">
+
+                    <table>
+
+                        <thead>
+
+                            <tr>
+                                <th>وظیفه</th>
+                                <th>پروژه</th>
+                                <th>تأییدکننده</th>
+                                <th>وضعیت</th>
+                                <th>عملیات</th>
+                            </tr>
+
+                        </thead>
+
+                        <tbody id="approvalTableBody"></tbody>
+
+                    </table>
+
+                </div>
+
+
+                <p
+                    id="approvalMessage"
+                    class="empty-state"
+                ></p>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- ================= زمان‌بندی ================= -->
+
+        <section class="page" id="schedule">
+
+            <div class="page-header">
+
+                <div>
+
+                    <span class="eyebrow">
+                        PROJECT SCHEDULE
+                    </span>
+
+                    <h2>زمان‌بندی پروژه</h2>
+
+                    <p>
+                        ساختار شکست کار و نمای گانت
+                        بر اساس تاریخ‌های شمسی ثبت‌شده
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="panel">
+
+                <div class="section-heading">
+
+                    <div>
+
+                        <h3>
+                            ساختار شکست کار (WBS)
+                        </h3>
+
+                        <p class="muted">
+                            وظایف ثبت‌شده به‌عنوان فعالیت‌های پروژه نمایش داده می‌شوند.
+                        </p>
+
+                    </div>
+
+
+                    <select
+                        id="scheduleProjectFilter"
+                        class="compact-select"
+                    ></select>
+
+                </div>
+
+
+                <div
+                    id="wbsList"
+                    class="scroll-box empty-state"
+                ></div>
+
+            </div>
+
+
+
+            <div class="panel">
+
+                <h3>
+                    نمای گانت
+                </h3>
+
+                <p class="muted">
+                    این نمای ساده، بازه زمانی فعالیت‌ها را نشان می‌دهد.
+                </p>
+
+
+                <div
+                    id="ganttList"
+                    class="gantt-list scroll-box"
+                ></div>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- ================= مدیریت سامانه ================= -->
+
+        <section class="page" id="admin">
+
+            <div class="page-header">
+
+                <div>
+
+                    <span class="eyebrow">
+                        SYSTEM MANAGEMENT
+                    </span>
+
+                    <h2>
+                        مدیریت سامانه
+                    </h2>
+
+                    <p>
+                        تنظیمات و اطلاعات پایه نسخه فعلی
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="panel">
+
+                <div class="panel-title">
+
+                    <div class="title-icon">
+                        ⚙
+                    </div>
+
+                    <div>
+
+                        <h3>
+                            اطلاعات نسخه
+                        </h3>
+
+                        <p>
+                            این نسخه برای نمونه‌سازی و توسعه اولیه طراحی شده است.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="info-grid">
+
+                    <div>
+                        <span>ذخیره‌سازی فعلی</span>
+                        <strong>
+                            Local Storage مرورگر
+                        </strong>
+                    </div>
+
+
+                    <div>
+                        <span>تقویم</span>
+                        <strong>
+                            شمسی
+                        </strong>
+                    </div>
+
+
+                    <div>
+                        <span>مدیریت نقش‌ها</span>
+                        <strong>
+                            مرحله توسعه بعدی
+                        </strong>
+                    </div>
+
+
+                    <div>
+                        <span>RBS و دسترسی</span>
+                        <strong>
+                            قابل توسعه
+                        </strong>
+                    </div>
+
+                </div>
+
+
+                <p class="warning">
+                    این نسخه هنوز ورود کاربران، نقش‌های واقعی
+                    و کنترل دسترسی سمت سرور ندارد.
+                    برای اطلاعات محرمانه یا واقعی سازمانی
+                    از این نسخه آزمایشی استفاده نکن.
+                </p>
+
+            </div>
+
+        </section>
+
+
+    </main>
+
+</div>
+
+
+<footer>
+    سامانه مدیریت وظایف سازمانی • نسخه اولیه
+</footer>
+
+
+<script src="script.js"></script>
+
 </body>
-                              </html>
+</html>
