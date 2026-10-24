@@ -1,0 +1,3587 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>سامانه مدیریت وظایف سازمانی</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+:root {
+    --primary: #246957;
+    --primary-dark: #194b40;
+    --secondary: #a45c42;
+    --purple: #a65d42;
+    --green: #28735b;
+    --orange: #b78a28;
+    --red: #ae563f;
+    --yellow: #c49b39;
+    --bg: #f7f3ec;
+    --white: #ffffff;
+    --text: #382e28;
+    --muted: #817365;
+    --border: #e7ddd0;
+    --shadow: 0 12px 30px rgba(74, 55, 37, 0.10);
+    --shadow-heavy: 0 20px 45px rgba(74, 55, 37, 0.18);
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: "Vazirmatn", Tahoma, Arial, sans-serif;
+    background:
+        radial-gradient(circle at 10% 10%, rgba(54, 175, 129, .08), transparent 30%),
+        radial-gradient(circle at 90% 30%, rgba(200, 128, 104, .08), transparent 30%),
+        #f0f9f6;
+    color: var(--text);
+    min-height: 100vh;
+}
+
+
+/* ================= HEADER ================= */
+
+.top-header {
+    min-height: 100px;
+    padding: 20px 38px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: white;
+
+    background:
+        radial-gradient(circle at 10% 100%, rgba(66, 183, 138, .35), transparent 30%),
+        radial-gradient(circle at 45% 0%, rgba(201, 125, 100, .30), transparent 25%),
+        linear-gradient(135deg, #3e3029, #7a4936 55%, #246957);
+
+    position: relative;
+    overflow: hidden;
+
+    box-shadow: 0 8px 25px rgba(19, 63, 46, .25);
+}
+
+.top-header::before {
+    content: "";
+    position: absolute;
+    width: 500px;
+    height: 500px;
+    border: 1px solid rgba(255, 255, 255,.10);
+    border-radius: 50%;
+    left: 10%;
+    top: -350px;
+}
+
+.top-header::after {
+    content: "";
+    position: absolute;
+    width: 380px;
+    height: 380px;
+    border: 1px solid rgba(255, 255, 255,.09);
+    border-radius: 50%;
+    left: 25%;
+    top: -250px;
+}
+
+.brand-area {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    z-index: 2;
+}
+
+.brand-icon {
+    width: 64px;
+    height: 64px;
+    border-radius: 20px;
+
+    display: grid;
+    place-items: center;
+
+    font-size: 32px;
+    font-weight: 800;
+
+    background:
+        linear-gradient(145deg, rgba(255, 255, 255,.30), rgba(255, 255, 255,.07));
+
+    border: 1px solid rgba(255, 255, 255,.30);
+
+    box-shadow:
+        inset 0 1px rgba(255, 255, 255,.5),
+        0 12px 30px rgba(55, 49, 40,.18);
+}
+
+.brand-area h1 {
+    font-size: 25px;
+    font-weight: 800;
+    margin-bottom: 5px;
+}
+
+.brand-area span {
+    color: rgba(255, 255, 255,.78);
+    font-size: 12px;
+}
+
+.header-user {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    z-index: 2;
+}
+
+.notification {
+    width: 42px;
+    height: 42px;
+    border-radius: 13px;
+    background: rgba(255, 255, 255,.12);
+    border: 1px solid rgba(255, 255, 255,.18);
+    display: grid;
+    place-items: center;
+    position: relative;
+}
+
+.notification span {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+
+    background: #e59d87;
+    color: white;
+
+    min-width: 18px;
+    height: 18px;
+    border-radius: 50%;
+
+    display: grid;
+    place-items: center;
+
+    font-size: 10px;
+    font-weight: 700;
+}
+
+.user-avatar {
+    width: 45px;
+    height: 45px;
+    border-radius: 14px;
+    display: grid;
+    place-items: center;
+
+    background: linear-gradient(145deg, #e5bc5e, #deb148);
+    color: white;
+    font-weight: 800;
+    font-size: 18px;
+
+    box-shadow: 0 7px 18px rgba(55, 49, 40,.18);
+}
+
+.user-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.user-info strong {
+    font-size: 13px;
+}
+
+.user-info small {
+    font-size: 10px;
+    opacity: .7;
+}
+
+
+/* ================= LAYOUT ================= */
+
+.app-layout {
+    display: flex;
+    min-height: calc(100vh - 100px);
+}
+
+.sidebar {
+    width: 275px;
+    background: rgba(255, 255, 255,.95);
+    border-left: 1px solid var(--border);
+    padding: 25px 15px;
+
+    position: sticky;
+    top: 0;
+    height: calc(100vh - 100px);
+
+    overflow-y: auto;
+
+    box-shadow: -5px 0 25px rgba(37, 83, 65, .04);
+
+    z-index: 10;
+}
+
+.sidebar-title {
+    display: flex;
+    gap: 9px;
+    align-items: center;
+    font-weight: 800;
+    color: var(--primary-dark);
+    padding: 0 12px;
+}
+
+.sidebar-title span {
+    background: #edf9f4;
+    width: 35px;
+    height: 35px;
+    border-radius: 11px;
+    display: grid;
+    place-items: center;
+}
+
+.sidebar-subtitle {
+    color: #9dbdb1;
+    font-size: 10px;
+    padding: 5px 58px 22px;
+}
+
+.main-menu {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.menu-item {
+    width: 100%;
+    border: none;
+    background: transparent;
+    color: #547d6d;
+
+    padding: 12px 13px;
+    border-radius: 13px;
+
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    font-family: inherit;
+    font-size: 13px;
+
+    cursor: pointer;
+    transition: .25s;
+    text-align: right;
+}
+
+.menu-item span {
+    width: 27px;
+    height: 27px;
+    border-radius: 8px;
+
+    display: grid;
+    place-items: center;
+
+    background: #f2f9f7;
+    color: #679a86;
+
+    transition: .25s;
+}
+
+.menu-item:hover {
+    background: #effaf6;
+    color: var(--primary);
+    transform: translateX(-3px);
+}
+
+.menu-item.active {
+    color: var(--primary-dark);
+    font-weight: 700;
+
+    background:
+        linear-gradient(135deg, #e4f7f0, #f1fbf7);
+
+    box-shadow:
+        inset 4px 0 0 var(--secondary),
+        0 7px 18px rgba(43, 142, 104, .08);
+}
+
+.menu-item.active span {
+    background: linear-gradient(145deg, #3ab183, #41b78a);
+    color: white;
+}
+
+.menu-badge {
+    margin-right: auto;
+    min-width: 23px;
+    height: 23px;
+    border-radius: 8px;
+
+    display: grid;
+    place-items: center;
+
+    background: #e6f3ed;
+    color: #2b8056;
+    font-size: 10px;
+}
+
+.menu-badge.orange {
+    background: #faf1de;
+    color: #cd9d2c;
+}
+
+.menu-divider {
+    height: 1px;
+    background: var(--border);
+    margin: 12px 8px;
+}
+
+.logout {
+    margin-top: 8px;
+    color: #c97f69;
+}
+
+.logout span {
+    background: #fcf5f3;
+    color: #c97f69;
+}
+
+
+/* ================= CONTENT ================= */
+
+.main-content {
+    flex: 1;
+    padding: 35px;
+    min-width: 0;
+}
+
+.page-section {
+    display: none;
+    animation: pageIn .35s ease;
+}
+
+.page-section.active {
+    display: block;
+}
+
+@keyframes pageIn {
+    from {
+        opacity: 0;
+        transform: translateY(12px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+
+/* ================= HERO ================= */
+
+.hero-card {
+    min-height: 350px;
+    border-radius: 28px;
+
+    position: relative;
+    overflow: hidden;
+
+    padding: 45px;
+
+    color: white;
+
+    background:
+        radial-gradient(circle at 15% 70%, rgba(57, 181, 133,.35), transparent 30%),
+        radial-gradient(circle at 85% 20%, rgba(219, 137, 110,.35), transparent 30%),
+        linear-gradient(135deg, #315b4a, #245947 65%, #a45c42);
+
+    box-shadow: var(--shadow-heavy);
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.hero-card::before {
+    content: "";
+    position: absolute;
+    width: 500px;
+    height: 500px;
+    border: 1px solid rgba(255, 255, 255,.12);
+    border-radius: 50%;
+    left: 38%;
+    top: -300px;
+}
+
+.hero-pattern {
+    position: absolute;
+    inset: 0;
+    opacity: .15;
+    background-image:
+        linear-gradient(rgba(255, 255, 255,.15) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255,.15) 1px, transparent 1px);
+    background-size: 45px 45px;
+    mask-image: linear-gradient(to right, black, transparent);
+}
+
+.hero-content {
+    max-width: 620px;
+    position: relative;
+    z-index: 2;
+}
+
+.hero-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+
+    padding: 7px 13px;
+    border-radius: 30px;
+
+    background: rgba(255, 255, 255,.11);
+    border: 1px solid rgba(255, 255, 255,.15);
+
+    font-size: 11px;
+    margin-bottom: 20px;
+}
+
+.hero-label::first-letter {
+    color: #67cc9b;
+}
+
+.hero-content h2 {
+    font-size: 35px;
+    line-height: 1.6;
+    margin-bottom: 15px;
+}
+
+.hero-content h2 span {
+    color: #72ceab;
+}
+
+.hero-content p {
+    line-height: 2.1;
+    color: rgba(255, 255, 255,.78);
+    font-size: 13px;
+    max-width: 570px;
+}
+
+.hero-buttons {
+    display: flex;
+    gap: 12px;
+    margin-top: 25px;
+}
+
+.primary-btn,
+.secondary-btn,
+.cancel-btn,
+.outline-btn,
+.filter-btn,
+.small-btn {
+    border: none;
+    font-family: inherit;
+    cursor: pointer;
+    transition: .25s;
+}
+
+.primary-btn {
+    padding: 12px 20px;
+    border-radius: 12px;
+
+    color: white;
+    font-weight: 700;
+
+    background: linear-gradient(135deg, #34a97c, #43c492);
+
+    box-shadow:
+        0 9px 20px rgba(42, 138, 101, .25);
+}
+
+.primary-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 14px 27px rgba(42, 138, 101, .35);
+}
+
+.secondary-btn {
+    padding: 12px 20px;
+    border-radius: 12px;
+
+    color: white;
+    font-weight: 600;
+
+    background: rgba(255, 255, 255,.12);
+    border: 1px solid rgba(255, 255, 255,.22);
+}
+
+.secondary-btn:hover {
+    background: rgba(255, 255, 255,.2);
+}
+
+.hero-visual {
+    width: 330px;
+    height: 280px;
+    position: relative;
+    display: grid;
+    place-items: center;
+}
+
+.orbit {
+    position: absolute;
+    border: 1px solid rgba(255, 255, 255,.14);
+    border-radius: 50%;
+}
+
+.orbit-one {
+    width: 280px;
+    height: 280px;
+}
+
+.orbit-two {
+    width: 200px;
+    height: 200px;
+}
+
+.hero-dashboard {
+    width: 210px;
+    height: 160px;
+
+    padding: 20px;
+    border-radius: 22px;
+
+    background:
+        linear-gradient(145deg,
+        rgba(255, 255, 255,.25),
+        rgba(255, 255, 255,.07));
+
+    border: 1px solid rgba(255, 255, 255,.25);
+
+    backdrop-filter: blur(15px);
+
+    box-shadow:
+        0 25px 50px rgba(55, 49, 40,.2),
+        inset 0 1px rgba(255, 255, 255,.4);
+
+    transform: rotate(-4deg);
+
+    position: relative;
+    z-index: 2;
+}
+
+.mini-top,
+.mini-footer {
+    display: flex;
+    justify-content: space-between;
+    font-size: 9px;
+    opacity: .75;
+}
+
+.mini-number {
+    font-size: 36px;
+    font-weight: 800;
+    margin: 14px 0 8px;
+}
+
+.mini-progress {
+    height: 7px;
+    background: rgba(255, 255, 255,.15);
+    border-radius: 20px;
+    overflow: hidden;
+}
+
+.mini-progress span {
+    display: block;
+    width: 87%;
+    height: 100%;
+    background: linear-gradient(90deg, #7ed4aa, #61caa2);
+    border-radius: inherit;
+}
+
+.mini-footer {
+    margin-top: 14px;
+}
+
+
+/* ================= STATS ================= */
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 18px;
+    margin-top: 22px;
+}
+
+.stat-card {
+    min-height: 125px;
+
+    padding: 22px;
+
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 19px;
+
+    display: flex;
+    align-items: center;
+    gap: 16px;
+
+    box-shadow: var(--shadow);
+
+    transition: .3s;
+
+    position: relative;
+    overflow: hidden;
+}
+
+.stat-card::after {
+    content: "";
+    position: absolute;
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    left: -35px;
+    bottom: -50px;
+    opacity: .1;
+}
+
+.stat-card:hover {
+    transform: translateY(-7px) rotateX(2deg);
+    box-shadow: var(--shadow-heavy);
+}
+
+.stat-icon {
+    width: 55px;
+    height: 55px;
+    border-radius: 17px;
+
+    display: grid;
+    place-items: center;
+
+    color: white;
+    font-size: 22px;
+    font-weight: 800;
+
+    flex-shrink: 0;
+
+    box-shadow:
+        inset 0 1px rgba(255, 255, 255,.5),
+        0 9px 18px rgba(55, 49, 40,.13);
+}
+
+.stat-card > div:last-child {
+    display: flex;
+    flex-direction: column;
+}
+
+.stat-card span {
+    font-size: 11px;
+    color: var(--muted);
+}
+
+.stat-card strong {
+    font-size: 28px;
+    margin: 3px 0;
+}
+
+.stat-card small {
+    font-size: 9px;
+}
+
+.stat-card.blue .stat-icon {
+    background: linear-gradient(145deg, #55c399, #40ba8b);
+}
+
+.stat-card.purple .stat-icon {
+    background: linear-gradient(145deg, #dc9983, #b87159);
+}
+
+.stat-card.green .stat-icon {
+    background: linear-gradient(145deg, #54b888, #2c8359);
+}
+
+.stat-card.orange .stat-icon {
+    background: linear-gradient(145deg, #e9c777, #ddad3f);
+}
+
+
+/* ================= PANELS ================= */
+
+.panel {
+    background: rgba(255, 255, 255,.92);
+    border: 1px solid var(--border);
+    border-radius: 21px;
+    box-shadow: var(--shadow);
+}
+
+.home-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-top: 22px;
+}
+
+.panel {
+    padding: 25px;
+}
+
+.panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.panel-header h3 {
+    font-size: 17px;
+}
+
+.eyebrow {
+    font-size: 9px;
+    letter-spacing: 1px;
+    color: #679d88;
+    font-weight: 800;
+    display: block;
+    margin-bottom: 5px;
+}
+
+.live-dot {
+    color: #2c855a;
+    background: #e9f6f0;
+    padding: 6px 11px;
+    border-radius: 20px;
+    font-size: 10px;
+}
+
+.operation-list {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.operation-list div {
+    padding: 17px;
+    background: linear-gradient(145deg, #f7fbff, #effaf6);
+    border-radius: 14px;
+    border: 1px solid #e7f4ef;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.operation-list span {
+    color: var(--muted);
+    font-size: 11px;
+}
+
+.operation-list strong {
+    font-size: 22px;
+}
+
+.quick-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.quick-grid button {
+    text-align: right;
+    border: 1px solid #e4efeb;
+    border-radius: 16px;
+    padding: 16px;
+    background: white;
+    font-family: inherit;
+    cursor: pointer;
+    transition: .25s;
+}
+
+.quick-grid button:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow);
+    border-color: #9bd8c1;
+}
+
+.quick-grid span {
+    display: block;
+    width: 35px;
+    height: 35px;
+    display: grid;
+    place-items: center;
+    border-radius: 10px;
+    background: #edf8f4;
+    color: var(--primary);
+    margin-bottom: 10px;
+}
+
+.quick-grid strong {
+    display: block;
+    font-size: 12px;
+    margin-bottom: 3px;
+}
+
+.quick-grid small {
+    color: #84ad9d;
+    font-size: 9px;
+}
+
+
+/* ================= PAGE TITLE ================= */
+
+.page-title {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+}
+
+.page-title h2 {
+    font-size: 27px;
+    color: var(--primary-dark);
+}
+
+.page-title p {
+    color: var(--muted);
+    font-size: 12px;
+    margin-top: 5px;
+}
+
+.filter-btn,
+.outline-btn {
+    background: white;
+    color: var(--primary);
+    border: 1px solid #d4e9e1;
+    border-radius: 11px;
+    padding: 10px 17px;
+}
+
+.filter-btn:hover,
+.outline-btn:hover {
+    background: #effaf6;
+}
+
+
+/* ================= DASHBOARD ================= */
+
+.dashboard-kpis {
+    display: grid;
+    grid-template-columns: repeat(4,1fr);
+    gap: 17px;
+    margin-bottom: 20px;
+}
+
+.kpi-card {
+    padding: 22px;
+    border-radius: 19px;
+    background: white;
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow);
+    position: relative;
+    overflow: hidden;
+}
+
+.kpi-card::before {
+    content: "";
+    position: absolute;
+    width: 90px;
+    height: 90px;
+    border-radius: 50%;
+    background: #e8f8f2;
+    left: -40px;
+    top: -40px;
+}
+
+.kpi-card span {
+    color: var(--muted);
+    font-size: 11px;
+}
+
+.kpi-card strong {
+    display: block;
+    font-size: 31px;
+    margin: 8px 0;
+    color: var(--primary-dark);
+}
+
+.kpi-card em {
+    font-size: 10px;
+    color: #2d865b;
+    font-style: normal;
+}
+
+.danger-text {
+    color: #cd7f67 !important;
+}
+
+.charts-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.chart-card {
+    min-height: 390px;
+    padding: 24px;
+
+    background: white;
+    border-radius: 22px;
+
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow);
+
+    overflow: hidden;
+}
+
+.chart-large {
+    grid-column: span 2;
+}
+
+.chart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 18px;
+}
+
+.chart-header span {
+    font-size: 9px;
+    letter-spacing: 1px;
+    color: #81ab9b;
+    font-weight: 800;
+}
+
+.chart-header h3 {
+    font-size: 15px;
+    margin-top: 4px;
+}
+
+.chart-header select {
+    border: 1px solid var(--border);
+    background: #f7fafc;
+    padding: 8px 12px;
+    border-radius: 9px;
+    font-family: inherit;
+    font-size: 10px;
+}
+
+.chart-card canvas {
+    width: 100% !important;
+    max-height: 290px;
+}
+
+.chart-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 10px;
+    font-size: 9px;
+    color: var(--muted);
+}
+
+.chart-legend i {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.green-dot {
+    background: #359f6c;
+}
+
+.blue-dot {
+    background: #4bc294;
+}
+
+.orange-dot {
+    background: #e2b650;
+}
+
+.red-dot {
+    background: #d2846c;
+}
+
+
+/* ================= TABLE ================= */
+
+.report-table {
+    margin-top: 20px;
+}
+
+.table-wrapper {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+table {
+    width: 100%;
+    min-width: 750px;
+    border-collapse: collapse;
+}
+
+th {
+    background: #f5fbf9;
+    color: #608f7d;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 14px;
+    text-align: right;
+}
+
+td {
+    border-bottom: 1px solid #eef4f2;
+    padding: 16px 14px;
+    font-size: 11px;
+    color: #527b6b;
+}
+
+td strong {
+    color: #2f5546;
+}
+
+.table-progress {
+    display: inline-block;
+    width: 80px;
+    height: 7px;
+    border-radius: 20px;
+    background: #ebf2ef;
+    overflow: hidden;
+    vertical-align: middle;
+    margin-left: 7px;
+}
+
+.table-progress span {
+    display: block;
+    height: 100%;
+    border-radius: inherit;
+    background: linear-gradient(90deg, #37a57b, #54c59a);
+}
+
+.status {
+    padding: 5px 9px;
+    border-radius: 8px;
+    font-size: 9px;
+    white-space: nowrap;
+}
+
+.active-status {
+    color: #2e946d;
+    background: #eaf8f3;
+}
+
+.warning-status {
+    color: #a98123;
+    background: #faf3e1;
+}
+
+.success-status {
+    color: #27744f;
+    background: #e8f5ef;
+}
+
+.danger-status {
+    color: #b9705a;
+    background: #fcf2ef;
+}
+
+.priority {
+    padding: 5px 9px;
+    border-radius: 8px;
+    font-size: 9px;
+}
+
+.priority.high {
+    background: #fbefeb;
+    color: #c4755d;
+}
+
+.priority.medium {
+    background: #faf1de;
+    color: #ae8627;
+}
+
+.priority.low {
+    background: #e6f5ee;
+    color: #27744e;
+}
+
+
+/* ================= FORM ================= */
+
+.form-card {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    box-shadow: var(--shadow);
+    padding: 30px;
+}
+
+.form-section-title {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    padding-bottom: 22px;
+    margin-bottom: 25px;
+    border-bottom: 1px solid var(--border);
+}
+
+.form-section-title > span {
+    width: 45px;
+    height: 45px;
+    display: grid;
+    place-items: center;
+    border-radius: 13px;
+
+    color: white;
+    font-weight: 800;
+
+    background: linear-gradient(145deg, #51ba91, #50bf94);
+}
+
+.form-section-title h3 {
+    font-size: 16px;
+}
+
+.form-section-title p {
+    color: var(--muted);
+    font-size: 10px;
+    margin-top: 4px;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.form-group.full {
+    grid-column: span 2;
+}
+
+.form-group label {
+    color: #517a6a;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.form-group label b {
+    color: #d1826a;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    width: 100%;
+
+    border: 1px solid #dfebe6;
+    background: #f9fbfd;
+
+    border-radius: 11px;
+
+    padding: 12px 14px;
+
+    font-family: inherit;
+    font-size: 11px;
+
+    color: #385b4e;
+
+    outline: none;
+
+    transition: .2s;
+}
+
+.form-group textarea {
+    min-height: 120px;
+    resize: vertical;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    background: white;
+    border-color: #6bc2a1;
+    box-shadow: 0 0 0 4px rgba(84, 184, 146, .10);
+}
+
+.jalali-input {
+    direction: rtl;
+}
+
+.upload-box {
+    border: 2px dashed #cfe4dc;
+    border-radius: 15px;
+    padding: 25px;
+    text-align: center;
+    position: relative;
+    background: #f9fcfe;
+    cursor: pointer;
+}
+
+.upload-box span {
+    display: block;
+    font-size: 25px;
+    margin-bottom: 8px;
+}
+
+.upload-box strong {
+    display: block;
+    font-size: 12px;
+}
+
+.upload-box small {
+    color: var(--muted);
+    font-size: 9px;
+}
+
+.upload-box input {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.form-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 30px;
+    padding-top: 22px;
+    border-top: 1px solid var(--border);
+}
+
+.cancel-btn {
+    padding: 12px 20px;
+    background: #f3f7f5;
+    color: #61927f;
+    border-radius: 12px;
+}
+
+
+/* ================= TASK CENTER ================= */
+
+.task-summary {
+    display: grid;
+    grid-template-columns: repeat(4,1fr);
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.task-summary div {
+    padding: 18px;
+    border-radius: 17px;
+    background: white;
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow);
+}
+
+.task-summary span {
+    color: var(--muted);
+    font-size: 10px;
+}
+
+.task-summary strong {
+    display: block;
+    font-size: 26px;
+    margin-top: 5px;
+}
+
+.table-toolbar {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.table-toolbar input,
+.table-toolbar select {
+    border: 1px solid var(--border);
+    background: #f9fbfd;
+    padding: 11px 14px;
+    border-radius: 10px;
+    font-family: inherit;
+    font-size: 10px;
+}
+
+.table-toolbar input {
+    flex: 1;
+}
+
+
+/* ================= APPROVALS ================= */
+
+.approval-grid {
+    display: grid;
+    grid-template-columns: repeat(3,1fr);
+    gap: 20px;
+}
+
+.approval-card {
+    background: white;
+    padding: 25px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow);
+    border-top: 4px solid #61c09c;
+}
+
+.approval-card.urgent {
+    border-top-color: #e0927a;
+}
+
+.approval-top {
+    display: flex;
+    justify-content: space-between;
+    color: #7aa695;
+    font-size: 10px;
+    margin-bottom: 20px;
+}
+
+.approval-top b {
+    width: 25px;
+    height: 25px;
+    display: grid;
+    place-items: center;
+    border-radius: 8px;
+    background: #eff9f5;
+    color: var(--primary);
+}
+
+.approval-card h3 {
+    font-size: 15px;
+    margin-bottom: 12px;
+}
+
+.approval-card p {
+    font-size: 10px;
+    color: var(--muted);
+    line-height: 2;
+}
+
+.approval-meta {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 18px;
+    font-size: 9px;
+    color: #7da998;
+}
+
+.approval-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 20px;
+}
+
+.approve,
+.reject {
+    flex: 1;
+    border: none;
+    padding: 10px;
+    border-radius: 10px;
+    font-family: inherit;
+    cursor: pointer;
+}
+
+.approve {
+    background: #e6f5ee;
+    color: #27744f;
+}
+
+.reject {
+    background: #fcf2ef;
+    color: #bd7660;
+}
+
+
+/* ================= COMPLETED / CANCELLED ================= */
+
+.completed-list,
+.cancelled-item {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.completed-item,
+.cancelled-item {
+    display: grid;
+    grid-template-columns: 45px 1fr auto auto;
+    align-items: center;
+    gap: 15px;
+
+    padding: 17px;
+
+    border-radius: 14px;
+    background: #f8fbfd;
+    border: 1px solid #e7f1ed;
+}
+
+.check-circle,
+.cancel-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    display: grid;
+    place-items: center;
+    font-weight: 800;
+}
+
+.check-circle {
+    background: #dff3e9;
+    color: #2c8359;
+}
+
+.cancel-icon {
+    background: #fbeeea;
+    color: #c77c65;
+}
+
+.completed-item h3,
+.cancelled-item h3 {
+    font-size: 12px;
+}
+
+.completed-item p,
+.cancelled-item p {
+    font-size: 9px;
+    color: var(--muted);
+    margin-top: 4px;
+}
+
+.completed-item span,
+.cancelled-item span {
+    color: var(--muted);
+    font-size: 9px;
+}
+
+.completed-item > b {
+    color: #2c8258;
+    font-size: 10px;
+}
+
+.cancelled-item > b {
+    color: #c57962;
+    font-size: 10px;
+}
+
+
+/* ================= WARNING ================= */
+
+.warning-banner {
+    background: linear-gradient(135deg, #fcf7eb, #f9f0dc);
+    border: 1px solid #eedfbd;
+    border-radius: 17px;
+    padding: 18px 20px;
+    display: flex;
+    gap: 13px;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.warning-banner > span {
+    font-size: 22px;
+}
+
+.warning-banner strong {
+    font-size: 12px;
+}
+
+.warning-banner p {
+    font-size: 9px;
+    color: #9c844b;
+    margin-top: 3px;
+}
+
+.small-btn {
+    background: #ebf8f3;
+    color: #35916e;
+    padding: 8px 12px;
+    border-radius: 9px;
+    font-size: 9px;
+}
+
+
+/* ================= GANTT ================= */
+
+.timeline-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+}
+
+.timeline-header h3 {
+    font-size: 16px;
+}
+
+.timeline-header span {
+    color: #287650;
+    background: #e7f6ef;
+    padding: 7px 12px;
+    border-radius: 20px;
+    font-size: 10px;
+}
+
+.gantt {
+    min-width: 750px;
+}
+
+.gantt-row {
+    display: grid;
+    grid-template-columns: 180px repeat(5, 1fr);
+    min-height: 58px;
+    border-bottom: 1px solid #eef4f2;
+    align-items: center;
+    position: relative;
+}
+
+.gantt-row > div {
+    font-size: 10px;
+    color: #588473;
+}
+
+.gantt-row > span {
+    height: 100%;
+    display: grid;
+    place-items: center;
+    color: #8eb4a5;
+    font-size: 9px;
+    border-right: 1px dashed #e3ede9;
+}
+
+.header-row {
+    background: #f5faf8;
+    border-radius: 10px;
+}
+
+.gantt-bar {
+    height: 22px;
+    border-radius: 20px;
+    margin: 0 8px;
+    position: relative;
+    z-index: 2;
+    box-shadow: 0 5px 12px rgba(55, 49, 40,.12);
+}
+
+.bar-green {
+    background: linear-gradient(90deg, #36a36e, #5cc291);
+}
+
+.bar-blue {
+    background: linear-gradient(90deg, #4abf92, #5bc19a);
+}
+
+.bar-purple {
+    background: linear-gradient(90deg, #c57f68, #d99b86);
+}
+
+.bar-orange {
+    background: linear-gradient(90deg, #deb146, #e5be62);
+}
+
+
+/* ================= USERS ================= */
+
+.users-grid {
+    display: grid;
+    grid-template-columns: repeat(4,1fr);
+    gap: 20px;
+}
+
+.user-card {
+    background: white;
+    padding: 28px 20px;
+    text-align: center;
+    border-radius: 21px;
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow);
+    transition: .3s;
+}
+
+.user-card:hover {
+    transform: translateY(-7px) rotateX(3deg);
+    box-shadow: var(--shadow-heavy);
+}
+
+.big-avatar {
+    width: 65px;
+    height: 65px;
+    margin: auto auto 15px;
+
+    border-radius: 20px;
+
+    display: grid;
+    place-items: center;
+
+    color: white;
+    font-size: 25px;
+    font-weight: 800;
+
+    background: linear-gradient(145deg, #50ba91, #4cbc91);
+}
+
+.purple-avatar {
+    background: linear-gradient(145deg, #d79782, #b67059);
+}
+
+.green-avatar {
+    background: linear-gradient(145deg, #4eb583, #2b8056);
+}
+
+.orange-avatar {
+    background: linear-gradient(145deg, #e8c470, #daac41);
+}
+
+.user-card h3 {
+    font-size: 14px;
+}
+
+.user-card span {
+    display: block;
+    font-size: 10px;
+    color: #649683;
+    margin-top: 5px;
+}
+
+.user-card small {
+    display: block;
+    color: var(--muted);
+    font-size: 9px;
+    margin-top: 12px;
+}
+
+
+/* ================= SETTINGS ================= */
+
+.settings-panel {
+    padding: 0 25px;
+}
+
+.setting-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 22px 0;
+    border-bottom: 1px solid var(--border);
+}
+
+.setting-row:last-child {
+    border-bottom: none;
+}
+
+.setting-row strong {
+    font-size: 12px;
+}
+
+.setting-row p {
+    color: var(--muted);
+    font-size: 9px;
+    margin-top: 4px;
+}
+
+.switch {
+    position: relative;
+    width: 48px;
+    height: 25px;
+}
+
+.switch input {
+    display: none;
+}
+
+.switch span {
+    position: absolute;
+    inset: 0;
+    border-radius: 30px;
+    background: #cdded7;
+    cursor: pointer;
+    transition: .3s;
+}
+
+.switch span::before {
+    content: "";
+    width: 19px;
+    height: 19px;
+    background: white;
+    border-radius: 50%;
+    position: absolute;
+    right: 3px;
+    top: 3px;
+    transition: .3s;
+    box-shadow: 0 2px 5px rgba(55, 49, 40,.15);
+}
+
+.switch input:checked + span {
+    background: linear-gradient(90deg, #309062, #3dab81);
+}
+
+.switch input:checked + span::before {
+    right: 26px;
+}
+
+
+/* ================= SUPPORT ================= */
+
+.support-grid,
+.content-grid {
+    display: grid;
+    grid-template-columns: repeat(3,1fr);
+    gap: 20px;
+}
+
+.support-card,
+.content-card {
+    background: white;
+    padding: 28px;
+    border-radius: 21px;
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow);
+    transition: .3s;
+}
+
+.support-card:hover,
+.content-card:hover {
+    transform: translateY(-6px);
+    box-shadow: var(--shadow-heavy);
+}
+
+.support-card > span,
+.content-card > span {
+    display: grid;
+    place-items: center;
+    width: 50px;
+    height: 50px;
+    border-radius: 15px;
+    background: #ecf8f3;
+    font-size: 23px;
+    margin-bottom: 17px;
+}
+
+.support-card h3,
+.content-card h3 {
+    font-size: 15px;
+    margin-bottom: 8px;
+}
+
+.support-card p {
+    color: var(--muted);
+    font-size: 10px;
+    line-height: 2;
+    margin-bottom: 15px;
+}
+
+.support-card strong {
+    color: var(--primary);
+    font-size: 12px;
+}
+
+.support-card button {
+    margin-top: 10px;
+}
+
+.content-grid {
+    grid-template-columns: repeat(4,1fr);
+}
+
+.content-card strong {
+    display: block;
+    font-size: 28px;
+    margin: 10px 0 2px;
+}
+
+.content-card small {
+    color: var(--muted);
+    font-size: 9px;
+}
+
+
+/* ================= TOAST ================= */
+
+.toast {
+    position: fixed;
+    bottom: 25px;
+    left: 25px;
+
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    padding: 14px 18px;
+
+    background: #1c4d3a;
+    color: white;
+
+    border-radius: 13px;
+
+    box-shadow: 0 15px 35px rgba(55, 49, 40,.22);
+
+    transform: translateY(120px);
+    opacity: 0;
+
+    transition: .35s;
+
+    z-index: 100;
+}
+
+.toast.show {
+    transform: translateY(0);
+    opacity: 1;
+}
+
+.toast span {
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    background: #42b07b;
+}
+
+.toast p {
+    font-size: 10px;
+}
+
+
+/* ================= SCROLLBAR ================= */
+
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #eef5f2;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #aecec2;
+    border-radius: 20px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #7bb39e;
+}
+
+
+/* ================= RESPONSIVE ================= */
+
+@media (max-width: 1200px) {
+
+    .stats-grid,
+    .dashboard-kpis {
+        grid-template-columns: repeat(2,1fr);
+    }
+
+    .users-grid {
+        grid-template-columns: repeat(2,1fr);
+    }
+
+    .content-grid {
+        grid-template-columns: repeat(2,1fr);
+    }
+
+    .hero-visual {
+        width: 260px;
+    }
+
+}
+
+@media (max-width: 900px) {
+
+    .sidebar {
+        width: 220px;
+    }
+
+    .main-content {
+        padding: 22px;
+    }
+
+    .hero-card {
+        padding: 30px;
+    }
+
+    .hero-visual {
+        display: none;
+    }
+
+    .home-grid,
+    .approval-grid,
+    .support-grid {
+        grid-template-columns: 1fr;
+    }
+
+}
+
+@media (max-width: 700px) {
+
+    .top-header {
+        padding: 15px;
+        min-height: 80px;
+    }
+
+    .brand-icon {
+        width: 48px;
+        height: 48px;
+        font-size: 23px;
+    }
+
+    .brand-area h1 {
+        font-size: 17px;
+    }
+
+    .brand-area span {
+        font-size: 8px;
+    }
+
+    .user-info {
+        display: none;
+    }
+
+    .app-layout {
+        display: block;
+    }
+
+    .sidebar {
+        position: sticky;
+        top: 0;
+        width: 100%;
+        height: auto;
+        max-height: 260px;
+        padding: 10px;
+        border-left: none;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .sidebar-title,
+    .sidebar-subtitle {
+        display: none;
+    }
+
+    .main-menu {
+        display: grid;
+        grid-template-columns: repeat(3,1fr);
+        gap: 5px;
+    }
+
+    .menu-item {
+        font-size: 9px;
+        padding: 8px 5px;
+        justify-content: center;
+        flex-direction: column;
+        gap: 4px;
+        text-align: center;
+    }
+
+    .menu-item span {
+        width: 25px;
+        height: 25px;
+    }
+
+    .menu-badge {
+        position: absolute;
+        margin: 0;
+        top: 1px;
+        left: 15px;
+        min-width: 18px;
+        height: 18px;
+    }
+
+    .menu-item {
+        position: relative;
+    }
+
+    .menu-divider {
+        display: none;
+    }
+
+    .logout {
+        margin-top: 0;
+    }
+
+    .main-content {
+        padding: 15px;
+    }
+
+    .hero-card {
+        min-height: 320px;
+        padding: 25px;
+        border-radius: 22px;
+    }
+
+    .hero-content h2 {
+        font-size: 25px;
+    }
+
+    .hero-content p {
+        font-size: 10px;
+    }
+
+    .hero-buttons {
+        flex-direction: column;
+    }
+
+    .stats-grid,
+    .dashboard-kpis,
+    .task-summary {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .charts-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .chart-large {
+        grid-column: span 1;
+    }
+
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .form-group.full {
+        grid-column: span 1;
+    }
+
+    .page-title {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .page-title h2 {
+        font-size: 21px;
+    }
+
+    .table-toolbar {
+        flex-direction: column;
+    }
+
+    .completed-item,
+    .cancelled-item {
+        grid-template-columns: 40px 1fr;
+    }
+
+    .completed-item span,
+    .completed-item b,
+    .cancelled-item span,
+    .cancelled-item b {
+        grid-column: 2;
+    }
+
+    .users-grid,
+    .content-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+
+}
+
+@media (max-width: 450px) {
+
+    .stats-grid,
+    .dashboard-kpis,
+    .task-summary,
+    .users-grid,
+    .content-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .operation-list,
+    .quick-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .hero-card {
+        min-height: auto;
+    }
+
+    .form-card,
+    .panel,
+    .chart-card {
+        padding: 17px;
+    }
+
+}
+
+</style>
+</head>
+
+<body>
+
+<!-- ================= HEADER ================= -->
+
+<header class="top-header">
+
+    <div class="brand-area">
+
+        <div class="brand-icon">
+            ✓
+        </div>
+
+        <div>
+            <h1>سامانه مدیریت وظایف</h1>
+            <span>مرکز یکپارچه مدیریت پروژه، وظایف و تأییدات سازمانی</span>
+        </div>
+
+    </div>
+
+    <div class="header-user">
+
+        <div class="notification">
+            🔔
+            <span>3</span>
+        </div>
+
+        <div class="user-avatar">
+            ن
+        </div>
+
+        <div class="user-info">
+            <strong>نیلوفر رحیم‌زاده</strong>
+            <small>کاربر سازمانی</small>
+        </div>
+
+    </div>
+
+</header>
+
+
+<!-- ================= MAIN LAYOUT ================= -->
+
+<div class="app-layout">
+
+    <!-- SIDEBAR -->
+
+    <aside class="sidebar">
+
+        <div class="sidebar-title">
+            <span>☰</span>
+            منوی سامانه
+        </div>
+
+        <div class="sidebar-subtitle">
+            Task Management
+        </div>
+
+
+        <nav class="main-menu">
+
+            <button class="menu-item active" data-section="home">
+                <span>⌂</span>
+                صفحه اصلی
+            </button>
+
+            <button class="menu-item" data-section="dashboard">
+                <span>▦</span>
+                داشبورد و گزارشات
+            </button>
+
+            <button class="menu-item" data-section="projects">
+                <span>▣</span>
+                ایجاد پروژه
+            </button>
+
+            <button class="menu-item" data-section="new-task">
+                <span>＋</span>
+                ایجاد وظیفه جدید
+            </button>
+
+            <button class="menu-item" data-section="tasks">
+                <span>✓</span>
+                مرکز وظایف
+                <b class="menu-badge">24</b>
+            </button>
+
+            <button class="menu-item" data-section="approvals">
+                <span>◉</span>
+                کارتابل تأییدات
+                <b class="menu-badge orange">5</b>
+            </button>
+
+            <button class="menu-item" data-section="completed">
+                <span>✓</span>
+                وظایف انجام‌شده
+            </button>
+
+            <button class="menu-item" data-section="cancelled">
+                <span>×</span>
+                وظایف لغوشده
+            </button>
+
+            <button class="menu-item" data-section="no-approver">
+                <span>!</span>
+                وظایف فاقد تأییدکننده
+            </button>
+
+            <button class="menu-item" data-section="schedule">
+                <span>▣</span>
+                زمان‌بندی پروژه
+            </button>
+
+            <div class="menu-divider"></div>
+
+            <button class="menu-item" data-section="users">
+                <span>♙</span>
+                اطلاعات کاربران
+            </button>
+
+            <button class="menu-item" data-section="settings">
+                <span>⚙</span>
+                تنظیمات
+            </button>
+
+            <button class="menu-item" data-section="support">
+                <span>?</span>
+                پشتیبانی
+            </button>
+
+            <button class="menu-item" data-section="content">
+                <span>▤</span>
+                محتویات سایت
+            </button>
+
+            <button class="menu-item logout" id="logoutBtn">
+                <span>⇥</span>
+                خروج
+            </button>
+
+        </nav>
+
+    </aside>
+
+
+    <!-- ================= CONTENT ================= -->
+
+    <main class="main-content">
+
+
+        <!-- ================= HOME ================= -->
+
+        <section id="home" class="page-section active">
+
+            <div class="hero-card">
+
+                <div class="hero-pattern"></div>
+
+                <div class="hero-content">
+
+                    <div class="hero-label">
+                        ● مرکز فرماندهی عملیات سازمان
+                    </div>
+
+                    <h2>
+                        مدیریت هوشمند
+                        <span>وظایف و پروژه‌ها</span>
+                    </h2>
+
+                    <p>
+                        تمام پروژه‌ها، وظایف، زمان‌بندی‌ها، تأییدات و گزارش‌های
+                        سازمانی را در یک محیط یکپارچه مدیریت کنید.
+                    </p>
+
+                    <div class="hero-buttons">
+
+                        <button class="primary-btn" data-go="new-task">
+                            ＋ ایجاد وظیفه جدید
+                        </button>
+
+                        <button class="secondary-btn" data-go="projects">
+                            ایجاد پروژه
+                        </button>
+
+                    </div>
+
+                </div>
+
+                <div class="hero-visual">
+
+                    <div class="orbit orbit-one"></div>
+                    <div class="orbit orbit-two"></div>
+
+                    <div class="hero-dashboard">
+
+                        <div class="mini-top">
+                            <span>وضعیت عملکرد</span>
+                            <b>امروز</b>
+                        </div>
+
+                        <div class="mini-number">
+                            ۸۷٪
+                        </div>
+
+                        <div class="mini-progress">
+                            <span></span>
+                        </div>
+
+                        <div class="mini-footer">
+                            <small>پیشرفت کلی وظایف</small>
+                            <strong>+۱۲٪</strong>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- QUICK STATS -->
+
+            <div class="stats-grid">
+
+                <div class="stat-card blue">
+                    <div class="stat-icon">▣</div>
+                    <div>
+                        <span>تعداد پروژه‌ها</span>
+                        <strong>۲۴</strong>
+                        <small>+۳ پروژه این ماه</small>
+                    </div>
+                </div>
+
+                <div class="stat-card purple">
+                    <div class="stat-icon">✓</div>
+                    <div>
+                        <span>کل وظایف</span>
+                        <strong>۱۲۸</strong>
+                        <small>۳۴ وظیفه فعال</small>
+                    </div>
+                </div>
+
+                <div class="stat-card green">
+                    <div class="stat-icon">◉</div>
+                    <div>
+                        <span>انجام‌شده</span>
+                        <strong>۷۸</strong>
+                        <small>۶۱٪ کل وظایف</small>
+                    </div>
+                </div>
+
+                <div class="stat-card orange">
+                    <div class="stat-icon">!</div>
+                    <div>
+                        <span>در انتظار تأیید</span>
+                        <strong>۵</strong>
+                        <small>نیازمند بررسی</small>
+                    </div>
+                </div>
+
+            </div>
+
+
+            <!-- HOME INFORMATION -->
+
+            <div class="home-grid">
+
+                <div class="panel">
+
+                    <div class="panel-header">
+                        <div>
+                            <span class="eyebrow">LIVE STATUS</span>
+                            <h3>وضعیت عملیاتی سامانه</h3>
+                        </div>
+
+                        <span class="live-dot">● فعال</span>
+                    </div>
+
+                    <div class="operation-list">
+
+                        <div>
+                            <span>پروژه‌های فعال</span>
+                            <strong>۱۴</strong>
+                        </div>
+
+                        <div>
+                            <span>وظایف امروز</span>
+                            <strong>۱۸</strong>
+                        </div>
+
+                        <div>
+                            <span>وظایف تکمیل‌شده</span>
+                            <strong>۷۸</strong>
+                        </div>
+
+                        <div>
+                            <span>در انتظار تأیید</span>
+                            <strong>۵</strong>
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="panel">
+
+                    <div class="panel-header">
+
+                        <div>
+                            <span class="eyebrow">QUICK ACCESS</span>
+                            <h3>دسترسی سریع</h3>
+                        </div>
+
+                    </div>
+
+                    <div class="quick-grid">
+
+                        <button data-go="projects">
+                            <span>▣</span>
+                            <strong>ایجاد پروژه</strong>
+                            <small>ثبت پروژه جدید</small>
+                        </button>
+
+                        <button data-go="new-task">
+                            <span>＋</span>
+                            <strong>ایجاد وظیفه</strong>
+                            <small>ثبت وظیفه جدید</small>
+                        </button>
+
+                        <button data-go="tasks">
+                            <span>✓</span>
+                            <strong>مرکز وظایف</strong>
+                            <small>مدیریت وظایف</small>
+                        </button>
+
+                        <button data-go="approvals">
+                            <span>◉</span>
+                            <strong>تأییدات</strong>
+                            <small>بررسی موارد جدید</small>
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ================= DASHBOARD ================= -->
+
+        <section id="dashboard" class="page-section">
+
+            <div class="page-title">
+
+                <div>
+                    <span class="eyebrow">MANAGEMENT ANALYTICS</span>
+                    <h2>داشبورد و گزارشات مدیریتی</h2>
+                    <p>نمای کلی عملکرد پروژه‌ها و وظایف سازمان</p>
+                </div>
+
+                <button class="filter-btn">
+                    ⚙ فیلتر گزارش
+                </button>
+
+            </div>
+
+
+            <div class="dashboard-kpis">
+
+                <div class="kpi-card">
+                    <span>پروژه‌های فعال</span>
+                    <strong>۱۴</strong>
+                    <em>▲ ۸٪</em>
+                </div>
+
+                <div class="kpi-card">
+                    <span>وظایف فعال</span>
+                    <strong>۳۴</strong>
+                    <em>▲ ۱۴٪</em>
+                </div>
+
+                <div class="kpi-card">
+                    <span>میانگین پیشرفت</span>
+                    <strong>۷۹٪</strong>
+                    <em>▲ ۶٪</em>
+                </div>
+
+                <div class="kpi-card">
+                    <span>وظایف عقب‌افتاده</span>
+                    <strong>۹</strong>
+                    <em class="danger-text">▼ ۳٪</em>
+                </div>
+
+            </div>
+
+
+            <div class="charts-grid">
+
+                <div class="chart-card chart-large">
+
+                    <div class="chart-header">
+                        <div>
+                            <span>PROJECT PERFORMANCE</span>
+                            <h3>روند عملکرد پروژه‌ها</h3>
+                        </div>
+
+                        <select>
+                            <option>۶ ماه اخیر</option>
+                            <option>۳ ماه اخیر</option>
+                            <option>سال جاری</option>
+                        </select>
+                    </div>
+
+                    <canvas id="performanceChart"></canvas>
+
+                </div>
+
+
+                <div class="chart-card">
+
+                    <div class="chart-header">
+                        <div>
+                            <span>TASK STATUS</span>
+                            <h3>وضعیت وظایف</h3>
+                        </div>
+                    </div>
+
+                    <canvas id="taskStatusChart"></canvas>
+
+                    <div class="chart-legend">
+                        <span><i class="green-dot"></i> انجام‌شده</span>
+                        <span><i class="blue-dot"></i> در حال انجام</span>
+                        <span><i class="orange-dot"></i> در انتظار</span>
+                        <span><i class="red-dot"></i> لغوشده</span>
+                    </div>
+
+                </div>
+
+
+                <div class="chart-card">
+
+                    <div class="chart-header">
+                        <div>
+                            <span>PROJECT TYPES</span>
+                            <h3>پروژه‌ها بر اساس نوع</h3>
+                        </div>
+                    </div>
+
+                    <canvas id="projectTypeChart"></canvas>
+
+                </div>
+
+
+                <div class="chart-card chart-large">
+
+                    <div class="chart-header">
+                        <div>
+                            <span>MONTHLY TASKS</span>
+                            <h3>آمار وظایف ماهانه</h3>
+                        </div>
+                    </div>
+
+                    <canvas id="monthlyTaskChart"></canvas>
+
+                </div>
+
+
+                <div class="chart-card">
+
+                    <div class="chart-header">
+                        <div>
+                            <span>PRIORITY</span>
+                            <h3>وظایف بر اساس اولویت</h3>
+                        </div>
+                    </div>
+
+                    <canvas id="priorityChart"></canvas>
+
+                </div>
+
+
+                <div class="chart-card">
+
+                    <div class="chart-header">
+                        <div>
+                            <span>DEPARTMENT</span>
+                            <h3>عملکرد واحدها</h3>
+                        </div>
+                    </div>
+
+                    <canvas id="departmentChart"></canvas>
+
+                </div>
+
+            </div>
+
+
+            <div class="report-table panel">
+
+                <div class="panel-header">
+                    <div>
+                        <span class="eyebrow">PROJECT REPORT</span>
+                        <h3>گزارش وضعیت پروژه‌ها</h3>
+                    </div>
+
+                    <button class="outline-btn">مشاهده همه</button>
+                </div>
+
+                <div class="table-wrapper">
+
+                    <table>
+
+                        <thead>
+                            <tr>
+                                <th>پروژه</th>
+                                <th>متولی</th>
+                                <th>درصد پیشرفت</th>
+                                <th>وضعیت</th>
+                                <th>مهلت</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+
+                            <tr>
+                                <td>اتوماسیون فرآیندهای مالی</td>
+                                <td>سارا احمدی</td>
+                                <td>
+                                    <div class="table-progress">
+                                        <span style="width:85%"></span>
+                                    </div>
+                                    ۸۵٪
+                                </td>
+                                <td><b class="status active-status">در حال اجرا</b></td>
+                                <td>۱۴۰۵/۰۹/۱۵</td>
+                            </tr>
+
+                            <tr>
+                                <td>سامانه مدیریت منابع انسانی</td>
+                                <td>علی رضایی</td>
+                                <td>
+                                    <div class="table-progress">
+                                        <span style="width:65%"></span>
+                                    </div>
+                                    ۶۵٪
+                                </td>
+                                <td><b class="status warning-status">نیازمند پیگیری</b></td>
+                                <td>۱۴۰۵/۱۰/۰۵</td>
+                            </tr>
+
+                            <tr>
+                                <td>بهبود فرآیند پشتیبانی</td>
+                                <td>مریم کریمی</td>
+                                <td>
+                                    <div class="table-progress">
+                                        <span style="width:92%"></span>
+                                    </div>
+                                    ۹۲٪
+                                </td>
+                                <td><b class="status success-status">نزدیک به اتمام</b></td>
+                                <td>۱۴۰۵/۰۸/۲۸</td>
+                            </tr>
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ================= CREATE PROJECT ================= -->
+
+        <section id="projects" class="page-section">
+
+            <div class="page-title">
+                <div>
+                    <span class="eyebrow">PROJECT CENTER</span>
+                    <h2>ایجاد پروژه</h2>
+                    <p>ثبت و مدیریت پروژه‌های سازمانی</p>
+                </div>
+            </div>
+
+            <div class="form-card">
+
+                <div class="form-section-title">
+                    <span>01</span>
+                    <div>
+                        <h3>اطلاعات اصلی پروژه</h3>
+                        <p>اطلاعات پایه پروژه را وارد کنید.</p>
+                    </div>
+                </div>
+
+                <div class="form-grid">
+
+                    <div class="form-group full">
+                        <label>عنوان پروژه <b>*</b></label>
+                        <input type="text" id="projectTitle" placeholder="عنوان پروژه را وارد کنید">
+                    </div>
+
+                    <div class="form-group">
+                        <label>تاریخ شروع <b>*</b></label>
+                        <input type="text" class="jalali-input" placeholder="۱۴۰۵/۰۸/۰۱">
+                    </div>
+
+                    <div class="form-group">
+                        <label>تاریخ پایان <b>*</b></label>
+                        <input type="text" class="jalali-input" placeholder="۱۴۰۵/۱۲/۲۹">
+                    </div>
+
+                    <div class="form-group">
+                        <label>متولی پروژه</label>
+                        <select>
+                            <option>انتخاب متولی</option>
+                            <option>سارا احمدی</option>
+                            <option>علی رضایی</option>
+                            <option>مریم کریمی</option>
+                            <option>نیلوفر رحیم‌زاده</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>مالک پروژه</label>
+                        <select>
+                            <option>انتخاب مالک</option>
+                            <option>مدیریت فناوری اطلاعات</option>
+                            <option>معاونت برنامه‌ریزی</option>
+                            <option>مدیریت منابع</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group full">
+                        <label>شرح پروژه</label>
+                        <textarea placeholder="شرح و اهداف پروژه را وارد کنید"></textarea>
+                    </div>
+
+                </div>
+
+                <div class="form-actions">
+
+                    <button class="primary-btn" id="createProjectBtn">
+                        ✓ ثبت پروژه
+                    </button>
+
+                    <button class="cancel-btn">
+                        انصراف
+                    </button>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ================= NEW TASK ================= -->
+
+        <section id="new-task" class="page-section">
+
+            <div class="page-title">
+                <div>
+                    <span class="eyebrow">TASK CENTER</span>
+                    <h2>ایجاد وظیفه جدید</h2>
+                    <p>یک وظیفه جدید برای پروژه ایجاد کنید.</p>
+                </div>
+            </div>
+
+            <div class="form-card">
+
+                <div class="form-section-title">
+                    <span>01</span>
+                    <div>
+                        <h3>مشخصات وظیفه</h3>
+                        <p>اطلاعات وظیفه را با دقت تکمیل کنید.</p>
+                    </div>
+                </div>
+
+                <div class="form-grid">
+
+                    <div class="form-group full">
+                        <label>عنوان وظیفه <b>*</b></label>
+                        <input type="text" id="taskTitle" placeholder="عنوان وظیفه">
+                    </div>
+
+                    <div class="form-group">
+                        <label>پروژه <b>*</b></label>
+                        <select>
+                            <option>انتخاب پروژه</option>
+                            <option>اتوماسیون فرآیندهای مالی</option>
+                            <option>سامانه مدیریت منابع انسانی</option>
+                            <option>بهبود فرآیند پشتیبانی</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>وضعیت</label>
+                        <select>
+                            <option>در حال انجام</option>
+                            <option>در انتظار شروع</option>
+                            <option>تکمیل‌شده</option>
+                            <option>لغوشده</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>تاریخ شروع <b>*</b></label>
+                        <input type="text" class="jalali-input" placeholder="۱۴۰۵/۰۸/۰۱">
+                    </div>
+
+                    <div class="form-group">
+                        <label>تاریخ پایان <b>*</b></label>
+                        <input type="text" class="jalali-input" placeholder="۱۴۰۵/۰۸/۲۰">
+                    </div>
+
+                    <div class="form-group">
+                        <label>متولی</label>
+                        <select>
+                            <option>انتخاب متولی</option>
+                            <option>سارا احمدی</option>
+                            <option>علی رضایی</option>
+                            <option>مریم کریمی</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>مالک</label>
+                        <select>
+                            <option>انتخاب مالک</option>
+                            <option>مدیریت فناوری اطلاعات</option>
+                            <option>معاونت برنامه‌ریزی</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>ناظر</label>
+                        <select>
+                            <option>انتخاب ناظر</option>
+                            <option>مدیر پروژه</option>
+                            <option>رئیس واحد</option>
+                            <option>مدیر فناوری اطلاعات</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>تأییدکننده</label>
+                        <select>
+                            <option>انتخاب تأییدکننده</option>
+                            <option>مدیر واحد</option>
+                            <option>مدیر پروژه</option>
+                            <option>معاون مربوطه</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group full">
+                        <label>شرح یا وظایف <b>*</b></label>
+                        <textarea id="taskDescription" placeholder="شرح کامل وظیفه و فعالیت‌های مورد نیاز"></textarea>
+                    </div>
+
+                    <div class="form-group full">
+                        <label>شرح آخرین وضعیت</label>
+                        <textarea placeholder="آخرین وضعیت انجام وظیفه"></textarea>
+                    </div>
+
+                    <div class="form-group full">
+                        <label>اسناد و فایل‌ها</label>
+                        <div class="upload-box">
+                            <span>📎</span>
+                            <strong>فایل را انتخاب کنید</strong>
+                            <small>PDF، Excel، Word و تصاویر</small>
+                            <input type="file">
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="form-actions">
+
+                    <button class="primary-btn" id="createTaskBtn">
+                        ✓ ثبت وظیفه
+                    </button>
+
+                    <button class="cancel-btn">
+                        پاک کردن فرم
+                    </button>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ================= TASK CENTER ================= -->
+
+        <section id="tasks" class="page-section">
+
+            <div class="page-title">
+
+                <div>
+                    <span class="eyebrow">TASK MANAGEMENT</span>
+                    <h2>مرکز وظایف</h2>
+                    <p>مدیریت، جستجو و پیگیری تمام وظایف</p>
+                </div>
+
+                <button class="primary-btn" data-go="new-task">
+                    ＋ ایجاد وظیفه جدید
+                </button>
+
+            </div>
+
+
+            <div class="task-summary">
+
+                <div>
+                    <span>کل وظایف</span>
+                    <strong>۱۲۸</strong>
+                </div>
+
+                <div>
+                    <span>در حال انجام</span>
+                    <strong>۳۴</strong>
+                </div>
+
+                <div>
+                    <span>انجام‌شده</span>
+                    <strong>۷۸</strong>
+                </div>
+
+                <div>
+                    <span>عقب‌افتاده</span>
+                    <strong>۹</strong>
+                </div>
+
+            </div>
+
+
+            <div class="panel">
+
+                <div class="table-toolbar">
+
+                    <input type="search" id="taskSearch" placeholder="🔎 جستجوی وظیفه...">
+
+                    <select id="taskFilter">
+                        <option value="all">همه وضعیت‌ها</option>
+                        <option value="doing">در حال انجام</option>
+                        <option value="done">انجام‌شده</option>
+                        <option value="waiting">در انتظار</option>
+                        <option value="cancelled">لغوشده</option>
+                    </select>
+
+                    <button class="outline-btn">
+                        فیلتر پیشرفته
+                    </button>
+
+                </div>
+
+
+                <div class="table-wrapper">
+
+                    <table id="taskTable">
+
+                        <thead>
+
+                            <tr>
+                                <th>عنوان وظیفه</th>
+                                <th>پروژه</th>
+                                <th>متولی</th>
+                                <th>اولویت</th>
+                                <th>وضعیت</th>
+                                <th>تاریخ پایان</th>
+                            </tr>
+
+                        </thead>
+
+                        <tbody>
+
+                            <tr data-status="doing">
+                                <td><strong>بررسی گزارش‌های مالی</strong></td>
+                                <td>اتوماسیون مالی</td>
+                                <td>سارا احمدی</td>
+                                <td><b class="priority high">زیاد</b></td>
+                                <td><b class="status active-status">در حال انجام</b></td>
+                                <td>۱۴۰۵/۰۸/۲۵</td>
+                            </tr>
+
+                            <tr data-status="waiting">
+                                <td><strong>بررسی درخواست کاربر</strong></td>
+                                <td>پشتیبانی سازمانی</td>
+                                <td>علی رضایی</td>
+                                <td><b class="priority medium">متوسط</b></td>
+                                <td><b class="status warning-status">در انتظار</b></td>
+                                <td>۱۴۰۵/۰۸/۲۸</td>
+                            </tr>
+
+                            <tr data-status="done">
+                                <td><strong>تهیه مستندات پروژه</strong></td>
+                                <td>مدیریت منابع</td>
+                                <td>مریم کریمی</td>
+                                <td><b class="priority low">کم</b></td>
+                                <td><b class="status success-status">انجام‌شده</b></td>
+                                <td>۱۴۰۵/۰۸/۱۵</td>
+                            </tr>
+
+                            <tr data-status="doing">
+                                <td><strong>تست نسخه جدید سامانه</strong></td>
+                                <td>سامانه سازمانی</td>
+                                <td>نیلوفر رحیم‌زاده</td>
+                                <td><b class="priority high">زیاد</b></td>
+                                <td><b class="status active-status">در حال انجام</b></td>
+                                <td>۱۴۰۵/۰۹/۰۳</td>
+                            </tr>
+
+                            <tr data-status="cancelled">
+                                <td><strong>طراحی گزارش قدیمی</strong></td>
+                                <td>گزارشات مدیریتی</td>
+                                <td>حسین مرادی</td>
+                                <td><b class="priority low">کم</b></td>
+                                <td><b class="status danger-status">لغوشده</b></td>
+                                <td>۱۴۰۵/۰۸/۱۰</td>
+                            </tr>
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ================= APPROVALS ================= -->
+
+        <section id="approvals" class="page-section">
+
+            <div class="page-title">
+                <div>
+                    <span class="eyebrow">APPROVAL WORKFLOW</span>
+                    <h2>کارتابل تأییدات</h2>
+                    <p>مواردی که نیاز به بررسی و تأیید شما دارند</p>
+                </div>
+            </div>
+
+            <div class="approval-grid">
+
+                <div class="approval-card urgent">
+                    <div class="approval-top">
+                        <span>نیازمند اقدام</span>
+                        <b>۱</b>
+                    </div>
+
+                    <h3>تأیید گزارش عملکرد ماهانه</h3>
+
+                    <p>
+                        پروژه: اتوماسیون فرآیندهای مالی
+                    </p>
+
+                    <div class="approval-meta">
+                        <span>متولی: سارا احمدی</span>
+                        <span>۱۴۰۵/۰۸/۲۲</span>
+                    </div>
+
+                    <div class="approval-actions">
+                        <button class="approve">✓ تأیید</button>
+                        <button class="reject">× رد</button>
+                    </div>
+                </div>
+
+
+                <div class="approval-card">
+                    <div class="approval-top">
+                        <span>در انتظار بررسی</span>
+                        <b>۲</b>
+                    </div>
+
+                    <h3>تأیید برنامه زمان‌بندی</h3>
+
+                    <p>
+                        پروژه: سامانه منابع انسانی
+                    </p>
+
+                    <div class="approval-meta">
+                        <span>متولی: علی رضایی</span>
+                        <span>۱۴۰۵/۰۸/۲۵</span>
+                    </div>
+
+                    <div class="approval-actions">
+                        <button class="approve">✓ تأیید</button>
+                        <button class="reject">× رد</button>
+                    </div>
+                </div>
+
+
+                <div class="approval-card">
+                    <div class="approval-top">
+                        <span>در انتظار بررسی</span>
+                        <b>۳</b>
+                    </div>
+
+                    <h3>تأیید مستندات فنی</h3>
+
+                    <p>
+                        پروژه: بهبود فرآیند پشتیبانی
+                    </p>
+
+                    <div class="approval-meta">
+                        <span>متولی: مریم کریمی</span>
+                        <span>۱۴۰۵/۰۸/۲۷</span>
+                    </div>
+
+                    <div class="approval-actions">
+                        <button class="approve">✓ تأیید</button>
+                        <button class="reject">× رد</button>
+                    </div>
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ================= COMPLETED ================= -->
+
+        <section id="completed" class="page-section">
+
+            <div class="page-title">
+                <div>
+                    <span class="eyebrow">COMPLETED TASKS</span>
+                    <h2>لیست وظایف انجام‌شده</h2>
+                    <p>وظایف تکمیل‌شده سامانه</p>
+                </div>
+            </div>
+
+            <div class="panel">
+
+                <div class="completed-list">
+
+                    <div class="completed-item">
+                        <div class="check-circle">✓</div>
+                        <div>
+                            <h3>تهیه گزارش عملکرد ماهانه</h3>
+                            <p>پروژه اتوماسیون مالی</p>
+                        </div>
+                        <span>۱۴۰۵/۰۸/۲۰</span>
+                        <b>۱۰۰٪</b>
+                    </div>
+
+                    <div class="completed-item">
+                        <div class="check-circle">✓</div>
+                        <div>
+                            <h3>بررسی مستندات سیستم</h3>
+                            <p>پروژه منابع انسانی</p>
+                        </div>
+                        <span>۱۴۰۵/۰۸/۱۸</span>
+                        <b>۱۰۰٪</b>
+                    </div>
+
+                    <div class="completed-item">
+                        <div class="check-circle">✓</div>
+                        <div>
+                            <h3>رفع خطای گزارش‌گیری</h3>
+                            <p>پروژه پشتیبانی</p>
+                        </div>
+                        <span>۱۴۰۵/۰۸/۱۶</span>
+                        <b>۱۰۰٪</b>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ================= CANCELLED ================= -->
+
+        <section id="cancelled" class="page-section">
+
+            <div class="page-title">
+                <div>
+                    <span class="eyebrow">CANCELLED TASKS</span>
+                    <h2>لیست وظایف لغوشده</h2>
+                    <p>سوابق وظایفی که لغو شده‌اند</p>
+                </div>
+            </div>
+
+            <div class="panel">
+
+                <div class="cancelled-item">
+                    <div class="cancel-icon">×</div>
+                    <div>
+                        <h3>طراحی گزارش قدیمی</h3>
+                        <p>علت لغو: تغییر نیازمندی پروژه</p>
+                    </div>
+                    <span>۱۴۰۵/۰۸/۱۰</span>
+                    <b>لغوشده</b>
+                </div>
+
+                <div class="cancelled-item">
+                    <div class="cancel-icon">×</div>
+                    <div>
+                        <h3>تهیه نسخه آزمایشی</h3>
+                        <p>علت لغو: ادغام با پروژه جدید</p>
+                    </div>
+                    <span>۱۴۰۵/۰۷/۲۸</span>
+                    <b>لغوشده</b>
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ================= NO APPROVER ================= -->
+
+        <section id="no-approver" class="page-section">
+
+            <div class="page-title">
+                <div>
+                    <span class="eyebrow">MISSING APPROVER</span>
+                    <h2>وظایف فاقد تأییدکننده</h2>
+                    <p>وظایفی که هنوز تأییدکننده برای آن‌ها مشخص نشده است</p>
+                </div>
+            </div>
+
+            <div class="warning-banner">
+                ⚠️
+                <div>
+                    <strong>نیازمند تکمیل اطلاعات</strong>
+                    <p>برای ۳ وظیفه تأییدکننده مشخص نشده است.</p>
+                </div>
+            </div>
+
+            <div class="panel">
+
+                <div class="table-wrapper">
+
+                    <table>
+
+                        <thead>
+                            <tr>
+                                <th>وظیفه</th>
+                                <th>پروژه</th>
+                                <th>متولی</th>
+                                <th>تاریخ پایان</th>
+                                <th>عملیات</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+
+                            <tr>
+                                <td>بررسی گزارش مالی</td>
+                                <td>اتوماسیون مالی</td>
+                                <td>سارا احمدی</td>
+                                <td>۱۴۰۵/۰۹/۰۲</td>
+                                <td><button class="small-btn">تعیین تأییدکننده</button></td>
+                            </tr>
+
+                            <tr>
+                                <td>بررسی درخواست تغییر</td>
+                                <td>منابع انسانی</td>
+                                <td>علی رضایی</td>
+                                <td>۱۴۰۵/۰۹/۰۶</td>
+                                <td><button class="small-btn">تعیین تأییدکننده</button></td>
+                            </tr>
+
+                            <tr>
+                                <td>تکمیل مستندات</td>
+                                <td>پشتیبانی</td>
+                                <td>مریم کریمی</td>
+                                <td>۱۴۰۵/۰۹/۱۰</td>
+                                <td><button class="small-btn">تعیین تأییدکننده</button></td>
+                            </tr>
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ================= SCHEDULE ================= -->
+
+        <section id="schedule" class="page-section">
+
+            <div class="page-title">
+                <div>
+                    <span class="eyebrow">PROJECT TIMELINE</span>
+                    <h2>زمان‌بندی پروژه</h2>
+                    <p>نمای کلی برنامه زمان‌بندی و فعالیت‌های پروژه</p>
+                </div>
+            </div>
+
+            <div class="timeline-card panel">
+
+                <div class="timeline-header">
+                    <h3>پروژه اتوماسیون فرآیندهای مالی</h3>
+                    <span>پیشرفت ۸۵٪</span>
+                </div>
+
+                <div class="gantt">
+
+                    <div class="gantt-row header-row">
+                        <div>فعالیت</div>
+                        <span>مهر</span>
+                        <span>آبان</span>
+                        <span>آذر</span>
+                        <span>دی</span>
+                        <span>بهمن</span>
+                    </div>
+
+                    <div class="gantt-row">
+                        <div>تحلیل نیازمندی‌ها</div>
+                        <i class="gantt-bar bar-green" style="grid-column:2 / 3;"></i>
+                    </div>
+
+                    <div class="gantt-row">
+                        <div>طراحی سیستم</div>
+                        <i class="gantt-bar bar-blue" style="grid-column:2 / 4;"></i>
+                    </div>
+
+                    <div class="gantt-row">
+                        <div>پیاده‌سازی</div>
+                        <i class="gantt-bar bar-purple" style="grid-column:3 / 5;"></i>
+                    </div>
+
+                    <div class="gantt-row">
+                        <div>تست و کنترل</div>
+                        <i class="gantt-bar bar-orange" style="grid-column:4 / 6;"></i>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ================= USERS ================= -->
+
+        <section id="users" class="page-section">
+
+            <div class="page-title">
+                <div>
+                    <span class="eyebrow">USER MANAGEMENT</span>
+                    <h2>اطلاعات کاربران</h2>
+                    <p>مدیریت کاربران و نقش‌های سامانه</p>
+                </div>
+            </div>
+
+            <div class="users-grid">
+
+                <div class="user-card">
+                    <div class="big-avatar">س</div>
+                    <h3>سارا احمدی</h3>
+                    <span>مدیر پروژه</span>
+                    <small>۱۲ وظیفه فعال</small>
+                </div>
+
+                <div class="user-card">
+                    <div class="big-avatar purple-avatar">ع</div>
+                    <h3>علی رضایی</h3>
+                    <span>کارشناس فناوری</span>
+                    <small>۸ وظیفه فعال</small>
+                </div>
+
+                <div class="user-card">
+                    <div class="big-avatar green-avatar">م</div>
+                    <h3>مریم کریمی</h3>
+                    <span>کارشناس پشتیبانی</span>
+                    <small>۶ وظیفه فعال</small>
+                </div>
+
+                <div class="user-card">
+                    <div class="big-avatar orange-avatar">ن</div>
+                    <h3>نیلوفر رحیم‌زاده</h3>
+                    <span>پشتیبان سامانه</span>
+                    <small>۴ وظیفه فعال</small>
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ================= SETTINGS ================= -->
+
+        <section id="settings" class="page-section">
+
+            <div class="page-title">
+                <div>
+                    <span class="eyebrow">SYSTEM SETTINGS</span>
+                    <h2>تنظیمات سامانه</h2>
+                    <p>تنظیمات عمومی سامانه مدیریت وظایف</p>
+                </div>
+            </div>
+
+            <div class="settings-panel panel">
+
+                <div class="setting-row">
+                    <div>
+                        <strong>اعلان‌های سامانه</strong>
+                        <p>دریافت اعلان برای وظایف و تأییدات جدید</p>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" checked>
+                        <span></span>
+                    </label>
+                </div>
+
+                <div class="setting-row">
+                    <div>
+                        <strong>نمایش وضعیت آنلاین</strong>
+                        <p>نمایش وضعیت فعال بودن کاربران</p>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" checked>
+                        <span></span>
+                    </label>
+                </div>
+
+                <div class="setting-row">
+                    <div>
+                        <strong>یادآوری مهلت وظایف</strong>
+                        <p>نمایش هشدار برای وظایف نزدیک به سررسید</p>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" checked>
+                        <span></span>
+                    </label>
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ================= SUPPORT ================= -->
+
+        <section id="support" class="page-section">
+
+            <div class="page-title">
+                <div>
+                    <span class="eyebrow">SUPPORT CENTER</span>
+                    <h2>پشتیبانی</h2>
+                    <p>درخواست خود را برای واحد پشتیبانی ثبت کنید.</p>
+                </div>
+            </div>
+
+            <div class="support-grid">
+
+                <div class="support-card">
+                    <span>🎧</span>
+                    <h3>تماس با پشتیبانی</h3>
+                    <p>ارتباط مستقیم با کارشناسان پشتیبانی سامانه</p>
+                    <strong>داخلی ۲۴۵</strong>
+                </div>
+
+                <div class="support-card">
+                    <span>📚</span>
+                    <h3>راهنمای سامانه</h3>
+                    <p>مشاهده راهنمای استفاده از بخش‌های مختلف سامانه</p>
+                    <button class="small-btn">مشاهده راهنما</button>
+                </div>
+
+                <div class="support-card">
+                    <span>✉</span>
+                    <h3>ثبت درخواست</h3>
+                    <p>ثبت تیکت و پیگیری درخواست‌های پشتیبانی</p>
+                    <button class="small-btn">ثبت درخواست</button>
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ================= CONTENT ================= -->
+
+        <section id="content" class="page-section">
+
+            <div class="page-title">
+                <div>
+                    <span class="eyebrow">SITE CONTENT</span>
+                    <h2>محتویات سایت</h2>
+                    <p>مدیریت اطلاعات و محتوای سامانه</p>
+                </div>
+            </div>
+
+            <div class="content-grid">
+
+                <div class="content-card">
+                    <span>📢</span>
+                    <h3>اطلاعیه‌ها</h3>
+                    <strong>۸</strong>
+                    <small>اطلاعیه فعال</small>
+                </div>
+
+                <div class="content-card">
+                    <span>📄</span>
+                    <h3>مستندات</h3>
+                    <strong>۳۶</strong>
+                    <small>سند ثبت‌شده</small>
+                </div>
+
+                <div class="content-card">
+                    <span>❓</span>
+                    <h3>راهنماها</h3>
+                    <strong>۱۲</strong>
+                    <small>راهنمای آموزشی</small>
+                </div>
+
+                <div class="content-card">
+                    <span>🔗</span>
+                    <h3>لینک‌های سازمانی</h3>
+                    <strong>۱۴</strong>
+                    <small>لینک فعال</small>
+                </div>
+
+            </div>
+
+        </section>
+
+
+    </main>
+
+</div>
+
+
+<!-- TOAST -->
+
+<div id="toast" class="toast">
+    <span>✓</span>
+    <p>عملیات با موفقیت انجام شد.</p>
+</div>
+
+
+<!-- CHART.JS -->
+
+
+
+<script>
+(function(){
+'use strict';
+const $=s=>document.querySelector(s), $$=s=>Array.from(document.querySelectorAll(s));
+const get=(k)=>{try{return JSON.parse(localStorage.getItem(k)||'[]')}catch(e){return []}};
+const put=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(e){alert('ذخیره‌سازی در این مرورگر مجاز نیست')}};
+function go(id){if(!document.getElementById(id))return; $$('.page-section').forEach(p=>p.classList.toggle('active',p.id===id)); $$('.menu-item[data-section]').forEach(b=>b.classList.toggle('active',b.dataset.section===id));window.scrollTo(0,0)}
+document.addEventListener('click',e=>{const b=e.target.closest('[data-section],[data-go]');if(b){go(b.dataset.section||b.dataset.go);return}});
+function fields(id){return $$('#'+id+' input,#'+id+' select,#'+id+' textarea')}
+function reset(id){fields(id).forEach(el=>{if(el.type==='file')el.value='';else if(el.tagName==='SELECT')el.selectedIndex=0;else el.value=''})}
+function notice(t){alert(t)}
+function projectOptions(){let s=$('#new-task select');if(!s)return;const old=s.value;const base=['اتوماسیون فرآیندهای مالی','سامانه مدیریت منابع انسانی','بهبود فرآیند پشتیبانی'];s.innerHTML='<option value="">انتخاب پروژه</option>';[...new Set([...base,...get('fixedProjects').map(x=>x.title)])].forEach(n=>{let o=document.createElement('option');o.textContent=n;o.value=n;s.append(o)});s.value=old}
+function projects(){const data=get('fixedProjects');let host=$('#projects .form-card');if(!host)return;let box=$('#savedProjects');if(!box){box=document.createElement('div');box.id='savedProjects';box.className='form-card';host.after(box)}box.innerHTML='<h3>پروژه‌های ثبت‌شده</h3>';data.forEach((p,i)=>{let row=document.createElement('p');row.style='padding:12px;border-bottom:1px solid #ddd';row.textContent=p.title+' — '+(p.manager||'');let del=document.createElement('button');del.textContent='حذف';del.className='cancel-btn';del.style.margin='0 12px';del.onclick=()=>{if(confirm('پروژه حذف شود؟')){data.splice(i,1);put('fixedProjects',data);projects();projectOptions()}};row.append(del);box.append(row)})}
+function tasks(){let data=get('fixedTasks'),tbody=$('#taskTable tbody');if(!tbody)return;tbody.querySelectorAll('[data-created="true"]').forEach(x=>x.remove());data.forEach((t,i)=>{let row=document.createElement('tr');row.dataset.created='true';[t.title,t.project,t.owner,'متوسط',t.status,t.end].forEach(v=>{let td=document.createElement('td');td.textContent=v||'—';row.append(td)});let td=document.createElement('td'),del=document.createElement('button');del.className='cancel-btn';del.textContent='حذف';del.onclick=()=>{if(confirm('وظیفه حذف شود؟')){data.splice(i,1);put('fixedTasks',data);tasks()}};td.append(del);row.append(td);tbody.append(row)})}
+$('#createProjectBtn')?.addEventListener('click',()=>{let title=$('#projectTitle')?.value.trim();if(!title)return notice('عنوان پروژه را وارد کنید');let f=fields('projects'),data=get('fixedProjects');data.push({title,manager:f.find(x=>x.tagName==='SELECT')?.value||''});put('fixedProjects',data);projects();projectOptions();reset('projects');notice('پروژه ثبت شد')});
+$('#createTaskBtn')?.addEventListener('click',()=>{let title=$('#taskTitle')?.value.trim(), f=fields('new-task'),selects=f.filter(x=>x.tagName==='SELECT');if(!title)return notice('عنوان وظیفه را وارد کنید');if(!selects[0]?.value)return notice('پروژه را انتخاب کنید');let dates=f.filter(x=>x.classList.contains('jalali-input'));let data=get('fixedTasks');data.push({title,project:selects[0].value,status:selects[1]?.value,owner:selects[2]?.value,end:dates[1]?.value});put('fixedTasks',data);tasks();reset('new-task');notice('وظیفه ثبت شد')});
+$$('#projects .cancel-btn,#new-task .cancel-btn').forEach(b=>b.addEventListener('click',()=>reset(b.closest('.page-section').id)));
+$('#taskSearch')?.addEventListener('input',e=>{$$('#taskTable tbody tr').forEach(r=>r.style.display=r.textContent.includes(e.target.value)?'':'none')});
+$('#taskFilter')?.addEventListener('change',e=>{const v=e.target.value;$$('#taskTable tbody tr').forEach(r=>r.style.display=!v||v==='all'||r.dataset.status===v?'':'none')});
+projectOptions();projects();tasks();
+console.log('Navigation and basic forms ready');
+})();
+</script>
+
+</body>
+</html>
