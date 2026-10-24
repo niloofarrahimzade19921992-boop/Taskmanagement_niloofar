@@ -29,7 +29,7 @@
     </div>
 
     <div class="topbar-left">
-        <span class="version-badge">نسخه سازمانی</span>
+        <span class="version-badge">نسخه سازمانی • داده نمایشی</span>
         <span class="user-label">پنل کاربری</span>
     </div>
 </header>
@@ -87,8 +87,6 @@
                     <h2>مرکز یکپارچه مدیریت وظایف سازمانی</h2>
                     <p>پروژه‌ها را تعریف کنید، وظایف را به مسئولان بسپارید، تأییدات را مدیریت کنید و گزارش عملکرد را در یک داشبورد ببینید.</p>
                     <div class="hero-actions">
-                        <button class="primary-btn" data-go="newTask">＋ ایجاد وظیفه جدید</button>
-                        <button class="secondary-btn" data-go="projects">▣ ایجاد پروژه</button>
                         <button class="link-btn" data-go="dashboard">مشاهده داشبورد ←</button>
                     </div>
                 </div>
@@ -118,9 +116,6 @@
                     </p>
                 </div>
 
-                <button class="primary-btn" type="button" data-go="projects">
-                    ＋ ایجاد پروژه
-                </button>
 
             </div>
 
@@ -168,6 +163,35 @@
 
             </div>
 
+
+            <div class="dashboard-visuals">
+                <div class="panel chart-panel">
+                    <div class="section-heading">
+                        <div>
+                            <h3>نمای تحلیلی وضعیت وظایف</h3>
+                            <p class="muted">تصویر خلاصه‌ای از وضعیت فعلی وظایف سامانه</p>
+                        </div>
+                    </div>
+                    <div class="donut-area">
+                        <div class="donut-chart" id="taskDonut"><div><strong id="donutTotal">۰</strong><span>کل وظایف</span></div></div>
+                        <div class="legend-list">
+                            <div><i class="legend-dot pending-dot"></i><span>در انتظار</span><strong id="legendPending">۰</strong></div>
+                            <div><i class="legend-dot progress-dot"></i><span>در حال انجام</span><strong id="legendProgress">۰</strong></div>
+                            <div><i class="legend-dot done-dot"></i><span>تکمیل‌شده</span><strong id="legendDone">۰</strong></div>
+                            <div><i class="legend-dot cancelled-dot"></i><span>لغوشده</span><strong id="legendCancelled">۰</strong></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="panel chart-panel">
+                    <div class="section-heading">
+                        <div>
+                            <h3>پیشرفت پروژه‌ها</h3>
+                            <p class="muted">درصد تکمیل وظایف هر پروژه</p>
+                        </div>
+                    </div>
+                    <div id="projectProgressChart" class="project-progress-chart"></div>
+                </div>
+            </div>
 
             <div class="dashboard-grid">
 
@@ -521,7 +545,7 @@
             <div class="page-header"><div><span class="eyebrow">TASK CREATION</span><h2>ایجاد وظیفه جدید</h2><p>تعریف وظیفه، مسئولیت‌ها، زمان‌بندی و گردش تأیید</p></div><button class="secondary-btn" data-go="tasks">مشاهده مرکز وظایف</button></div>
             <div class="panel form-panel">
                 <div class="panel-title"><div class="title-icon">＋</div><div><h3>اطلاعات وظیفه</h3><p>فیلدهای ستاره‌دار الزامی هستند.</p></div></div>
-                <form id="newTaskForm"><div class="form-grid">
+                <form id="newTaskForm"><input type="hidden" id="newTaskId"><div class="form-grid">
                     <label>پروژه *<select id="newTaskProject" required></select></label>
                     <label>عنوان وظیفه *<input id="newTaskTitle" required maxlength="150" placeholder="عنوان وظیفه را وارد کنید"></label>
                     <label>وضعیت<select id="newTaskStatus"><option value="pending">در انتظار انجام</option><option value="progress">در حال انجام</option><option value="done">تکمیل‌شده</option><option value="cancelled">لغوشده</option></select></label>
@@ -559,251 +583,20 @@
                 </div>
 
 
-                <button
-                    class="secondary-btn"
-                    type="button"
-                    data-go="projects"
-                >
-                    ＋ ایجاد پروژه
-                </button>
 
             </div>
 
 
 
-            <div class="panel form-panel">
-
+            <div class="panel task-center-intro">
                 <div class="panel-title">
-
                     <div class="title-icon">✓</div>
-
                     <div>
-
-                        <h3 id="formTitle">
-                            ایجاد وظیفه جدید
-                        </h3>
-
-                        <p>
-                            اطلاعات وظیفه و مسئولیت‌های مرتبط را ثبت کنید.
-                        </p>
-
+                        <h3>فهرست و پیگیری وظایف</h3>
+                        <p>برای ثبت وظیفه جدید فقط از گزینه «ایجاد وظیفه جدید» در منوی سامانه استفاده کنید.</p>
                     </div>
-
                 </div>
-
-
-                <form id="taskForm">
-
-                    <input type="hidden" id="taskId">
-
-
-                    <div class="form-grid">
-
-
-                        <label>
-                            پروژه *
-
-                            <select
-                                id="taskProject"
-                                required
-                            ></select>
-
-                        </label>
-
-
-                        <label>
-                            عنوان وظیفه *
-
-                            <input
-                                id="title"
-                                required
-                                maxlength="150"
-                                placeholder="عنوان وظیفه را وارد کنید"
-                            >
-
-                        </label>
-
-
-                        <label>
-                            وضعیت
-
-                            <select id="status">
-
-                                <option value="pending">
-                                    در انتظار انجام
-                                </option>
-
-                                <option value="progress">
-                                    در حال انجام
-                                </option>
-
-                                <option value="done">
-                                    تکمیل‌شده
-                                </option>
-
-                            </select>
-
-                        </label>
-
-
-                        <label>
-                            متولی
-
-                            <input
-                                id="responsible"
-                                placeholder="مسئول اجرا"
-                            >
-
-                        </label>
-
-
-                        <label>
-                            مالک
-
-                            <input
-                                id="owner"
-                                placeholder="مالک وظیفه"
-                            >
-
-                        </label>
-
-
-                        <label>
-                            ناظر
-
-                            <input
-                                id="supervisor"
-                                placeholder="ناظر وظیفه"
-                            >
-
-                        </label>
-
-
-                        <label>
-                            تأییدکننده
-
-                            <input
-                                id="approver"
-                                placeholder="تأییدکننده"
-                            >
-
-                        </label>
-
-
-                        <label>
-                            تاریخ شروع
-
-                            <div class="date-input-wrap">
-
-                                <input
-                                    id="startDate"
-                                    class="jalali-input"
-                                    inputmode="numeric"
-                                    placeholder="۱۴۰۵/۰۸/۰۱"
-                                >
-
-                                <small>
-                                    فرمت: ۱۴۰۵/۰۸/۰۱
-                                </small>
-
-                            </div>
-
-                        </label>
-
-
-                        <label>
-                            تاریخ پایان
-
-                            <div class="date-input-wrap">
-
-                                <input
-                                    id="endDate"
-                                    class="jalali-input"
-                                    inputmode="numeric"
-                                    placeholder="۱۴۰۵/۰۸/۳۰"
-                                >
-
-                                <small>
-                                    فرمت: ۱۴۰۵/۰۸/۳۰
-                                </small>
-
-                            </div>
-
-                        </label>
-
-
-                        <label class="full-width">
-
-                            شرح وظیفه
-
-                            <textarea
-                                id="description"
-                                rows="3"
-                                placeholder="توضیحات و شرح وظیفه"
-                            ></textarea>
-
-                        </label>
-
-
-                        <label class="full-width">
-
-                            آخرین شرح وضعیت
-
-                            <textarea
-                                id="latestStatus"
-                                rows="2"
-                                placeholder="آخرین پیشرفت، مانع یا توضیح وضعیت"
-                            ></textarea>
-
-                        </label>
-
-
-                        <label class="full-width">
-
-                            نام یا نشانی سند
-
-                            <input
-                                id="documentName"
-                                placeholder="مثلاً گزارش-ماهانه.pdf"
-                            >
-
-                        </label>
-
-                    </div>
-
-
-                    <div class="form-actions">
-
-                        <button
-                            class="primary-btn"
-                            type="submit"
-                        >
-                            ذخیره وظیفه
-                        </button>
-
-
-                        <button
-                            class="secondary-btn"
-                            type="button"
-                            id="cancelEdit"
-                        >
-                            انصراف از ویرایش
-                        </button>
-
-                    </div>
-
-
-                    <p
-                        id="formMessage"
-                        class="form-message"
-                        role="status"
-                    ></p>
-
-                </form>
-
             </div>
-
-
 
             <div class="panel">
 
@@ -1209,3 +1002,4 @@
 <script src="Script.js"></script>
 
 </body>
+</html>
