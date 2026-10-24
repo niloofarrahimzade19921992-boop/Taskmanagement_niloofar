@@ -3582,6 +3582,72 @@ projectOptions();projects();tasks();
 console.log('Navigation and basic forms ready');
 })();
 </script>
+<!-- تم پاییزی و انتقال منو به بالای سایت؛ این قطعه را درست قبل از </body> قرار بده -->
+<style>
+:root{--primary:#315c4b;--primary-dark:#213e32;--secondary:#c76a35;--purple:#a9633c;--green:#566b39;--orange:#d28b28;--red:#b85b3b;--yellow:#c7a03c;--bg:#f7f2e8;--text:#322e25;--muted:#817866;--border:#e5dccb;--shadow:0 8px 22px rgba(64,55,35,.07);--shadow-heavy:0 14px 30px rgba(64,55,35,.13)}
+body{background:#f7f2e8!important;color:var(--text)}
+.top-header{min-height:78px;padding:14px 3%;background:linear-gradient(105deg,#243f33,#435a3c 62%,#7c5834)!important;box-shadow:none}
+.brand-icon{background:linear-gradient(140deg,#d89942,#b96a36)}
+.app-layout{display:flex!important;flex-direction:column!important;min-height:calc(100vh - 78px)}
+.sidebar{width:100%!important;height:auto!important;max-height:none!important;position:relative!important;top:auto!important;padding:0 3%!important;overflow:visible!important;border-left:none!important;border-bottom:1px solid #d9d1bd;background:#304d3c!important;box-shadow:0 5px 15px rgba(38,53,38,.12)}
+.sidebar-title,.sidebar-subtitle,.menu-divider{display:none!important}
+.main-menu{display:flex!important;flex-direction:row!important;align-items:stretch!important;gap:3px!important;flex-wrap:nowrap!important;overflow-x:auto!important;padding:8px 0!important;scrollbar-width:thin}
+.menu-item{flex:0 0 auto!important;width:auto!important;min-width:fit-content!important;display:flex!important;flex-direction:row!important;align-items:center!important;justify-content:center!important;gap:7px!important;position:relative!important;padding:11px 13px!important;margin:0!important;color:#f9f0df!important;font-size:12px!important;white-space:nowrap!important;border-radius:10px!important;text-align:center!important;transform:none!important}
+.menu-item span{width:24px!important;height:24px!important;background:rgba(255,255,255,.12)!important;color:#f7dfaa!important}
+.menu-item:hover{background:#47654c!important;color:white!important}
+.menu-item.active{background:linear-gradient(120deg,#d07c36,#bb6232)!important;color:white!important;box-shadow:none!important}
+.menu-item.active span{background:rgba(255,255,255,.18)!important;color:white!important}
+.menu-badge{position:static!important;margin:0!important;background:#e6bc69!important;color:#3e3827!important}
+.logout{margin:0!important}
+.main-content{width:100%;padding:25px 3% 45px!important}
+.hero-card{background:linear-gradient(115deg,#e9dcc0 0%,#f4e9d4 49%,#d3d7b8 100%)!important;color:#253b2e!important;min-height:330px!important;box-shadow:var(--shadow);border:1px solid #e2d5ba}
+.hero-content{max-width:55%;z-index:3}
+.hero-content h2{color:#263d30!important}
+.hero-content h2 span{color:#a85a2b!important}
+.hero-content p{color:#625944!important}
+.hero-label{background:#e5d6b8!important;border:1px solid #d9c59d!important;color:#56663e!important}
+.hero-pattern{opacity:.08!important}
+.hero-visual{width:340px;height:280px;display:grid!important;place-items:center}
+.hero-dashboard,.orbit{display:none!important}
+.autumn-woman{width:min(100%,330px);height:280px;display:block;filter:drop-shadow(0 12px 14px rgba(55,59,41,.15))}
+.primary-btn{background:linear-gradient(135deg,#c56b36,#a9562f)!important;box-shadow:0 8px 18px rgba(154,87,44,.18)!important}
+.secondary-btn{background:#355744!important;color:white!important;border:1px solid #355744!important}
+.stat-card.blue .stat-icon,.stat-card.green .stat-icon{background:linear-gradient(140deg,#577c52,#344f3a)!important}
+.stat-card.purple .stat-icon{background:linear-gradient(140deg,#c97a48,#9f5232)!important}
+.stat-card.orange .stat-icon{background:linear-gradient(140deg,#dfb456,#b8892e)!important}
+.panel,.stat-card,.kpi-card,.chart-card,.form-card,.user-card,.support-card,.content-card,.task-summary>div,.approval-card{background:#fffdf8!important;border-color:#e7ddcb!important;box-shadow:var(--shadow)!important}
+.menu-item,.primary-btn,.secondary-btn{transition:background .2s,color .2s}
+.menu-item.active{font-weight:700}
+.operation-list div{background:#f7f3e8!important;border-color:#e8dfcc!important}
+.quick-grid button,.quick-grid span,.support-card>span,.content-card>span{background:#f3eddb!important;border-color:#e5d7b8!important}
+th{background:#f1ebdb!important;color:#536345!important}
+td{color:#5b604b!important}
+.form-group input,.form-group select,.form-group textarea,.table-toolbar input,.table-toolbar select{background:#fffdf8!important;border-color:#ddd4bf!important}
+@media(max-width:900px){.hero-content{max-width:100%}.hero-visual{width:220px;height:230px}.autumn-woman{height:230px}}
+@media(max-width:700px){.sidebar{max-height:none!important}.main-menu{display:flex!important;flex-direction:row!important;flex-wrap:nowrap!important;overflow-x:auto!important}.menu-item{font-size:11px!important;padding:9px 10px!important}.hero-card{display:flex!important;flex-direction:column-reverse!important;align-items:center!important;gap:8px;padding:18px!important}.hero-content{max-width:100%;text-align:center}.hero-buttons{justify-content:center}.hero-visual{height:170px;width:190px}.autumn-woman{height:170px}.top-header{padding:12px!important}.main-content{padding:16px!important}}
+</style>
+<script>
+(function(){
+  const visual=document.querySelector('.hero-visual');
+  if(!visual)return;
+  visual.innerHTML=`<svg class="autumn-woman" viewBox="0 0 330 280" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="تصویر گرافیکی بانوی متخصص در مدیریت پروژه">
+    <defs><linearGradient id="coat" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#c87b3c"/><stop offset="1" stop-color="#a75530"/></linearGradient><linearGradient id="veil" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#314f3c"/><stop offset="1" stop-color="#203c31"/></linearGradient></defs>
+    <circle cx="165" cy="140" r="123" fill="#b6bf9a" opacity=".23"/>
+    <g stroke="#8a9a73" stroke-width="2" opacity=".7"><path d="M65 86 111 50 165 80 230 45 276 89" fill="none"/><path d="M55 182 108 148 165 170 251 137" fill="none"/></g>
+    <g fill="#f8edcf" stroke="#b38c47" stroke-width="2"><circle cx="65" cy="86" r="18"/><circle cx="111" cy="50" r="16"/><circle cx="230" cy="45" r="17"/><circle cx="276" cy="89" r="18"/><circle cx="55" cy="182" r="16"/><circle cx="251" cy="137" r="18"/></g>
+    <g fill="#556c43"><circle cx="65" cy="80" r="5"/><path d="M57 94q8-12 16 0z"/><circle cx="111" cy="45" r="5"/><path d="M103 57q8-12 16 0z"/><circle cx="230" cy="40" r="5"/><path d="M222 52q8-12 16 0z"/><circle cx="276" cy="83" r="5"/><path d="M268 96q8-12 16 0z"/></g>
+    <path d="M101 278q-6-93 65-98 76-3 83 98z" fill="url(#coat)"/>
+    <path d="M117 277q12-69 49-71 35 0 61 71" fill="none" stroke="#e3a66b" stroke-width="3"/>
+    <path d="M117 165q-22-64 12-96 32-35 71 2 25 24 15 91l-14 44-69 1z" fill="url(#veil)"/>
+    <ellipse cx="166" cy="131" rx="40" ry="53" fill="#e4b28f"/>
+    <path d="M123 119q5-63 49-61 50 3 47 75-22-13-33-43-23 29-63 29z" fill="url(#veil)"/>
+    <path d="M148 132h9m25 0h9" stroke="#543d32" stroke-width="3" stroke-linecap="round"/><path d="M159 158q9 6 18 0" stroke="#9d6654" stroke-width="2" fill="none" stroke-linecap="round"/>
+    <path d="M128 172q-1 31 33 53l-23 40-28-49zM207 167q7 32-37 57l22 39 35-49z" fill="#294936"/>
+    <rect x="192" y="219" width="98" height="57" rx="8" fill="#e9dcc0" stroke="#b8a47d" stroke-width="3"/><rect x="201" y="227" width="80" height="39" rx="3" fill="#f8f3e8"/>
+    <path d="M224 250l15-10 11 6 14-14" stroke="#b97135" stroke-width="4" fill="none" stroke-linecap="round"/>
+  </svg>`;
+})();
+</script>
 
 </body>
 </html>
