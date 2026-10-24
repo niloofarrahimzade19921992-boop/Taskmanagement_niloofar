@@ -10,6 +10,25 @@ let tasks = load(STORAGE.tasks, [
  {id:"t4",projectId:"p1",title:"فعالیت لغوشده نمونه",status:"cancelled",responsible:"واحد عملیات",owner:"مدیر پروژه",supervisor:"ناظر پروژه",approver:"مدیر واحد",startDate:"۱۴۰۵/۰۸/۰۵",endDate:"۱۴۰۵/۰۸/۱۲",description:"فعالیت آزمایشی",latestStatus:"به علت تغییر برنامه لغو شد",documentName:"",approval:"rejected"}
 ]);
 let currentFilter="all";
+
+const demoProjects = [
+ {id:"p2",name:"بهبود فرآیند خدمات مشتریان",manager:"سارا احمدی",start:"۱۴۰۵/۰۸/۰۵",end:"۱۴۰۵/۱۱/۱۵",description:"بازطراحی فرآیند ثبت و پیگیری درخواست‌های مشتریان"},
+ {id:"p3",name:"گزارش‌گیری مدیریتی شعب",manager:"محمد رضایی",start:"۱۴۰۵/۰۸/۱۰",end:"۱۴۰۵/۰۹/۳۰",description:"تجمیع شاخص‌های عملکرد و گزارش‌های مدیریتی"}
+];
+const demoTasks = [
+ {id:"t5",projectId:"p2",title:"تحلیل فرآیند فعلی خدمات",status:"done",responsible:"سارا احمدی",owner:"مدیر عملیات",supervisor:"ناظر واحد",approver:"مدیر واحد",startDate:"۱۴۰۵/۰۸/۰۵",endDate:"۱۴۰۵/۰۸/۱۲",description:"بررسی مراحل فعلی و شناسایی گلوگاه‌ها",latestStatus:"تحلیل نهایی شد",documentName:"تحلیل-فرآیند.pdf",approval:"approved"},
+ {id:"t6",projectId:"p2",title:"طراحی گردش کار درخواست‌ها",status:"progress",responsible:"علی کریمی",owner:"مدیر عملیات",supervisor:"ناظر واحد",approver:"مدیر واحد",startDate:"۱۴۰۵/۰۸/۱۳",endDate:"۱۴۰۵/۰۸/۲۵",description:"طراحی گردش ثبت، ارجاع و پیگیری",latestStatus:"نسخه اولیه آماده است",documentName:"",approval:""},
+ {id:"t7",projectId:"p2",title:"تست گردش تأیید",status:"pending",responsible:"واحد پشتیبانی",owner:"مدیر عملیات",supervisor:"ناظر واحد",approver:"مدیر واحد",startDate:"۱۴۰۵/۰۸/۲۶",endDate:"۱۴۰۵/۰۹/۰۵",description:"تست سناریوهای تأیید و رد",latestStatus:"در صف اجرا",documentName:"",approval:""},
+ {id:"t8",projectId:"p3",title:"تعریف شاخص‌های مدیریتی",status:"done",responsible:"محمد رضایی",owner:"مدیر برنامه‌ریزی",supervisor:"ناظر گزارشات",approver:"مدیر واحد",startDate:"۱۴۰۵/۰۸/۱۰",endDate:"۱۴۰۵/۰۸/۱۸",description:"تعیین KPIهای اصلی",latestStatus:"تکمیل شده",documentName:"KPI.pdf",approval:"approved"},
+ {id:"t9",projectId:"p3",title:"ساخت گزارش ماهانه شعب",status:"progress",responsible:"واحد گزارشات",owner:"مدیر برنامه‌ریزی",supervisor:"ناظر گزارشات",approver:"",startDate:"۱۴۰۵/۰۸/۱۹",endDate:"۱۴۰۵/۰۹/۱۰",description:"ساخت گزارش تجمیعی شعب",latestStatus:"در حال پیاده‌سازی",documentName:"",approval:""}
+];
+function seedDemoData(){
+ let changed=false;
+ demoProjects.forEach(p=>{if(!projects.some(x=>x.id===p.id)){projects.push(p);changed=true}});
+ demoTasks.forEach(t=>{if(!tasks.some(x=>x.id===t.id)){tasks.push(t);changed=true}});
+ if(changed)save();
+}
+seedDemoData();
 function load(k,f){try{const v=JSON.parse(localStorage.getItem(k));return Array.isArray(v)?v:f}catch(e){return f}}
 function save(){localStorage.setItem(STORAGE.projects,JSON.stringify(projects));localStorage.setItem(STORAGE.tasks,JSON.stringify(tasks))}
 function faNum(v){return String(v).replace(/\d/g,d=>"۰۱۲۳۴۵۶۷۸۹"[d])}
@@ -30,7 +49,7 @@ function showPage(id){
 }
 qsa(".nav-btn").forEach(b=>b.addEventListener("click",()=>showPage(b.dataset.page)));
 qsa("[data-go]").forEach(b=>b.addEventListener("click",()=>showPage(b.dataset.go)));
-const menuButton=qs(".menu-button"),sidebar=qs(".sidebar");
+const menuButton=document.querySelector(".menu-button"),sidebar=document.querySelector(".sidebar");
 if(menuButton)menuButton.addEventListener("click",()=>sidebar?.classList.toggle("open"));
 
 function fillProjects(){
@@ -41,7 +60,12 @@ function fillProjects(){
 function renderStats(){
  const total=tasks.length,done=tasks.filter(t=>t.status==="done").length,progress=tasks.filter(t=>t.status==="progress").length,pending=tasks.filter(t=>t.status==="pending").length,cancelled=tasks.filter(t=>t.status==="cancelled").length,waiting=tasks.filter(t=>approvalState(t)==="pending").length;
  [["projectCount",projects.length],["totalCount",total],["progressCount",progress],["approvalCount",waiting],["doneCount",done],["cancelledCount",cancelled],["pendingCount",pending],["progressReportCount",progress],["doneReportCount",done],["cancelledReportCount",cancelled],["donutTotal",total],["waitingApprovalCount",waiting],["approvedCount",tasks.filter(t=>approvalState(t)==="approved").length],["rejectedCount",tasks.filter(t=>approvalState(t)==="rejected").length]].forEach(([id,v])=>{if($(id))$(id).textContent=faNum(v)});
- if($("donutChart")){const n=total||1,a=pending/n*100,b=(pending+progress)/n*100,c=(pending+progress+done)/n*100;$("donutChart").style.background=`conic-gradient(#f1b83b 0 ${a}%,#2f86c5 ${a}% ${b}%,#22a06b ${b}% ${c}%,#d96b6b ${c}% 100%)`}
+ const pct=n=>total?Math.round(n/total*100):0;
+ const donut=$("taskDonut");
+ if(donut){const a=pct(pending),b=pct(progress),c=pct(done);donut.style.setProperty("--pending",a+"%");donut.style.setProperty("--progress",(a+b)+"%");donut.style.setProperty("--done",(a+b+c)+"%");donut.style.setProperty("--cancelled","100%")}
+ [["legendPending",pending],["legendProgress",progress],["legendDone",done],["legendCancelled",cancelled]].forEach(([id,v])=>{if($(id))$(id).textContent=faNum(v)});
+ const chart=$("projectProgressChart");
+ if(chart){chart.innerHTML=projects.map(p=>{const a=tasks.filter(t=>t.projectId===p.id);const d=a.filter(t=>t.status==="done").length;const percent=a.length?Math.round(d/a.length*100):0;return `<div class="project-progress-item"><div class="progress-label"><span>${esc(p.name)}</span><strong>${faNum(percent)}٪</strong></div><div class="project-progress-track"><i style="width:${percent}%"></i></div></div>`}).join("")}
 }
 function renderRecent(){const box=$("recentTasks");if(!box)return;const rows=[...tasks].slice(-6).reverse();box.innerHTML=rows.length?rows.map(t=>`<div class="recent-item"><strong>${esc(t.title)}</strong><span>${esc(projectName(t.projectId))} • ${statusText(t.status)} • ${t.endDate||"بدون تاریخ"}</span></div>`).join(""):"<div class='empty-state'>هنوز وظیفه‌ای ثبت نشده است.</div>"}
 function renderProjectReport(){const b=$("projectReportBody");if(!b)return;b.innerHTML=projects.map(p=>{const a=tasks.filter(t=>t.projectId===p.id),d=a.filter(t=>t.status==="done").length,pr=a.filter(t=>t.status==="progress").length,pe=a.filter(t=>t.status==="pending").length,x=a.length?Math.round(d/a.length*100):0;return `<tr><td><strong>${esc(p.name)}</strong></td><td>${faNum(a.length)}</td><td>${faNum(d)}</td><td>${faNum(pr)}</td><td>${faNum(pe)}</td><td>${faNum(x)}٪</td></tr>`}).join("")||"<tr><td colspan='6'>پروژه‌ای ثبت نشده است.</td></tr>"}
@@ -66,8 +90,7 @@ function collectTask(prefix=""){
 function saveTask(e,prefix=""){e.preventDefault();const project=$(prefix?"newTaskProject":"taskProject").value,title=$(prefix?"newTaskTitle":"title").value.trim();const msg=$(prefix?"newTaskMessage":"formMessage");if(!project){msg.textContent="لطفاً پروژه را انتخاب کنید.";return}if(!title){msg.textContent="لطفاً عنوان وظیفه را وارد کنید.";return}const data=collectTask(prefix),i=tasks.findIndex(t=>t.id===data.id);if(i>=0)tasks[i]=data;else tasks.push(data);save();e.target.reset();if(!prefix&&$("taskId"))$("taskId").value="";msg.textContent="وظیفه با موفقیت ذخیره شد.";renderAll()}
 $("taskForm")?.addEventListener("submit",e=>saveTask(e,""));$("newTaskForm")?.addEventListener("submit",e=>saveTask(e,"new"));$("cancelEdit")?.addEventListener("click",()=>{$("taskForm").reset();$("taskId").value=""});
 
-function editTask(t){showPage("tasks");$("taskId").value=t.id;["taskProject","title","status","responsible","owner","supervisor","approver","startDate","endDate","description","latestStatus","documentName"].forEach((id,i)=>$(id).value=[t.projectId,t.title,t.status,t.responsible||"",t.owner||"",t.supervisor||"",t.approver||"",t.startDate||"",t.endDate||"",t.description||"",t.latestStatus||"",t.documentName||""][i]);$("formTitle").textContent="ویرایش وظیفه";window.scrollTo({top:document.body.scrollHeight,behavior:"smooth"})}
-
+function editTask(t){showPage("newTask");if($("newTaskId"))$("newTaskId").value=t.id;["newTaskProject","newTaskTitle","newTaskStatus","newTaskResponsible","newTaskOwner","newTaskSupervisor","newTaskApprover","newTaskStart","newTaskEnd","newTaskDescription","newTaskLatest","newTaskDocument"].forEach((id,i)=>{if($(id))$(id).value=[t.projectId,t.title,t.status,t.responsible||"",t.owner||"",t.supervisor||"",t.approver||"",t.startDate||"",t.endDate||"",t.description||"",t.latestStatus||"",t.documentName||""][i]});if($("newTaskMessage"))$("newTaskMessage").textContent="در حال ویرایش وظیفه انتخاب‌شده هستید.";window.scrollTo({top:0,behavior:"smooth"})}
 document.addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;if(b.dataset.go)return;if(b.dataset.editProject){const p=projects.find(x=>x.id===b.dataset.editProject);if(p){showPage("projects");$("projectId").value=p.id;$("projectName").value=p.name;$("projectManager").value=p.manager||"";$("projectStartDate").value=p.start||"";$("projectEndDate").value=p.end||"";$("projectDescription").value=p.description||""}}if(b.dataset.deleteProject&&confirm("این پروژه حذف شود؟")){projects=projects.filter(p=>p.id!==b.dataset.deleteProject);tasks=tasks.filter(t=>t.projectId!==b.dataset.deleteProject);save();renderAll()}if(b.dataset.editTask){const t=tasks.find(x=>x.id===b.dataset.editTask);if(t)editTask(t)}if(b.dataset.deleteTask&&confirm("این وظیفه حذف شود؟")){tasks=tasks.filter(t=>t.id!==b.dataset.deleteTask);save();renderAll()}if(b.dataset.approve){const t=tasks.find(x=>x.id===b.dataset.approve);if(t){t.approval="approved";save();renderAll();alert("وظیفه با موفقیت تأیید شد.")}}if(b.dataset.reject){const t=tasks.find(x=>x.id===b.dataset.reject);if(t){t.approval="rejected";save();renderAll();alert("وظیفه رد شد.")}}});
 qsa(".filter-btn").forEach(b=>b.addEventListener("click",()=>{qsa(".filter-btn").forEach(x=>x.classList.remove("active"));b.classList.add("active");currentFilter=b.dataset.filter;renderTasks()}));
 $("searchTasks")?.addEventListener("input",renderTasks);$("searchProjects")?.addEventListener("input",renderProjects);$("approvalFilter")?.addEventListener("change",renderApprovals);$("scheduleProjectFilter")?.addEventListener("change",renderSchedule);
@@ -79,4 +102,3 @@ $("logoutBtn")?.addEventListener("click",()=>alert("خروج از نسخه نم�
 if($("currentDate"))$("currentDate").textContent=todayFa();
 const savedTheme=localStorage.getItem(STORAGE.theme);if(savedTheme&&$("themeSelect")){document.body.dataset.theme=savedTheme;$("themeSelect").value=savedTheme}
 renderAll();
-
