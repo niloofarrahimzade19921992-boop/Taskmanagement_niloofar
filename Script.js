@@ -60,6 +60,20 @@ function fillProjects(){
 function renderStats(){
  const total=tasks.length,done=tasks.filter(t=>t.status==="done").length,progress=tasks.filter(t=>t.status==="progress").length,pending=tasks.filter(t=>t.status==="pending").length,cancelled=tasks.filter(t=>t.status==="cancelled").length,waiting=tasks.filter(t=>approvalState(t)==="pending").length;
  [["projectCount",projects.length],["totalCount",total],["progressCount",progress],["approvalCount",waiting],["doneCount",done],["cancelledCount",cancelled],["pendingCount",pending],["progressReportCount",progress],["doneReportCount",done],["cancelledReportCount",cancelled],["donutTotal",total],["waitingApprovalCount",waiting],["approvedCount",tasks.filter(t=>approvalState(t)==="approved").length],["rejectedCount",tasks.filter(t=>approvalState(t)==="rejected").length]].forEach(([id,v])=>{if($(id))$(id).textContent=faNum(v)});
+ const noApprover=tasks.filter(t=>!t.approver).length;
+ const completion=total?Math.round(done/total*100):0;
+ const coverage=total?Math.round((total-noApprover)/total*100):0;
+ [
+   ["homeProjectCount",projects.length],["homeTaskCount",total],["homeProgressCount",progress],["homeApprovalCount",waiting],
+   ["homeDoneCount",done],["homeCancelledCount",cancelled],["homeNoApproverCount",noApprover],
+   ["homeCompletionRate",faNum(completion)+"٪"],["perfCompletion",faNum(completion)+"٪"],["perfApprovalCoverage",faNum(coverage)+"٪"],
+   ["perfProgress",progress],["perfCancelled",cancelled],["attentionApproval",waiting],["attentionNoApprover",noApprover],["attentionDone",done],
+   ["dashboardDate",todayFa()]
+ ].forEach(([id,v])=>{if($(id))$(id).textContent=faNum(v)});
+ if($("homeCompletionBar"))$("homeCompletionBar").style.width=completion+"%";
+ if($("perfCompletionBar"))$("perfCompletionBar").style.width=completion+"%";
+ if($("perfApprovalBar"))$("perfApprovalBar").style.width=coverage+"%";
+
  const pct=n=>total?Math.round(n/total*100):0;
  const donut=$("taskDonut");
  if(donut){const a=pct(pending),b=pct(progress),c=pct(done);donut.style.setProperty("--pending",a+"%");donut.style.setProperty("--progress",(a+b)+"%");donut.style.setProperty("--done",(a+b+c)+"%");donut.style.setProperty("--cancelled","100%")}
@@ -67,7 +81,7 @@ function renderStats(){
  const chart=$("projectProgressChart");
  if(chart){chart.innerHTML=projects.map(p=>{const a=tasks.filter(t=>t.projectId===p.id);const d=a.filter(t=>t.status==="done").length;const percent=a.length?Math.round(d/a.length*100):0;return `<div class="project-progress-item"><div class="progress-label"><span>${esc(p.name)}</span><strong>${faNum(percent)}٪</strong></div><div class="project-progress-track"><i style="width:${percent}%"></i></div></div>`}).join("")}
 }
-function renderRecent(){const box=$("recentTasks");if(!box)return;const rows=[...tasks].slice(-6).reverse();box.innerHTML=rows.length?rows.map(t=>`<div class="recent-item"><strong>${esc(t.title)}</strong><span>${esc(projectName(t.projectId))} • ${statusText(t.status)} • ${t.endDate||"بدون تاریخ"}</span></div>`).join(""):"<div class='empty-state'>هنوز وظیفه‌ای ثبت نشده است.</div>"}
+function renderRecent(){const box=$("recentTasks");if(!box)return;const rows=[...tasks].slice(-6).reverse();box.innerHTML=rows.length?rows.map(t=>`<div class="recent-item"><strong>${esc(t.title)}</strong><span>${esc(projectName(t.projectId))}</span><small>${statusText(t.status)} • پایان ${t.endDate||"بدون تاریخ"}</small></div>`).join(""):"<div class='empty-state'>هنوز وظیفه‌ای ثبت نشده است.</div>"}
 function renderProjectReport(){const b=$("projectReportBody");if(!b)return;b.innerHTML=projects.map(p=>{const a=tasks.filter(t=>t.projectId===p.id),d=a.filter(t=>t.status==="done").length,pr=a.filter(t=>t.status==="progress").length,pe=a.filter(t=>t.status==="pending").length,x=a.length?Math.round(d/a.length*100):0;return `<tr><td><strong>${esc(p.name)}</strong></td><td>${faNum(a.length)}</td><td>${faNum(d)}</td><td>${faNum(pr)}</td><td>${faNum(pe)}</td><td>${faNum(x)}٪</td></tr>`}).join("")||"<tr><td colspan='6'>پروژه‌ای ثبت نشده است.</td></tr>"}
 function renderProjects(){const b=$("projectTableBody");if(!b)return;const q=($("searchProjects")?.value||"").toLowerCase();const rows=projects.filter(p=>p.name.toLowerCase().includes(q));b.innerHTML=rows.map(p=>`<tr><td><strong>${esc(p.name)}</strong></td><td>${esc(p.manager||"—")}</td><td>${p.start||"—"}</td><td>${p.end||"—"}</td><td>${faNum(tasks.filter(t=>t.projectId===p.id).length)}</td><td><button class="action-btn" data-edit-project="${p.id}">ویرایش</button><button class="delete-btn" data-delete-project="${p.id}">حذف</button></td></tr>`).join("");if($("projectListMessage"))$("projectListMessage").textContent=rows.length?"":"پروژه‌ای برای نمایش وجود ندارد."}
 function taskRows(){const q=($("searchTasks")?.value||"").toLowerCase();return tasks.filter(t=>(currentFilter==="all"||t.status===currentFilter)).filter(t=>(t.title+" "+projectName(t.projectId)+" "+(t.responsible||"")).toLowerCase().includes(q))}
