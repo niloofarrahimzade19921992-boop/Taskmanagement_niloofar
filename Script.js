@@ -172,8 +172,8 @@ document.addEventListener("DOMContentLoaded", function () {
     // عناصر صفحه
     // ==================================================
 
-    const navItems = document.querySelectorAll(".nav-btn");
-    const pages = document.querySelectorAll(".page");
+    const navItems = document.querySelectorAll(".menu-item[data-section]");
+    const pages = document.querySelectorAll(".page-section");
     const sidebar = document.querySelector(".sidebar");
     const menuButton = document.querySelector(".menu-button");
 
@@ -199,7 +199,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
         const activeButton = document.querySelector(
-            `.nav-btn[data-page="${pageId}"]`
+            `.menu-item[data-section="${pageId}"]`
         );
 
         if (activeButton) {
@@ -217,7 +217,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
         item.addEventListener("click", function () {
 
-            const pageId = this.getAttribute("data-page");
+            const pageId = this.getAttribute("data-section");
 
             if (pageId) {
                 showPage(pageId);
