@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="سامانه مدیریت وظایف، پروژه‌ها، تأییدات و گزارش‌های سازمانی">
     <title>سامانه مدیریت وظایف سازمانی</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="Style.css">
 </head>
 
 <body>
@@ -49,38 +49,22 @@
         </div>
 
 
-        <nav>
-
-            <button class="nav-btn active" data-page="dashboard">
-                <span>▦</span>
-                <span>داشبورد و گزارشات</span>
-            </button>
-
-            <button class="nav-btn" data-page="projects">
-                <span>▣</span>
-                <span>ایجاد پروژه</span>
-            </button>
-
-            <button class="nav-btn" data-page="tasks">
-                <span>✓</span>
-                <span>مرکز وظایف</span>
-            </button>
-
-            <button class="nav-btn" data-page="approvals">
-                <span>◉</span>
-                <span>مرکز تأییدات</span>
-            </button>
-
-            <button class="nav-btn" data-page="schedule">
-                <span>◫</span>
-                <span>زمان‌بندی پروژه</span>
-            </button>
-
-            <button class="nav-btn" data-page="admin">
-                <span>⚙</span>
-                <span>مدیریت سامانه</span>
-            </button>
-
+        <nav id="mainNav">
+            <button class="nav-btn active" data-page="home"><span>⌂</span><span>صفحه اصلی</span></button>
+            <button class="nav-btn" data-page="dashboard"><span>▦</span><span>داشبورد و گزارشات</span></button>
+            <button class="nav-btn" data-page="projects"><span>▣</span><span>ایجاد پروژه</span></button>
+            <button class="nav-btn" data-page="newTask"><span>＋</span><span>ایجاد وظیفه جدید</span></button>
+            <button class="nav-btn" data-page="tasks"><span>✓</span><span>مرکز وظایف</span></button>
+            <button class="nav-btn" data-page="approvals"><span>◉</span><span>کارتابل تأییدات</span></button>
+            <button class="nav-btn" data-page="completed"><span>✓</span><span>وظایف انجام‌شده</span></button>
+            <button class="nav-btn" data-page="cancelled"><span>×</span><span>وظایف لغوشده</span></button>
+            <button class="nav-btn" data-page="noApprover"><span>!</span><span>وظایف فاقد تأییدکننده</span></button>
+            <button class="nav-btn" data-page="schedule"><span>◫</span><span>زمان‌بندی پروژه</span></button>
+            <button class="nav-btn" data-page="users"><span>♙</span><span>اطلاعات کاربران</span></button>
+            <button class="nav-btn" data-page="settings"><span>⚙</span><span>تنظیمات</span></button>
+            <button class="nav-btn" data-page="support"><span>?</span><span>پشتیبانی</span></button>
+            <button class="nav-btn" data-page="content"><span>▤</span><span>محتویات سایت</span></button>
+            <button class="nav-btn logout-btn" data-page="logout"><span>⇥</span><span>خروج</span></button>
         </nav>
 
 
@@ -94,6 +78,29 @@
 
     <main class="content">
 
+
+        <!-- ================= صفحه اصلی ================= -->
+        <section class="page active" id="home">
+            <div class="welcome-hero panel">
+                <div>
+                    <span class="eyebrow">WELCOME TO TASK MANAGEMENT</span>
+                    <h2>مرکز یکپارچه مدیریت وظایف سازمانی</h2>
+                    <p>پروژه‌ها را تعریف کنید، وظایف را به مسئولان بسپارید، تأییدات را مدیریت کنید و گزارش عملکرد را در یک داشبورد ببینید.</p>
+                    <div class="hero-actions">
+                        <button class="primary-btn" data-go="newTask">＋ ایجاد وظیفه جدید</button>
+                        <button class="secondary-btn" data-go="projects">▣ ایجاد پروژه</button>
+                        <button class="link-btn" data-go="dashboard">مشاهده داشبورد ←</button>
+                    </div>
+                </div>
+                <div class="hero-checklist"><div class="check-circle">✓</div><strong>مدیریت متمرکز</strong><span>از تعریف تا انجام و تأیید</span></div>
+            </div>
+            <div class="quick-grid">
+                <article class="quick-card" data-go="tasks"><span>✓</span><strong>مرکز وظایف</strong><small>مشاهده و پیگیری همه وظایف</small></article>
+                <article class="quick-card" data-go="approvals"><span>◉</span><strong>کارتابل تأییدات</strong><small>بررسی و تصمیم‌گیری سریع</small></article>
+                <article class="quick-card" data-go="completed"><span>✓</span><strong>وظایف انجام‌شده</strong><small>آرشیو فعالیت‌های تکمیل‌شده</small></article>
+                <article class="quick-card" data-go="schedule"><span>◫</span><strong>زمان‌بندی</strong><small>WBS و نمای گانت</small></article>
+            </div>
+        </section>
 
         <!-- ================= داشبورد ================= -->
 
@@ -508,6 +515,28 @@
         </section>
 
 
+
+        <!-- ================= ایجاد وظیفه جدید ================= -->
+        <section class="page" id="newTask">
+            <div class="page-header"><div><span class="eyebrow">TASK CREATION</span><h2>ایجاد وظیفه جدید</h2><p>تعریف وظیفه، مسئولیت‌ها، زمان‌بندی و گردش تأیید</p></div><button class="secondary-btn" data-go="tasks">مشاهده مرکز وظایف</button></div>
+            <div class="panel form-panel">
+                <div class="panel-title"><div class="title-icon">＋</div><div><h3>اطلاعات وظیفه</h3><p>فیلدهای ستاره‌دار الزامی هستند.</p></div></div>
+                <form id="newTaskForm"><div class="form-grid">
+                    <label>پروژه *<select id="newTaskProject" required></select></label>
+                    <label>عنوان وظیفه *<input id="newTaskTitle" required maxlength="150" placeholder="عنوان وظیفه را وارد کنید"></label>
+                    <label>وضعیت<select id="newTaskStatus"><option value="pending">در انتظار انجام</option><option value="progress">در حال انجام</option><option value="done">تکمیل‌شده</option><option value="cancelled">لغوشده</option></select></label>
+                    <label>متولی<input id="newTaskResponsible" placeholder="مسئول اجرا"></label>
+                    <label>مالک<input id="newTaskOwner" placeholder="مالک وظیفه"></label>
+                    <label>ناظر<input id="newTaskSupervisor" placeholder="ناظر وظیفه"></label>
+                    <label>تأییدکننده<input id="newTaskApprover" placeholder="تأییدکننده"></label>
+                    <label>تاریخ شروع<input id="newTaskStart" class="jalali-input" inputmode="numeric" placeholder="۱۴۰۵/۰۸/۰۱"><small class="field-help">فرمت: ۱۴۰۵/۰۸/۰۱</small></label>
+                    <label>تاریخ پایان<input id="newTaskEnd" class="jalali-input" inputmode="numeric" placeholder="۱۴۰۵/۰۸/۳۰"><small class="field-help">فرمت: ۱۴۰۵/۰۸/۳۰</small></label>
+                    <label class="full-width">شرح وظیفه یا فعالیت‌ها<textarea id="newTaskDescription" rows="3" placeholder="شرح وظیفه و فعالیت‌های مورد انتظار"></textarea></label>
+                    <label class="full-width">آخرین شرح وضعیت<textarea id="newTaskLatest" rows="2" placeholder="آخرین پیشرفت، مانع یا توضیح وضعیت"></textarea></label>
+                    <label class="full-width">نام یا نشانی سند<input id="newTaskDocument" placeholder="مثلاً گزارش-ماهانه.pdf"></label>
+                </div><div class="form-actions"><button class="primary-btn" type="submit">ذخیره وظیفه</button><button class="secondary-btn" type="reset">پاک کردن فرم</button></div><p id="newTaskMessage" class="form-message"></p></form>
+            </div>
+        </section>
 
         <!-- ================= مرکز وظایف ================= -->
 
@@ -979,6 +1008,11 @@
 
 
 
+        <!-- ================= فهرست‌های وظایف ================= -->
+        <section class="page" id="completed"><div class="page-header"><div><span class="eyebrow">COMPLETED TASKS</span><h2>لیست وظایف انجام‌شده</h2><p>آرشیو وظایف تکمیل‌شده</p></div></div><div class="panel"><div class="table-wrap scroll-table"><table><thead><tr><th>عنوان</th><th>پروژه</th><th>متولی</th><th>تاریخ پایان</th><th>تأییدکننده</th></tr></thead><tbody id="completedBody"></tbody></table></div><p id="completedMessage" class="empty-state"></p></div></section>
+        <section class="page" id="cancelled"><div class="page-header"><div><span class="eyebrow">CANCELLED TASKS</span><h2>لیست وظایف لغوشده</h2><p>فهرست وظایف لغوشده برای پیگیری و گزارش</p></div></div><div class="panel"><div class="table-wrap scroll-table"><table><thead><tr><th>عنوان</th><th>پروژه</th><th>متولی</th><th>تاریخ پایان</th><th>شرح وضعیت</th></tr></thead><tbody id="cancelledBody"></tbody></table></div><p id="cancelledMessage" class="empty-state"></p></div></section>
+        <section class="page" id="noApprover"><div class="page-header"><div><span class="eyebrow">MISSING APPROVER</span><h2>وظایف فاقد تأییدکننده</h2><p>وظایفی که هنوز تأییدکننده برای آن‌ها تعیین نشده است</p></div></div><div class="panel"><div class="table-wrap scroll-table"><table><thead><tr><th>عنوان</th><th>پروژه</th><th>متولی</th><th>وضعیت</th><th>عملیات</th></tr></thead><tbody id="noApproverBody"></tbody></table></div><p id="noApproverMessage" class="empty-state"></p></div></section>
+
         <!-- ================= زمان‌بندی ================= -->
 
         <section class="page" id="schedule">
@@ -1058,6 +1092,13 @@
         </section>
 
 
+
+        <!-- ================= اطلاعات کاربران ================= -->
+        <section class="page" id="users"><div class="page-header"><div><span class="eyebrow">USER INFORMATION</span><h2>اطلاعات کاربران</h2><p>اطلاعات پایه کاربران و نقش‌های سامانه</p></div></div><div class="panel"><div class="table-wrap scroll-table"><table><thead><tr><th>نام کاربر</th><th>نقش</th><th>واحد</th><th>وضعیت</th></tr></thead><tbody><tr><td>نیلوفر</td><td>کاربر سامانه</td><td>پشتیبانی</td><td><span class="status done">فعال</span></td></tr><tr><td>مدیر سامانه</td><td>مدیر</td><td>مدیریت</td><td><span class="status done">فعال</span></td></tr><tr><td>تأییدکننده نمونه</td><td>تأییدکننده</td><td>عملیات</td><td><span class="status done">فعال</span></td></tr></tbody></table></div></div></section>
+        <section class="page" id="settings"><div class="page-header"><div><span class="eyebrow">SETTINGS</span><h2>تنظیمات</h2><p>تنظیمات ظاهری و رفتاری سامانه</p></div></div><div class="panel settings-grid"><label>حالت نمایش<select id="themeSelect"><option value="light">روشن</option><option value="soft">ملایم</option></select></label><label>نمایش تاریخ داشبورد<select id="dateDisplay"><option value="yes">فعال</option><option value="no">غیرفعال</option></select></label><div class="setting-info"><strong>ذخیره‌سازی</strong><span>اطلاعات نسخه نمایشی در Local Storage مرورگر ذخیره می‌شود.</span></div></div></section>
+        <section class="page" id="support"><div class="page-header"><div><span class="eyebrow">SUPPORT</span><h2>پشتیبانی</h2><p>راهنمای استفاده و ثبت درخواست پشتیبانی</p></div></div><div class="support-grid"><div class="panel"><h3>راهنمای سریع</h3><ul class="clean-list"><li>ابتدا پروژه را ایجاد کنید.</li><li>سپس وظایف را ثبت و مسئولان را مشخص کنید.</li><li>برای گردش تأیید، تأییدکننده را تعیین کنید.</li><li>گزارش‌ها را در داشبورد و گزارشات مشاهده کنید.</li></ul></div><div class="panel"><h3>درخواست پشتیبانی</h3><textarea id="supportText" rows="6" placeholder="شرح مشکل یا درخواست خود را بنویسید..."></textarea><button class="primary-btn" id="supportBtn">ثبت درخواست</button><p id="supportMessage" class="form-message"></p></div></div></section>
+        <section class="page" id="content"><div class="page-header"><div><span class="eyebrow">SITE CONTENT</span><h2>محتویات سایت</h2><p>نمای کلی ماژول‌های موجود در سامانه</p></div></div><div class="content-cards"><div class="content-card"><span>01</span><strong>پروژه‌ها</strong><p>ایجاد و مدیریت پروژه‌ها</p></div><div class="content-card"><span>02</span><strong>وظایف</strong><p>تعریف و پیگیری وظایف</p></div><div class="content-card"><span>03</span><strong>تأییدات</strong><p>کارتابل بررسی و تصمیم‌گیری</p></div><div class="content-card"><span>04</span><strong>زمان‌بندی</strong><p>WBS و نمای گانت</p></div><div class="content-card"><span>05</span><strong>گزارشات</strong><p>آمار و گزارش تجمیعی</p></div><div class="content-card"><span>06</span><strong>مدیریت سامانه</strong><p>تنظیمات و اطلاعات پایه</p></div></div></section>
+        <section class="page" id="logout"><div class="logout-panel panel"><div class="logout-icon">⇥</div><h2>خروج از سامانه</h2><p>در نسخه نمایشی، خروج از حساب کاربری شبیه‌سازی می‌شود.</p><button class="primary-btn" id="logoutBtn">تأیید خروج</button><button class="secondary-btn" data-go="home">بازگشت به صفحه اصلی</button></div></section>
 
         <!-- ================= مدیریت سامانه ================= -->
 
@@ -1165,7 +1206,6 @@
 </footer>
 
 
-<script src="script.js"></script>
+<script src="Script.js"></script>
 
 </body>
-</html>
