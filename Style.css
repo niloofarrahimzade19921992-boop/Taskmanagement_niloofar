@@ -1705,11 +1705,11 @@ td strong {
     box-shadow: 0 2px 5px rgba(0,0,0,.15);
 }
 
-.switch input:checked + span {
+.switch input:checked � span {
     background: linear-gradient(90deg, #17a984, #26bfc2);
 }
 
-.switch input:checked + span::before {
+.switch input:checked � span::before {
     right: 26px;
 }
 
