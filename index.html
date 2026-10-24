@@ -80,252 +80,150 @@
 
 
         <!-- ================= صفحه اصلی ================= -->
-        <section class="page active" id="home">
-            <div class="welcome-hero panel">
-                <div>
-                    <span class="eyebrow">WELCOME TO TASK MANAGEMENT</span>
-                    <h2>مرکز یکپارچه مدیریت وظایف سازمانی</h2>
-                    <p>پروژه‌ها را تعریف کنید، وظایف را به مسئولان بسپارید، تأییدات را مدیریت کنید و گزارش عملکرد را در یک داشبورد ببینید.</p>
-                    <div class="hero-actions">
-                        <button class="link-btn" data-go="dashboard">مشاهده داشبورد ←</button>
-                    </div>
-                </div>
-                <div class="hero-checklist"><div class="check-circle">✓</div><strong>مدیریت متمرکز</strong><span>از تعریف تا انجام و تأیید</span></div>
+        
+<section class="page active" id="home">
+    <div class="home-hero premium-hero">
+        <div class="hero-grid-overlay"></div>
+        <div class="hero-content">
+            <div class="hero-kicker"><span class="pulse-dot"></span> مرکز فرماندهی عملیات سازمان</div>
+            <h2>سامانه یکپارچه مدیریت وظایف</h2>
+            <p>از تعریف پروژه و تخصیص وظیفه تا تأیید، پایش زمان‌بندی و گزارش‌گیری مدیریتی؛ همه‌چیز در یک محیط متمرکز.</p>
+            <div class="hero-actions">
+                <button class="primary-btn hero-btn" data-go="newTask">＋ ایجاد وظیفه جدید</button>
+                <button class="ghost-light-btn" data-go="dashboard">مشاهده داشبورد ←</button>
             </div>
-            <div class="quick-grid">
-                <article class="quick-card" data-go="tasks"><span>✓</span><strong>مرکز وظایف</strong><small>مشاهده و پیگیری همه وظایف</small></article>
-                <article class="quick-card" data-go="approvals"><span>◉</span><strong>کارتابل تأییدات</strong><small>بررسی و تصمیم‌گیری سریع</small></article>
-                <article class="quick-card" data-go="completed"><span>✓</span><strong>وظایف انجام‌شده</strong><small>آرشیو فعالیت‌های تکمیل‌شده</small></article>
-                <article class="quick-card" data-go="schedule"><span>◫</span><strong>زمان‌بندی</strong><small>WBS و نمای گانت</small></article>
+            <div class="hero-meta">
+                <span>داده نمایشی سازمانی</span>
+                <span>•</span>
+                <span id="currentDate">—</span>
             </div>
-        </section>
-
-        <!-- ================= داشبورد ================= -->
-
-        <section class="page active" id="dashboard">
-
-            <div class="page-header">
-
-                <div>
-                    <span class="eyebrow">OVERVIEW</span>
-
-                    <h2>داشبورد و گزارشات</h2>
-
-                    <p>
-                        نمای کلی از وضعیت پروژه‌ها، وظایف و تأییدات
-                    </p>
-                </div>
-
-
+        </div>
+        <div class="hero-orbit">
+            <div class="orbit-ring ring-one"></div>
+            <div class="orbit-ring ring-two"></div>
+            <div class="orbit-core">
+                <span class="core-icon">✓</span>
+                <strong>کنترل متمرکز</strong>
+                <small>Project • Task • Approval</small>
             </div>
+        </div>
+    </div>
 
+    <div class="kpi-strip">
+        <article class="mini-kpi"><span class="kpi-icon blue">▣</span><div><small>پروژه‌های فعال</small><strong id="homeProjectCount">۰</strong></div></article>
+        <article class="mini-kpi"><span class="kpi-icon violet">✓</span><div><small>کل وظایف</small><strong id="homeTaskCount">۰</strong></div></article>
+        <article class="mini-kpi"><span class="kpi-icon amber">◷</span><div><small>در حال انجام</small><strong id="homeProgressCount">۰</strong></div></article>
+        <article class="mini-kpi"><span class="kpi-icon green">◎</span><div><small>در انتظار تأیید</small><strong id="homeApprovalCount">۰</strong></div></article>
+    </div>
 
-            <div class="stats">
-
-                <article class="stat-card">
-                    <div class="stat-icon">▣</div>
-
-                    <div>
-                        <span>پروژه‌ها</span>
-                        <strong id="projectCount">۰</strong>
-                    </div>
-                </article>
-
-
-                <article class="stat-card">
-                    <div class="stat-icon">✓</div>
-
-                    <div>
-                        <span>کل وظایف</span>
-                        <strong id="totalCount">۰</strong>
-                    </div>
-                </article>
-
-
-                <article class="stat-card">
-                    <div class="stat-icon">◷</div>
-
-                    <div>
-                        <span>در حال انجام</span>
-                        <strong id="progressCount">۰</strong>
-                    </div>
-                </article>
-
-
-                <article class="stat-card">
-                    <div class="stat-icon">◎</div>
-
-                    <div>
-                        <span>نیازمند تأیید</span>
-                        <strong id="approvalCount">۰</strong>
-                    </div>
-                </article>
-
+    <div class="home-grid">
+        <div class="panel spotlight-panel">
+            <div class="section-heading">
+                <div><span class="section-kicker">QUICK ACCESS</span><h3>دسترسی سریع</h3><p class="muted">مسیرهای پرکاربرد سامانه</p></div>
             </div>
+            <div class="access-grid">
+                <button class="access-card" data-go="projects"><span>01</span><b>ایجاد پروژه</b><small>تعریف پروژه و اطلاعات پایه</small><i>→</i></button>
+                <button class="access-card" data-go="newTask"><span>02</span><b>ایجاد وظیفه جدید</b><small>ثبت مسئول، زمان و تأییدکننده</small><i>→</i></button>
+                <button class="access-card" data-go="tasks"><span>03</span><b>مرکز وظایف</b><small>پیگیری و مدیریت همه وظایف</small><i>→</i></button>
+                <button class="access-card" data-go="approvals"><span>04</span><b>کارتابل تأییدات</b><small>بررسی موارد در انتظار تصمیم</small><i>→</i></button>
+            </div>
+        </div>
+
+        <div class="panel activity-panel">
+            <div class="section-heading">
+                <div><span class="section-kicker">LIVE SNAPSHOT</span><h3>وضعیت عملیاتی</h3><p class="muted">خلاصه‌ای از وضعیت فعلی سامانه</p></div>
+                <span class="live-badge"><i></i> فعال</span>
+            </div>
+            <div class="status-summary">
+                <div><span>تکمیل‌شده</span><strong id="homeDoneCount">۰</strong><em>وظیفه</em></div>
+                <div><span>لغوشده</span><strong id="homeCancelledCount">۰</strong><em>وظیفه</em></div>
+                <div><span>فاقد تأییدکننده</span><strong id="homeNoApproverCount">۰</strong><em>وظیفه</em></div>
+            </div>
+            <div class="activity-meter"><div><span>نرخ تکمیل وظایف</span><strong id="homeCompletionRate">۰٪</strong></div><div class="meter-track"><i id="homeCompletionBar"></i></div></div>
+        </div>
+    </div>
+</section>
 
 
-            <div class="dashboard-visuals">
-                <div class="panel chart-panel">
-                    <div class="section-heading">
-                        <div>
-                            <h3>نمای تحلیلی وضعیت وظایف</h3>
-                            <p class="muted">تصویر خلاصه‌ای از وضعیت فعلی وظایف سامانه</p>
-                        </div>
-                    </div>
-                    <div class="donut-area">
-                        <div class="donut-chart" id="taskDonut"><div><strong id="donutTotal">۰</strong><span>کل وظایف</span></div></div>
-                        <div class="legend-list">
-                            <div><i class="legend-dot pending-dot"></i><span>در انتظار</span><strong id="legendPending">۰</strong></div>
-                            <div><i class="legend-dot progress-dot"></i><span>در حال انجام</span><strong id="legendProgress">۰</strong></div>
-                            <div><i class="legend-dot done-dot"></i><span>تکمیل‌شده</span><strong id="legendDone">۰</strong></div>
-                            <div><i class="legend-dot cancelled-dot"></i><span>لغوشده</span><strong id="legendCancelled">۰</strong></div>
-                        </div>
-                    </div>
-                </div>
-                <div class="panel chart-panel">
-                    <div class="section-heading">
-                        <div>
-                            <h3>پیشرفت پروژه‌ها</h3>
-                            <p class="muted">درصد تکمیل وظایف هر پروژه</p>
-                        </div>
-                    </div>
-                    <div id="projectProgressChart" class="project-progress-chart"></div>
+<!-- ================= داشبورد ================= -->
+
+        
+<section class="page" id="dashboard">
+    <div class="page-header premium-page-header">
+        <div>
+            <span class="eyebrow">EXECUTIVE CONTROL CENTER</span>
+            <h2>داشبورد و گزارشات مدیریتی</h2>
+            <p>نمای لحظه‌ای از پروژه‌ها، وظایف، تأییدات و شاخص‌های عملکرد سازمان</p>
+        </div>
+        <div class="header-date-card"><small>تاریخ امروز</small><strong id="dashboardDate">—</strong></div>
+    </div>
+
+    <div class="stats premium-stats">
+        <article class="stat-card premium-stat"><div class="stat-icon project">▣</div><div><span>کل پروژه‌ها</span><strong id="projectCount">۰</strong><small>پروژه ثبت‌شده</small></div><b>01</b></article>
+        <article class="stat-card premium-stat"><div class="stat-icon task">✓</div><div><span>کل وظایف</span><strong id="totalCount">۰</strong><small>در تمام پروژه‌ها</small></div><b>02</b></article>
+        <article class="stat-card premium-stat"><div class="stat-icon progress">◷</div><div><span>در حال انجام</span><strong id="progressCount">۰</strong><small>نیازمند پیگیری</small></div><b>03</b></article>
+        <article class="stat-card premium-stat"><div class="stat-icon approval">◎</div><div><span>نیازمند تأیید</span><strong id="approvalCount">۰</strong><small>در کارتابل تأییدات</small></div><b>04</b></article>
+    </div>
+
+    <div class="executive-grid">
+        <div class="panel chart-panel large-chart">
+            <div class="section-heading">
+                <div><span class="section-kicker">TASK HEALTH</span><h3>سلامت سبد وظایف</h3><p class="muted">توزیع وظایف بر اساس وضعیت</p></div>
+                <span class="chart-note">نمای کلی</span>
+            </div>
+            <div class="donut-area enhanced-donut">
+                <div class="donut-chart" id="taskDonut"><div><strong id="donutTotal">۰</strong><span>کل وظایف</span></div></div>
+                <div class="legend-list enhanced-legend">
+                    <div><i class="legend-dot pending-dot"></i><span>در انتظار انجام</span><strong id="legendPending">۰</strong></div>
+                    <div><i class="legend-dot progress-dot"></i><span>در حال انجام</span><strong id="legendProgress">۰</strong></div>
+                    <div><i class="legend-dot done-dot"></i><span>تکمیل‌شده</span><strong id="legendDone">۰</strong></div>
+                    <div><i class="legend-dot cancelled-dot"></i><span>لغوشده</span><strong id="legendCancelled">۰</strong></div>
                 </div>
             </div>
+        </div>
 
-            <div class="dashboard-grid">
-
-                <div class="panel">
-
-                    <div class="section-heading">
-
-                        <div>
-                            <h3>گزارش وضعیت وظایف</h3>
-                            <p class="muted">
-                                توزیع وظایف بر اساس وضعیت
-                            </p>
-                        </div>
-
-                    </div>
-
-
-                    <div class="report-bars">
-
-                        <div class="report-row">
-
-                            <div>
-                                <span>در انتظار انجام</span>
-                                <strong id="pendingCount">۰</strong>
-                            </div>
-
-                            <div class="progress-track">
-                                <i id="pendingBar"></i>
-                            </div>
-
-                        </div>
-
-
-                        <div class="report-row">
-
-                            <div>
-                                <span>در حال انجام</span>
-                                <strong id="progressReportCount">۰</strong>
-                            </div>
-
-                            <div class="progress-track">
-                                <i id="progressBar"></i>
-                            </div>
-
-                        </div>
-
-
-                        <div class="report-row">
-
-                            <div>
-                                <span>تکمیل‌شده</span>
-                                <strong id="doneCount">۰</strong>
-                            </div>
-
-                            <div class="progress-track">
-                                <i id="doneBar"></i>
-                            </div>
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-
-                <div class="panel">
-
-                    <div class="section-heading">
-
-                        <div>
-                            <h3>آخرین وظایف</h3>
-
-                            <p class="muted">
-                                آخرین موارد ثبت یا ویرایش‌شده
-                            </p>
-                        </div>
-
-                        <button class="link-btn" type="button" data-go="tasks">
-                            مشاهده همه
-                        </button>
-
-                    </div>
-
-                    <div id="recentTasks" class="recent-list"></div>
-
-                </div>
-
+        <div class="panel chart-panel">
+            <div class="section-heading">
+                <div><span class="section-kicker">PROJECT PERFORMANCE</span><h3>پیشرفت پروژه‌ها</h3><p class="muted">نرخ تکمیل وظایف هر پروژه</p></div>
             </div>
+            <div id="projectProgressChart" class="project-progress-chart"></div>
+        </div>
+    </div>
 
-
-            <div class="panel">
-
-                <div class="section-heading">
-
-                    <div>
-                        <h3>گزارش تجمیعی پروژه‌ها</h3>
-
-                        <p class="muted">
-                            خلاصه‌ای از تعداد وظایف هر پروژه
-                        </p>
-                    </div>
-
-                </div>
-
-
-                <div class="table-wrap scroll-table">
-
-                    <table>
-
-                        <thead>
-
-                            <tr>
-                                <th>پروژه</th>
-                                <th>تعداد وظایف</th>
-                                <th>تکمیل‌شده</th>
-                                <th>در حال انجام</th>
-                                <th>در انتظار</th>
-                            </tr>
-
-                        </thead>
-
-                        <tbody id="projectReportBody"></tbody>
-
-                    </table>
-
-                </div>
-
+    <div class="dashboard-lower-grid">
+        <div class="panel">
+            <div class="section-heading"><div><span class="section-kicker">PERFORMANCE</span><h3>شاخص‌های عملکرد</h3><p class="muted">معیارهای کلیدی برای پایش وضعیت سامانه</p></div></div>
+            <div class="performance-grid">
+                <div class="performance-card"><span>نرخ تکمیل</span><strong id="perfCompletion">۰٪</strong><div class="tiny-track"><i id="perfCompletionBar"></i></div></div>
+                <div class="performance-card"><span>پوشش تأییدکننده</span><strong id="perfApprovalCoverage">۰٪</strong><div class="tiny-track"><i id="perfApprovalBar"></i></div></div>
+                <div class="performance-card"><span>وظایف در حال اقدام</span><strong id="perfProgress">۰</strong><small>در حال انجام</small></div>
+                <div class="performance-card"><span>وظایف لغوشده</span><strong id="perfCancelled">۰</strong><small>نیازمند بررسی</small></div>
             </div>
+        </div>
 
-        </section>
+        <div class="panel">
+            <div class="section-heading"><div><span class="section-kicker">ATTENTION</span><h3>موارد نیازمند توجه</h3><p class="muted">اولویت‌های مدیریتی</p></div></div>
+            <div class="attention-list">
+                <button class="attention-item" data-go="approvals"><span class="attention-icon amber">!</span><div><b>کارتابل تأییدات</b><small>موارد در انتظار بررسی</small></div><strong id="attentionApproval">۰</strong></button>
+                <button class="attention-item" data-go="noApprover"><span class="attention-icon red">×</span><div><b>وظایف فاقد تأییدکننده</b><small>نیازمند تکمیل اطلاعات</small></div><strong id="attentionNoApprover">۰</strong></button>
+                <button class="attention-item" data-go="completed"><span class="attention-icon green">✓</span><div><b>وظایف تکمیل‌شده</b><small>ثبت‌شده در آرشیو</small></div><strong id="attentionDone">۰</strong></button>
+            </div>
+        </div>
+    </div>
+
+    <div class="panel recent-panel">
+        <div class="section-heading"><div><span class="section-kicker">RECENT ACTIVITY</span><h3>آخرین فعالیت‌ها</h3><p class="muted">آخرین وظایف ثبت‌شده در سامانه</p></div><button class="link-btn" type="button" data-go="tasks">مشاهده همه ←</button></div>
+        <div id="recentTasks" class="recent-list rich-recent-list"></div>
+    </div>
+
+    <div class="panel">
+        <div class="section-heading"><div><span class="section-kicker">PROJECT REPORT</span><h3>گزارش تجمیعی پروژه‌ها</h3><p class="muted">مقایسه تعداد وظایف و درصد پیشرفت پروژه‌ها</p></div></div>
+        <div class="table-wrap scroll-table"><table><thead><tr><th>پروژه</th><th>تعداد وظایف</th><th>تکمیل‌شده</th><th>در حال انجام</th><th>در انتظار</th><th>پیشرفت</th></tr></thead><tbody id="projectReportBody"></tbody></table></div>
+    </div>
+</section>
 
 
-
-        <!-- ================= ایجاد پروژه ================= -->
+<!-- ================= ایجاد پروژه ================= -->
 
         <section class="page" id="projects">
 
