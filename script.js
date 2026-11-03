@@ -2093,6 +2093,24 @@ document.addEventListener("DOMContentLoaded", function () {
         });
 
 
+
+    // تنظیم رنگ پوسته (در صورت وجود کنترل انتخاب رنگ در تنظیمات)
+    const savedTheme = localStorage.getItem("taskSystemThemeColor");
+    if (savedTheme) document.documentElement.style.setProperty("--primary", savedTheme);
+    const themePicker = document.getElementById("themeColor");
+    if (themePicker) {
+        if (savedTheme) themePicker.value = savedTheme;
+        themePicker.addEventListener("input", function () {
+            document.documentElement.style.setProperty("--primary", this.value);
+            localStorage.setItem("taskSystemThemeColor", this.value);
+        });
+    }
+
+    // جلوگیری از ارسال ناخواسته فرم با کلید Enter
+    document.querySelectorAll("form").forEach(form => {
+        form.addEventListener("submit", event => event.preventDefault());
+    });
+
     // ==================================================
     // اجرای اولیه سامانه
     // ==================================================
