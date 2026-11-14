@@ -1701,11 +1701,11 @@ td strong {
     box-shadow: 0 2px 5px rgba(55, 49, 40,.15);
 }
 
-.switch input:checked � span {
+.switch input:checked ��� span {
     background: linear-gradient(90deg, #309062, #3dab81);
 }
 
-.switch input:checked � span::before {
+.switch input:checked ��� span::before {
     right: 26px;
 }
 
@@ -2094,7 +2094,7 @@ td strong {
 
 
 
-/* �������������� �������� ������������ */
+/* ������������������������������������������ ������������������������ ������������������������������������ */
 html, body { max-width:100%; overflow-x:hidden; }
 .app-layout { display:flex !important; flex-direction:row !important; align-items:stretch; }
 .sidebar { flex:0 0 275px !important; width:275px !important; height:calc(100vh - 100px) !important; position:sticky !important; top:0 !important; overflow-y:auto !important; overflow-x:hidden !important; }
@@ -2136,14 +2136,14 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 
 /* ================= AUTUMN COLOR PALETTE ================= */
 :root {
-    --primary: #55734b;       /* ������������ */
-    --primary-dark: #3d4930;  /* ������������ �������� */
-    --secondary: #b87932;     /* ����������-������������ */
-    --purple: #876044;        /* ��������������� ������ */
-    --green: #3f7657;         /* �������� */
-    --orange: #c17b32;        /* ������������ ������������ */
-    --red: #a9573f;           /* ���������� */
-    --yellow: #d2a83d;        /* ���������� */
+    --primary: #55734b;       /* ������������������������������������ */
+    --primary-dark: #3d4930;  /* ������������������������������������ ������������������������ */
+    --secondary: #b87932;     /* ������������������������������-������������������������������������ */
+    --purple: #876044;        /* ��������������������������������������������� ������������������ */
+    --green: #3f7657;         /* ������������������������ */
+    --orange: #c17b32;        /* ������������������������������������ ������������������������������������ */
+    --red: #a9573f;           /* ������������������������������ */
+    --yellow: #d2a83d;        /* ������������������������������ */
     --bg: #f6f0e5;
     --white: #fffdf8;
     --text: #3d3329;
@@ -2229,3 +2229,31 @@ body {
 ::-webkit-scrollbar-thumb { background: #b8a27d; }
 ::-webkit-scrollbar-thumb:hover { background: #8b7958; }
 button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible { outline: 3px solid rgba(184,121,50,.32); }
+
+/* �������� ������ ����������������� �� ������������ ���� ����������������� ������������ */
+[hidden]{display:none!important}
+html,body{max-width:100%;overflow-x:hidden}
+.wf-toolbar{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin:15px 0;padding:18px}
+.wf-toolbar label{display:flex;align-items:center;gap:9px;font-size:13px}
+.wf-toolbar select,.wf-toolbar input,.wf-dialog input,.wf-dialog textarea{border:1px solid var(--border);border-radius:10px;padding:11px;font:inherit;background:#fff;color:var(--text);min-width:0}
+.wf-toolbar #wfSearch{flex:1;min-width:180px}
+.wf-upload{cursor:pointer;border:1px solid var(--border);border-radius:10px;padding:11px;background:#f5ead8}
+.wf-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.wf-stats>div{padding:18px;background:#fff;border:1px solid var(--border);border-radius:14px;font-size:12px;color:var(--muted)}
+.wf-stats strong{display:block;font-size:26px;color:var(--primary-dark);margin-top:8px}
+.wf-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:15px;margin:18px 0}
+.wf-project{background:#fff;border:1px solid var(--border);border-radius:17px;padding:22px;box-shadow:var(--shadow);min-width:0}
+.wf-project-head{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+.wf-project h3{font-size:16px}.wf-project p{font-size:12px;color:var(--muted);line-height:2;margin:5px 0;overflow-wrap:anywhere}
+.wf-tag{background:#f5ead8;color:#7c522a;padding:7px 12px;border-radius:30px;font-size:11px}
+.wf-project details{margin:14px 0;font-size:12px}.wf-project summary{cursor:pointer;color:var(--primary);font-weight:700}.wf-project ul{padding:12px 22px;line-height:2;color:var(--muted)}
+.wf-actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:15px}.wf-actions button{border:0;border-radius:10px;padding:10px 14px;background:var(--primary);color:white;font:inherit;cursor:pointer}.wf-actions .wf-alt{background:#a45c42}
+.wf-note{font-size:12px;line-height:2;color:var(--text)}.wf-empty{padding:24px;background:#fff;border-radius:14px}
+.wf-modal{position:fixed;inset:0;background:rgba(25,31,23,.65);z-index:1000;display:flex;align-items:center;justify-content:center;padding:16px}
+.wf-dialog{background:#fff;border-radius:18px;padding:24px;width:min(540px,100%);max-height:90vh;overflow:auto;box-shadow:var(--shadow-heavy)}
+.wf-dialog h3{margin-bottom:16px}.wf-dialog label{display:flex;flex-direction:column;gap:6px;margin:12px 0;font-size:12px;font-weight:700}.wf-dialog textarea{min-height:75px;resize:vertical}
+@media(max-width:900px){.wf-list{grid-template-columns:1fr}.wf-stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:450px){.wf-toolbar{align-items:stretch;flex-direction:column}.wf-toolbar label{flex-wrap:wrap}.wf-stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+/* Task workflow stage tabs */
+.wf-tabs{display:flex;gap:9px;overflow-x:auto;padding:12px 0;margin-top:12px}.wf-tabs button{white-space:nowrap;flex-shrink:0;border:1px solid #dbc9ad;background:#fff9ef;color:#5d4933;border-radius:12px;padding:12px 15px;font:inherit;cursor:pointer}.wf-tabs button.active{background:#386c53;color:#fff;border-color:#386c53}.wf-toolbar h3{font-size:15px;color:#59442e}.wf-modal[hidden]{display:none!important}.wf-stage-hint{font-size:12px;color:#775c3d;margin:10px 0}.wf-project .wf-actions button:disabled{opacity:.5;cursor:not-allowed}
