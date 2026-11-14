@@ -125,6 +125,7 @@
                 زمان‌بندی پروژه
             </button>
 
+            <button class="menu-item" data-section="workflow"><span>🍂</span> کارتابل‌های گردش وظیفه</button>
             <div class="menu-divider"></div>
 
             <button class="menu-item" data-section="users">
@@ -1448,6 +1449,17 @@
         </section>
 
 
+
+<section id="workflow" class="page-section">
+ <div class="page-title"><div><span class="eyebrow">TASK WORKFLOW · DEMO</span><h2>کارتابل‌های گردش وظیفه</h2><p>مراحل فرآیند وظیفه، از تعریف تا تأیید و خاتمه — نسخه نمایشی برای تست مدیر</p></div></div>
+ <div class="wf-toolbar panel"><label>نقش آزمایشی <select id="wfRole"><option value="support">پشتیبان</option><option value="executor">متولی</option><option value="owner">کارفرما</option></select></label><span>نقش فعال: <strong id="wfRoleLabel">پشتیبان</strong></span><button class="outline-btn" id="wfExport">خروجی JSON</button><label class="wf-upload">بازیابی JSON <input id="wfImport" type="file" accept=".json,application/json" hidden></label></div>
+ <div id="wfStats" class="wf-stats"></div>
+ <div class="wf-tabs" id="wfTabs"><button class="active" data-stage="define">۱. تعریف وظیفه</button><button data-stage="register">۲. ثبت اطلاعات وظیفه</button><button data-stage="publish">۳. انتشار وظیفه</button><button data-stage="update">۴. به‌روزرسانی وضعیت</button><button data-stage="approve">۵. تأیید کارفرما</button><button data-stage="all">همه وظایف / سوابق</button></div>
+ <div class="wf-toolbar panel"><h3 id="wfStageTitle">تعریف وظیفه</h3><input id="wfSearch" placeholder="جست‌وجوی عنوان یا مسئول"><button id="wfCreate" class="primary-btn">+ تعریف وظیفه</button></div>
+ <div id="wfList" class="wf-list"></div>
+ <div class="panel wf-note">گردش کار: تعریف ← ثبت اطلاعات ← انتشار همراه منشور و زمان‌بندی ← گزارش درصد پیشرفت یا مستندات تأخیر توسط متولی ← تأیید یا برگشت کارفرما. پس از تأیید، امکان ثبت گزارش دوره بعد وجود دارد؛ خاتمه مستقل از تأیید گزارش است. این نسخه برای نمایش است؛ اطلاعات فقط در مرورگر ذخیره می‌شود و نقش‌ها احراز هویت واقعی نیستند. از فایل‌های واقعی فقط نام مستندات نگهداری می‌شود.</div>
+</section>
+<div id="wfModal" class="wf-modal" hidden><div class="wf-dialog"><h3 id="wfModalTitle"></h3><form id="wfModalForm"><div id="wfModalFields"></div><div class="wf-actions"><button type="submit" class="primary-btn">ثبت</button><button type="button" id="wfModalCancel" class="cancel-btn">انصراف</button></div></form></div></div>
     </main>
 
 </div>
@@ -1464,6 +1476,7 @@
 <!-- کتابخانه نمودارها و منطق سامانه -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="script.js"></script>
+<script src="workflow.js"></script>
 
 </body>
 </html>
