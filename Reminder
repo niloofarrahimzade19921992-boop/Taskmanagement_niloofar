@@ -1,0 +1,21 @@
+(()=>{'use strict';
+const $=id=>document.getElementById(id),KEY='taskSystemPersonalRemindersV1',SET='taskSystemReminderSettingsV1',WF='taskSystemTaskWorkflowV2';
+const safe=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function read(k,def){try{let v=JSON.parse(localStorage.getItem(k));return v??def}catch{return def}}
+let reminders=read(KEY,[]),settings=read(SET,{notifications:true,online:true,deadlines:true});if(!Array.isArray(reminders))reminders=[];
+const save=()=>localStorage.setItem(KEY,JSON.stringify(reminders));
+function alerts(){let tasks=read(WF,[]);if(!Array.isArray(tasks))tasks=[];let out=[];
+if(settings.notifications)tasks.forEach(t=>{if(t.stage==='pending')out.push({id:'task-'+t.id,title:'در انتظار تأیید: '+t.title,desc:'گزارش متولی برای بررسی کارفرما آماده است.',due:0});if(t.stage==='returned')out.push({id:'return-'+t.id,title:'نیازمند اصلاح: '+t.title,desc:'گزارش توسط کارفرما برگشت داده شده است.',due:0})});
+if(settings.deadlines)tasks.forEach(t=>{if(!t.end||t.stage==='closed')return;let raw=String(t.end).replace(/[۰-۹]/g,c=>'۰۱۲۳۴۵۶۷۸۹'.indexOf(c)).replace(/[٠-٩]/g,c=>'٠١٢٣٤٥٦٧٨٩'.indexOf(c));let date=new Date(raw);if(!Number.isNaN(date.getTime())){let days=(date-Date.now())/86400000;if(days<4)out.push({id:'due-'+t.id,title:(days<0?'سررسید گذشته: ':'نزدیک سررسید: ')+t.title,desc:'مهلت ثبت‌شده: '+t.end,due:date.getTime()})}});
+return out}
+function render(){let list=$('reminderList');if(!list)return;let now=Date.now(),system=alerts(),pending=reminders.filter(x=>!x.done&&new Date(x.date).getTime()<=now).length;
+let badge=$('reminderBadge');if(badge)badge.textContent=String(pending+system.length).replace(/\d/g,d=>'۰۱۲۳۴۵۶۷۸۹'[d]);
+let rows=[...system.map(x=>({...x,system:true})),...reminders.map(x=>({...x,system:false}))].sort((a,b)=>(a.done?1:0)-(b.done?1:0));
+list.innerHTML=rows.length?rows.map(x=>`<div class="reminder-row ${x.done?'reminder-done':''}"><div><strong>${safe(x.title)}</strong><p>${safe(x.desc||x.note||'')}</p>${x.date?`<small>${safe(new Date(x.date).toLocaleString('fa-IR'))}</small>`:''}${x.system?'<small> · هشدار گردش کار</small>':''}</div>${x.system?'':`<div class="reminder-actions"><button data-reminder-action="toggle" data-id="${safe(x.id)}">${x.done?'فعال‌سازی':'انجام شد'}</button><button data-reminder-action="delete" data-id="${safe(x.id)}">حذف</button></div>`}</div>`).join(''):'<p class="reminder-empty">هنوز یادآوری‌ای ثبت نشده است.</p>'}
+document.addEventListener('DOMContentLoaded',()=>{let form=$('reminderForm');if(!form)return;
+form.addEventListener('submit',e=>{e.preventDefault();let title=$('reminderTitle').value.trim(),date=$('reminderDate').value;if(!title||!date)return;reminders.unshift({id:String(Date.now())+Math.random(),title,date,note:$('reminderNote').value.trim(),done:false});save();form.reset();render()});
+$('reminderList').addEventListener('click',e=>{let b=e.target.closest('[data-reminder-action]');if(!b)return;let i=reminders.findIndex(x=>x.id===b.dataset.id);if(i<0)return;if(b.dataset.reminderAction==='delete'){if(!confirm('این یادآوری حذف شود؟'))return;reminders.splice(i,1)}else reminders[i].done=!reminders[i].done;save();render()});
+let inputs=$('settings')?.querySelectorAll('.setting-row input[type="checkbox"]');if(inputs?.length>=3){let keys=['notifications','online','deadlines'];inputs.forEach((input,i)=>{if(i>=3)return;input.checked=!!settings[keys[i]];input.addEventListener('change',()=>{settings[keys[i]]=input.checked;localStorage.setItem(SET,JSON.stringify(settings));render()})})}
+let bell=document.querySelector('.notification');if(bell){bell.style.cursor='pointer';bell.title='مشاهده یادآوری‌های من';bell.addEventListener('click',()=>document.querySelector('[data-section="my-reminders"]')?.click())}
+render();setInterval(render,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)render()});
+});})();
