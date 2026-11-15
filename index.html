@@ -133,6 +133,8 @@
                 اطلاعات کاربران
             </button>
 
+            <button class="menu-item" data-section="my-reminders"><span>🔔</span> یادآوری‌های من <b class="menu-badge orange" id="reminderBadge">۰</b></button>
+
             <button class="menu-item" data-section="settings">
                 <span>⚙</span>
                 تنظیمات
@@ -1362,6 +1364,17 @@
         </section>
 
 
+        <section id="my-reminders" class="page-section">
+          <div class="page-title"><div><span class="eyebrow">MY REMINDERS</span><h2>یادآوری‌های من</h2><p>یادآوری‌های شخصی و هشدارهای گردش کار وظایف</p></div></div>
+          <div class="form-card"><h3>ثبت یادآوری جدید</h3><form id="reminderForm" class="form-grid">
+            <div class="form-group"><label>عنوان یادآوری</label><input id="reminderTitle" required maxlength="120" placeholder="مثلاً بررسی گزارش پیشرفت"></div>
+            <div class="form-group"><label>تاریخ و ساعت</label><input id="reminderDate" type="datetime-local" required></div>
+            <div class="form-group full"><label>توضیحات</label><textarea id="reminderNote" placeholder="توضیحات اختیاری"></textarea></div>
+            <div class="form-group full"><button class="primary-btn" type="submit">+ ثبت یادآوری</button></div>
+          </form></div><div class="panel" style="margin-top:20px"><div class="panel-header"><h3>فهرست یادآوری‌ها و هشدارها</h3></div><div id="reminderList"></div></div>
+          <p style="margin-top:12px;color:var(--muted)">یادآوری‌ها در همین مرورگر ذخیره می‌شوند. اعلان سیستمی در زمان بسته بودن سایت ارسال نمی‌شود.</p>
+        </section>
+
         <!-- ================= SUPPORT ================= -->
 
         <section id="support" class="page-section">
@@ -1477,6 +1490,7 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="script.js"></script>
 <script src="workflow.js"></script>
+<script src="reminders.js"></script>
 
 </body>
 </html>
