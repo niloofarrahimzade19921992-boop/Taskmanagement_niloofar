@@ -77,3 +77,17 @@ COMMIT;
 -- IMPORTANT: review existing policies on user_profiles. Admin approval needs
 -- a secure UPDATE policy for pm_is_admin(); users should only read approved
 -- profiles, and admin can read pending ones. Do not add broad SELECT/UPDATE.
+
+-- Profile access required by registration, team assignment and administrator approval.
+-- IMPORTANT: inspect any pre-existing policies on user_profiles before running;
+-- permissive policies are combined with OR and could expose data.
+DROP POLICY IF EXISTS pm_profiles_select ON public.user_profiles;
+DROP POLICY IF EXISTS pm_profiles_admin_update ON public.user_profiles;
+CREATE POLICY pm_profiles_select ON public.user_profiles FOR SELECT TO authenticated
+USING (id=auth.uid() OR public.pm_is_admin() OR (public.pm_is_approved() AND is_approved=true));
+CREATE POLICY pm_profiles_admin_update ON public.user_profiles FOR UPDATE TO authenticated
+USING (public.pm_is_admin()) WITH CHECK (public.pm_is_admin());
+-- Existing projects have no owner_id. Administrators should assign their
+-- actual owner UUIDs explicitly before enforcing private visibility.
+-- Example (replace placeholders only after confirming ownership):
+-- UPDATE public.projects SET owner_id='ACTUAL-USER-UUID' WHERE id=ACTUAL-PROJECT-ID;
