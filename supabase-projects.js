@@ -70,6 +70,7 @@ async function adminRequest(body){
  if(!response.ok||result.error)throw Error(result.error||"خطای سرور");
  return result;
 }
+let adminUsersCache=[],editingPermissionsUser=null;
 async function refreshAdminUsers(){
  const box=$("#adminUsers"),list=$("#usersList"),loading=$("#usersLoading");
  box.style.display=canApprove()?"block":"none";
@@ -77,14 +78,41 @@ async function refreshAdminUsers(){
  list.textContent="";loading.style.display="block";$("#usersTable").innerHTML="";
  try{
  const result=await adminRequest({action:"list"});
+ adminUsersCache=result.users;
  $("#usersTable").innerHTML=result.users.map(u=>{
  const defaults=k=>["home","center","charter","schedule","list"].includes(k)||(k==="create"&&u.role==="support");
- const options=Object.entries(permissionLabels).filter(([k])=>k!=="users").map(([k,label])=>'<label><input type="checkbox" data-permission-user="'+safe(u.id)+'" data-permission-key="'+k+'" '+((u.permissions?.[k]??defaults(k))?"checked":"")+'>'+safe(label)+'</label>').join("");
- return '<tr><td>'+safe(u.full_name?.trim()||"کاربر")+'</td><td>'+(u.is_admin?'مدیر سامانه':'<select data-user-role="'+safe(u.id)+'"><option value="responsible" '+(u.role==="responsible"?"selected":"")+'>کاربر عادی</option><option value="employer" '+(u.role==="employer"?"selected":"")+'>کارفرما</option><option value="support" '+(u.role==="support"?"selected":"")+'>پشتیبان</option></select>')+'</td><td><input type="checkbox" data-user-approved="'+safe(u.id)+'" '+(u.is_approved?"checked":"")+' '+(u.is_admin?"disabled":"")+'></td><td>'+(u.is_admin?'دسترسی کامل':'<details class="permissions-detail"><summary>تنظیم دسترسی‌ها</summary><div class="permission-grid">'+options+'</div></details>')+'</td><td>'+(u.is_admin?"مدیر سامانه":'<button type="button" data-save-user="'+safe(u.id)+'">ذخیره</button>')+'</td></tr>'
+ const permitted=Object.entries(permissionLabels).filter(([k])=>k!=="users").filter(([k])=>u.permissions?.[k]??defaults(k)).length;
+ return '<tr><td>'+safe(u.full_name?.trim()||"کاربر")+'</td><td>'+(u.is_admin?'مدیر سامانه':'<select data-user-role="'+safe(u.id)+'"><option value="responsible" '+(u.role==="responsible"?"selected":"")+'>کاربر عادی</option><option value="employer" '+(u.role==="employer"?"selected":"")+'>کارفرما</option><option value="support" '+(u.role==="support"?"selected":"")+'>پشتیبان</option></select>')+'</td><td><input type="checkbox" data-user-approved="'+safe(u.id)+'" '+(u.is_approved?"checked":"")+' '+(u.is_admin?"disabled":"")+'></td><td>'+(u.is_admin?'<span>دسترسی کامل</span>':'<button type="button" class="permission-action" data-open-permissions="'+safe(u.id)+'" aria-label="تنظیم دسترسی‌های '+safe(u.full_name?.trim()||"کاربر")+'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3 4 7v5c0 5 3.4 8 8 9 4.6-1 8-4 8-9V7l-8-4Z"/><path d="m9 12 2 2 4-4"/></svg> دسترسی‌ها <small>('+permitted+')</small></button>')+'</td><td>'+(u.is_admin?"مدیر سامانه":'<button type="button" data-save-user="'+safe(u.id)+'">ذخیره نقش و وضعیت</button>')+'</td></tr>'
  }).join("");
  }catch(e){$("#userAdminStatus").textContent="خطا در دریافت کاربران: "+e.message}finally{loading.style.display="none"}
 }
 
+const permKeys=Object.keys(permissionLabels).filter(k=>k!=="users");
+function updatePermissionSelectAll(){const inputs=[...document.querySelectorAll("#permissionModalGrid input")],n=inputs.filter(x=>x.checked).length,all=$("#permissionSelectAll");all.checked=n===inputs.length;all.indeterminate=n>0&&n<inputs.length;$("#permissionCount").textContent=n+" از "+inputs.length+" دسترسی"}
+function closePermissionModal(){editingPermissionsUser=null;$("#permissionModal").hidden=true;document.body.style.overflow=""}
+function openPermissionModal(id){
+ const u=adminUsersCache.find(x=>x.id===id);if(!u||u.is_admin)return;
+ editingPermissionsUser=id;
+ $("#permissionModalTitle").textContent="دسترسی‌های "+(u.full_name?.trim()||"کاربر");
+ $("#permissionModalSubtitle").textContent="بخش‌هایی که این کاربر اجازه مشاهده و استفاده از آن‌ها را دارد.";
+ $("#permissionModalStatus").textContent="";
+ const defaults=k=>["home","center","charter","schedule","list"].includes(k)||(k==="create"&&u.role==="support");
+ $("#permissionModalGrid").innerHTML=permKeys.map(k=>'<label class="permission-tile"><input type="checkbox" data-modal-permission="'+k+'" '+((u.permissions?.[k]??defaults(k))?"checked":"")+'><span>'+safe(permissionLabels[k])+'</span></label>').join("");
+ $("#permissionModal").hidden=false;document.body.style.overflow="hidden";updatePermissionSelectAll();$("#permissionModalClose").focus();
+}
+document.addEventListener("click",e=>{const btn=e.target.closest("[data-open-permissions]");if(btn)openPermissionModal(btn.dataset.openPermissions)});
+$("#permissionModalClose").addEventListener("click",closePermissionModal);
+$("#permissionModalCancel").addEventListener("click",closePermissionModal);
+$("#permissionModal").addEventListener("click",e=>{if(e.target.id==="permissionModal")closePermissionModal()});
+document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!$("#permissionModal").hidden)closePermissionModal()});
+$("#permissionSelectAll").addEventListener("change",e=>{document.querySelectorAll("#permissionModalGrid input").forEach(x=>x.checked=e.target.checked);updatePermissionSelectAll()});
+$("#permissionModalGrid").addEventListener("change",updatePermissionSelectAll);
+$("#permissionModalSave").addEventListener("click",async()=>{
+ if(!editingPermissionsUser)return;const btn=$("#permissionModalSave"),status=$("#permissionModalStatus"),id=editingPermissionsUser;
+ const permissions=Object.fromEntries([...document.querySelectorAll("[data-modal-permission]")].map(x=>[x.dataset.modalPermission,x.checked]));permissions.users=false;
+ btn.disabled=true;status.textContent="در حال ذخیره دسترسی‌ها...";
+ try{await adminRequest({action:"permissions",id,permissions});closePermissionModal();$("#userAdminStatus").textContent="✓ دسترسی‌ها ذخیره شدند";await refreshAdminUsers()}catch(err){status.textContent="خطا: "+err.message}finally{btn.disabled=false}
+});
 let jalaliTarget=null;
 const jpMonths=["فروردین","اردیبهشت","خرداد","تیر","مرداد","شهریور","مهر","آبان","آذر","دی","بهمن","اسفند"];
 function initJalaliPicker(){
@@ -122,7 +150,7 @@ const open=e.target.closest("[data-open]");if(open){selected=Number(open.dataset
 const dec=e.target.closest("[data-decision]");if(dec&&canDecide())await action(async()=>{await run(sb.from("projects").update({workflow_status:dec.dataset.decision}).eq("id",Number(dec.dataset.id)).eq("workflow_status","pending").select())});
 });
 $("#newUserForm").addEventListener("submit",async e=>{e.preventDefault();const msg=$("#userAdminStatus");msg.textContent="در حال ایجاد کاربر...";try{const v=Object.fromEntries(new FormData(e.target));await adminRequest({action:"create",...v});e.target.reset();msg.textContent="✓ کاربر با موفقیت ایجاد شد";await refreshAdminUsers()}catch(err){msg.textContent="خطا: "+err.message}});
-document.addEventListener("click",async e=>{const btn=e.target.closest("[data-save-user]");if(!btn)return;const id=btn.dataset.saveUser;const msg=$("#userAdminStatus");try{await adminRequest({action:"update",id,role:document.querySelector('[data-user-role="'+id+'"]').value,is_approved:document.querySelector('[data-user-approved="'+id+'"]').checked});const permissions=Object.fromEntries([...document.querySelectorAll('[data-permission-user="'+id+'"]')].map(x=>[x.dataset.permissionKey,x.checked]));permissions.users=false;await adminRequest({action:"permissions",id,permissions});msg.textContent="✓ دسترسی کاربر ذخیره شد";await refreshAdminUsers()}catch(err){msg.textContent="خطا: "+err.message}});
+document.addEventListener("click",async e=>{const btn=e.target.closest("[data-save-user]");if(!btn)return;const id=btn.dataset.saveUser;const msg=$("#userAdminStatus");try{await adminRequest({action:"update",id,role:document.querySelector('[data-user-role="'+id+'"]').value,is_approved:document.querySelector('[data-user-approved="'+id+'"]').checked});msg.textContent="✓ دسترسی کاربر ذخیره شد";await refreshAdminUsers()}catch(err){msg.textContent="خطا: "+err.message}});
 document.addEventListener("click",async e=>{
  const archive=e.target.closest("[data-archive-project]"),restore=e.target.closest("[data-restore-project]");
  if(!archive&&!restore)return;
@@ -170,7 +198,9 @@ $("#saveCharterButton").addEventListener("click",saveCharter);
 $("#phaseForm").addEventListener("submit",e=>{e.preventDefault();action(async()=>{if(!editable(current())||!hasPermission("schedule"))throw Error("امکان ثبت مرحله وجود ندارد");const v=Object.fromEntries(new FormData(e.target));v.start=gregorianDate(v.start);v.end=gregorianDate(v.end);if(v.end<v.start)throw Error("تاریخ پایان نامعتبر است");await run(sb.from("project_phases").insert({project_id:selected,title:v.title,start_date:v.start,end_date:v.end}));e.target.reset()})});
 $("#requestApproval").addEventListener("click",()=>action(async()=>{const p=current();if(!hasPermission("charter")||!editable(p)||!p.objective?.trim())throw Error("ابتدا منشور را ذخیره کنید");await run(sb.from("projects").update({workflow_status:"pending"}).eq("id",p.id).select())}));
 $("#publishProject").addEventListener("click",()=>action(async()=>{const p=current();if(!canPublish()||p?.workflow_status!=="approved")throw Error("تأیید مدیر لازم است");await run(sb.from("projects").update({workflow_status:"published"}).eq("id",p.id).select())}));
-const banner=new Image();banner.onload=()=>document.querySelector(".auth-backdrop")?.classList.add("image-ready");banner.src="home-banner.png";try{const {data,error}=await sb.auth.getUser();if(error&&/invalid.*token|session.*missing/i.test(error.message||""))await sb.auth.signOut();user=data?.user||null;if(recoveryMode||new URLSearchParams(location.search).get("auth")==="recovery"){showRecovery();return}await load()}catch(e){user=null;profile=null;render();fail(e)}
-sb.auth.onAuthStateChange((event,session)=>{user=session?.user||null;if(event==="PASSWORD_RECOVERY"||new URLSearchParams(location.search).get("auth")==="recovery"){showRecovery();return}if(recoveryMode)return;setTimeout(()=>load().catch(fail),0)});
+let authInitialized=false;
+const finishAuthBoot=()=>{$("#authBoot").hidden=true;authInitialized=true};
+const banner=new Image();banner.onload=()=>document.querySelector(".auth-backdrop")?.classList.add("image-ready");banner.src="home-banner.png";try{const {data,error}=await sb.auth.getUser();if(error&&/invalid.*token|session.*missing/i.test(error.message||""))await sb.auth.signOut();user=data?.user||null;if(recoveryMode||new URLSearchParams(location.search).get("auth")==="recovery"){showRecovery();return}await load()}catch(e){user=null;profile=null;render();fail(e)}finally{finishAuthBoot()}
+sb.auth.onAuthStateChange((event,session)=>{user=session?.user||null;if(event==="PASSWORD_RECOVERY"||new URLSearchParams(location.search).get("auth")==="recovery"){showRecovery();return}if(recoveryMode||!authInitialized)return;setTimeout(()=>load().catch(fail),0)});
 });
 })();
