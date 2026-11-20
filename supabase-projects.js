@@ -1,7 +1,7 @@
 (()=>{
 "use strict";
 const sb=window.supabase.createClient("https://xgrtcsudpqcznhlkberz.supabase.co","sb_publishable_kyEmcxiKYeNFgnPTBqnjqw_BxrCP7hu");
-let projects=[],phases=[],profile=null,user=null,selected=null;
+let projects=[],archivedProjects=[],phases=[],profile=null,user=null,selected=null;
 const $=s=>document.querySelector(s),safe=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const faDigits=s=>String(s??"").replace(/[۰-۹]/g,x=>String("۰۱۲۳۴۵۶۷۸۹".indexOf(x))).replace(/[٠-٩]/g,x=>String("٠١٢٣٤٥٦٧٨٩".indexOf(x)));
 const fmt=new Intl.DateTimeFormat("en-US-u-ca-persian",{year:"numeric",month:"2-digit",day:"2-digit",timeZone:"UTC"});
@@ -19,7 +19,9 @@ async function load(){
 if(!user){projects=[];phases=[];profile=null;render();return}
 profile=await run(sb.from("user_profiles").select("id,full_name,role,is_approved,is_admin").eq("id",user.id).maybeSingle());
 if(!profile?.is_approved){projects=[];phases=[];render();return}
-projects=await run(sb.from("projects").select("*").order("id",{ascending:false}));
+const allProjects=await run(sb.from("projects").select("*").order("id",{ascending:false}));
+projects=allProjects.filter(p=>!p.deleted_at);
+archivedProjects=canApprove()?allProjects.filter(p=>!!p.deleted_at):[];
 phases=await run(sb.from("project_phases").select("*"));
 render();
 if(document.querySelector(".page#users.active"))refreshAdminUsers();
@@ -34,6 +36,7 @@ if(p)$("#selectedProject").value=String(p.id);
 $("#stats").innerHTML=[["کل پروژه‌ها",projects.length],["منتشرشده",projects.filter(x=>x.workflow_status==="published").length],["در انتظار تأیید",projects.filter(x=>x.workflow_status==="pending").length],["پیش‌نویس",projects.filter(x=>x.workflow_status==="draft").length]].map(([a,b])=>'<div class="metric"><span>'+a+'</span><strong>'+b+'</strong></div>').join("");
 $("#projectDetails").innerHTML=p?'<h3>'+safe(p.name)+'</h3><p>مدیر: '+safe(p.manager||"—")+'</p><p>شرح: '+safe(p.description||"—")+'</p><p>شروع: '+displayDate(p.start_date)+' | پایان: '+displayDate(p.end_date)+'</p><span class="badge">'+status[st]+'</span><div class="actions"><button class="primary" data-jump="charter">منشور</button><button class="secondary" data-jump="schedule">گانت</button><button class="secondary" data-jump="publish">انتشار</button></div>':"<p>پروژه‌ای وجود ندارد یا هنوز وارد نشده‌اید.</p>";
 const cf=$("#charterForm");["objective","scope","deliverables","stakeholders","approver"].forEach(k=>cf.elements[k].value=p?.[k]||"");
+$("#trashList").innerHTML=canApprove()?(archivedProjects.map(x=>'<tr><td>'+safe(x.name)+'</td><td>'+safe(new Date(x.deleted_at).toLocaleDateString("fa-IR"))+'</td><td><button data-restore-project="'+x.id+'">بازیابی</button></td></tr>').join("")||'<tr><td colspan="3">پروژه حذف‌شده‌ای وجود ندارد.</td></tr>'):'<tr><td colspan="3">فقط مدیر سامانه دسترسی دارد.</td></tr>';
 $("#projectList").innerHTML=projects.map(x=>'<tr><td>'+safe(x.name)+'</td><td>'+safe(x.manager||"—")+'</td><td>'+displayDate(x.start_date)+'</td><td>'+displayDate(x.end_date)+'</td><td><span class="badge">'+status[x.workflow_status]+'</span></td><td><button data-open="'+x.id+'">مشاهده</button></td></tr>').join("")||'<tr><td colspan="6">پروژه‌ای وجود ندارد.</td></tr>';
 $("#approvalList").innerHTML=projects.filter(x=>x.workflow_status==="pending").map(x=>'<div class="panel"><strong>'+safe(x.name)+'</strong><p>تأییدکننده: '+safe(x.approver||"مشخص نشده")+'</p>'+(canApprove()?'<div class="actions"><button class="primary" data-decision="approved" data-id="'+x.id+'">تأیید</button><button class="danger" data-decision="rejected" data-id="'+x.id+'">برگشت</button></div>':"<p>فقط مدیر می‌تواند تصمیم بگیرد.</p>")+'</div>').join("")||"<p>پروژه‌ای در انتظار تأیید نیست.</p>";
 $("#publishDetails").innerHTML=p?'<strong>'+safe(p.name)+'</strong><p>وضعیت: '+status[st]+'</p>':"پروژه‌ای انتخاب نشده است.";
@@ -109,6 +112,21 @@ const dec=e.target.closest("[data-decision]");if(dec&&canApprove())await action(
 });
 $("#newUserForm").addEventListener("submit",async e=>{e.preventDefault();const msg=$("#userAdminStatus");msg.textContent="در حال ایجاد کاربر...";try{const v=Object.fromEntries(new FormData(e.target));await adminRequest({action:"create",...v});e.target.reset();msg.textContent="✓ کاربر با موفقیت ایجاد شد";await refreshAdminUsers()}catch(err){msg.textContent="خطا: "+err.message}});
 document.addEventListener("click",async e=>{const btn=e.target.closest("[data-save-user]");if(!btn)return;const id=btn.dataset.saveUser;const msg=$("#userAdminStatus");try{await adminRequest({action:"update",id,role:document.querySelector('[data-user-role="'+id+'"]').value,is_approved:document.querySelector('[data-user-approved="'+id+'"]').checked});msg.textContent="✓ دسترسی کاربر ذخیره شد";await refreshAdminUsers()}catch(err){msg.textContent="خطا: "+err.message}});
+document.addEventListener("click",async e=>{
+ const archive=e.target.closest("[data-archive-project]"),restore=e.target.closest("[data-restore-project]");
+ if(!archive&&!restore)return;
+ if(!canApprove()){fail(Error("فقط مدیر سامانه مجاز است"));return}
+ const id=Number(archive?archive.dataset.archiveProject:restore.dataset.restoreProject);
+ const p=(archive?projects:archivedProjects).find(x=>x.id===id);
+ if(!p||!confirm((archive?"حذف پروژه «":"بازیابی پروژه «")+p.name+"»؟"))return;
+ try{
+  const {data:{session}}=await sb.auth.getSession();
+  if(!session?.access_token)throw Error("ابتدا وارد شوید");
+  const response=await fetch("https://xgrtcsudpqcznhlkberz.supabase.co/functions/v1/project-archive",{method:"POST",headers:{"Content-Type":"application/json",Authorization:"Bearer "+session.access_token,apikey:"sb_publishable_kyEmcxiKYeNFgnPTBqnjqw_BxrCP7hu"},body:JSON.stringify({action:archive?"archive":"restore",project_id:id})});
+  const result=await response.json();if(!response.ok||!result.ok)throw Error(result.error||"عملیات ناموفق بود");
+  await load();alert(archive?"پروژه به بخش حذف‌شده‌ها منتقل شد":"پروژه بازیابی شد");
+ }catch(err){fail(err)}
+});
 $("#selectedProject").addEventListener("change",e=>{selected=Number(e.target.value);render()});
 $("#loginForm").addEventListener("submit",e=>{e.preventDefault();action(async()=>{const f=e.target;const {data,error}=await sb.auth.signInWithPassword({email:f.elements.username.value.trim(),password:f.elements.password.value});if(error)throw error;user=data.user})});
 $("#logout").addEventListener("click",()=>action(async()=>{await run(sb.auth.signOut());user=null;selected=null}));
