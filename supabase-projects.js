@@ -1,7 +1,7 @@
 (()=>{
 "use strict";
 const sb=window.supabase.createClient("https://xgrtcsudpqcznhlkberz.supabase.co","sb_publishable_kyEmcxiKYeNFgnPTBqnjqw_BxrCP7hu");
-let projects=[],archivedProjects=[],phases=[],profile=null,user=null,selected=null;let recoveryMode=false;
+let projects=[],archivedProjects=[],phases=[],profile=null,user=null,selected=null,permissionOverrides={};let recoveryMode=false;
 const $=s=>document.querySelector(s),safe=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const faDigits=s=>String(s??"").replace(/[۰-۹]/g,x=>String("۰۱۲۳۴۵۶۷۸۹".indexOf(x))).replace(/[٠-٩]/g,x=>String("٠١٢٣٤٥٦٧٨٩".indexOf(x)));
 const fmt=new Intl.DateTimeFormat("en-US-u-ca-persian",{year:"numeric",month:"2-digit",day:"2-digit",timeZone:"UTC"});
@@ -11,26 +11,33 @@ function gregorianDate(input){const s=faDigits(input).trim();const m=/^([0-9]{4}
 const status={draft:"پیش‌نویس",pending:"در انتظار تأیید",approved:"تأییدشده",rejected:"برگشت‌خورده",published:"منتشرشده"};
 const current=()=>projects.find(p=>String(p.id)===String(selected));
 const editable=p=>p&&["draft","rejected"].includes(p.workflow_status)&&canEdit();
+const permissionLabels={home:"صفحه اصلی",center:"مرکز پروژه",create:"ایجاد پروژه",charter:"منشور پروژه",schedule:"زمان‌بندی",approvals:"کارتابل تأییدات",publish:"انتشار پروژه",list:"فهرست پروژه‌ها",trash:"پروژه‌های حذف‌شده",users:"مدیریت کاربران"};
+const defaultPermission=k=>["home","center","charter","schedule","list"].includes(k)||(k==="create"&&profile?.role==="support");
+const hasPermission=k=>!!(user&&profile?.is_approved&&(profile.is_admin||(k!=="users"&&(Object.hasOwn(permissionOverrides,k)?permissionOverrides[k]:defaultPermission(k)))));
 const canEdit=()=>profile?.is_approved&&(profile.is_admin||profile.role==="support");
 const canApprove=()=>profile?.is_approved&&profile.is_admin;
+const canDecide=()=>canEdit()&&hasPermission("approvals");
+const canPublish=()=>canEdit()&&hasPermission("publish");
 function fail(e){const message=e?.message||String(e);const auth=$("#authScreen");if(auth&&!auth.hidden){const status=$("#authMessage");if(status)status.textContent=/invalid login credentials/i.test(message)?"ایمیل یا رمز عبور صحیح نیست. در صورت فراموشی رمز، از بازیابی رمز عبور استفاده کنید.":/email not confirmed/i.test(message)?"ایمیل حساب هنوز تأیید نشده است.":/failed to fetch|network/i.test(message)?"ارتباط با سرور برقرار نشد. اتصال اینترنت را بررسی کنید.":"ورود ناموفق بود: "+message;return}alert("خطا: "+message)}
 async function run(promise){const {data,error}=await promise;if(error)throw error;return data}
 async function load(){
-if(!user){projects=[];archivedProjects=[];phases=[];profile=null;render();return}
+if(!user){projects=[];archivedProjects=[];phases=[];profile=null;permissionOverrides={};render();return}
 profile=await run(sb.from("user_profiles").select("id,full_name,role,is_approved,is_admin").eq("id",user.id).maybeSingle());
-if(!profile?.is_approved){projects=[];archivedProjects=[];phases=[];render();return}
+if(!profile?.is_approved){projects=[];archivedProjects=[];phases=[];permissionOverrides={};render();return}
+const permResult=await sb.from("user_permissions").select("permission_key,allowed").eq("user_id",user.id);if(permResult.error)throw permResult.error;
+permissionOverrides=Object.fromEntries((permResult.data||[]).map(p=>[p.permission_key,p.allowed]));
 const allProjects=await run(sb.from("projects").select("*").order("id",{ascending:false}));
 projects=allProjects.filter(p=>!p.deleted_at);
-archivedProjects=canApprove()?allProjects.filter(p=>!!p.deleted_at):[];
+archivedProjects=hasPermission("trash")?allProjects.filter(p=>!!p.deleted_at):[];
 phases=await run(sb.from("project_phases").select("*"));
 render();
 if(document.querySelector(".page#users.active"))refreshAdminUsers();
 }
-function show(page){if(!user||!profile?.is_approved){document.getElementById("authScreen").hidden=false;return}if(page==="users"&&!canApprove())page="home";document.querySelectorAll(".page").forEach(e=>e.classList.toggle("active",e.id===page));document.querySelectorAll(".nav").forEach(e=>e.classList.toggle("active",e.dataset.page===page));render();if(page==="users")refreshAdminUsers();window.scrollTo(0,0)}
+function show(page){if(!user||!profile?.is_approved){document.getElementById("authScreen").hidden=false;return}if(!hasPermission(page))page=Object.keys(permissionLabels).find(hasPermission)||"home";document.querySelectorAll(".page").forEach(e=>e.classList.toggle("active",e.id===page));document.querySelectorAll(".nav").forEach(e=>e.classList.toggle("active",e.dataset.page===page));render();if(page==="users")refreshAdminUsers();window.scrollTo(0,0)}
 function render(){
 if(!projects.some(p=>String(p.id)===String(selected)))selected=projects[0]?.id??null;
 const p=current(),st=p?.workflow_status||"draft";
-const authorized=!!(!recoveryMode&&user&&profile?.is_approved);$("#userLabel").textContent=authorized?(profile.full_name||user.email):"";$("#adminNav").style.display=canApprove()?"block":"none";$("#headerLogout").style.display=authorized?"inline-block":"none";$("#headerLogin").style.display=authorized?"none":"inline-block";$("#authScreen").hidden=authorized;document.querySelector(".layout").style.visibility=authorized?"visible":"hidden";document.querySelector("header").style.visibility=authorized?"visible":"hidden";if(user&&!authorized&&!recoveryMode)$("#authMessage").textContent="حساب شما هنوز تأیید نشده است.";else if(!user&&!recoveryMode)$("#authMessage").textContent="";if(!authorized){document.querySelectorAll(".page").forEach(x=>x.classList.toggle("active",x.id==="home"));document.querySelectorAll(".nav").forEach(x=>x.classList.toggle("active",x.dataset.page==="home"))}
+const authorized=!!(!recoveryMode&&user&&profile?.is_approved);$("#userLabel").textContent=authorized?(profile.full_name||user.email):"";$("#adminNav").style.display=canApprove()?"block":"none";document.querySelectorAll("[data-page],[data-jump]").forEach(el=>{const key=el.dataset.page||el.dataset.jump;el.hidden=!hasPermission(key);el.style.display=hasPermission(key)?"":"none"});document.querySelectorAll(".page.active").forEach(el=>{if(!hasPermission(el.id))el.classList.remove("active")});if(authorized&&!document.querySelector(".page.active")){const first=Object.keys(permissionLabels).find(hasPermission);if(first)$("#"+first)?.classList.add("active")}$("#headerLogout").style.display=authorized?"inline-block":"none";$("#headerLogin").style.display=authorized?"none":"inline-block";$("#authScreen").hidden=authorized;document.querySelector(".layout").style.visibility=authorized?"visible":"hidden";document.querySelector("header").style.visibility=authorized?"visible":"hidden";if(user&&!authorized&&!recoveryMode)$("#authMessage").textContent="حساب شما هنوز تأیید نشده است.";else if(!user&&!recoveryMode)$("#authMessage").textContent="";if(!authorized){document.querySelectorAll(".page").forEach(x=>x.classList.toggle("active",x.id==="home"));document.querySelectorAll(".nav").forEach(x=>x.classList.toggle("active",x.dataset.page==="home"))}
 $("#selectedProject").innerHTML=projects.map(x=>'<option value="'+x.id+'">'+safe(x.name)+'</option>').join("");
 if(p)$("#selectedProject").value=String(p.id);
 $("#stats").innerHTML=[["کل پروژه‌ها",projects.length],["منتشرشده",projects.filter(x=>x.workflow_status==="published").length],["در انتظار تأیید",projects.filter(x=>x.workflow_status==="pending").length],["پیش‌نویس",projects.filter(x=>x.workflow_status==="draft").length]].map(([a,b])=>'<div class="metric"><span>'+a+'</span><strong>'+b+'</strong></div>').join("");
@@ -38,12 +45,12 @@ const recent=$("#recentProjects");if(recent)recent.innerHTML=projects.slice(0,5)
 const cf=$("#charterForm");["objective","scope","deliverables","stakeholders","approver"].forEach(k=>cf.elements[k].value=p?.[k]||"");
 $("#trashList").innerHTML=canApprove()?(archivedProjects.map(x=>'<tr><td>'+safe(x.name)+'</td><td>'+safe(new Date(x.deleted_at).toLocaleDateString("fa-IR"))+'</td><td><button data-restore-project="'+x.id+'">بازیابی</button></td></tr>').join("")||'<tr><td colspan="3">پروژه حذف‌شده‌ای وجود ندارد.</td></tr>'):'<tr><td colspan="3">فقط مدیر سامانه دسترسی دارد.</td></tr>';
 $("#projectList").innerHTML=projects.map(x=>'<tr><td>'+safe(x.name)+'</td><td>'+safe(x.manager||"—")+'</td><td>'+displayDate(x.start_date)+'</td><td>'+displayDate(x.end_date)+'</td><td><span class="badge">'+status[x.workflow_status]+'</span></td><td><button data-open="'+x.id+'">مشاهده</button>'+(canApprove()?'<button class="danger" type="button" data-archive-project="'+x.id+'" style="margin-inline-start:8px">حذف</button>':'')+'</td></tr>').join("")||'<tr><td colspan="6">پروژه‌ای وجود ندارد.</td></tr>';
-$("#approvalList").innerHTML=projects.filter(x=>x.workflow_status==="pending").map(x=>'<div class="panel"><strong>'+safe(x.name)+'</strong><p>تأییدکننده: '+safe(x.approver||"مشخص نشده")+'</p>'+(canApprove()?'<div class="actions"><button class="primary" data-decision="approved" data-id="'+x.id+'">تأیید</button><button class="danger" data-decision="rejected" data-id="'+x.id+'">برگشت</button></div>':"<p>فقط مدیر می‌تواند تصمیم بگیرد.</p>")+'</div>').join("")||"<p>پروژه‌ای در انتظار تأیید نیست.</p>";
+$("#approvalList").innerHTML=projects.filter(x=>x.workflow_status==="pending").map(x=>'<div class="panel"><strong>'+safe(x.name)+'</strong><p>تأییدکننده: '+safe(x.approver||"مشخص نشده")+'</p>'+(canDecide()?'<div class="actions"><button class="primary" data-decision="approved" data-id="'+x.id+'">تأیید</button><button class="danger" data-decision="rejected" data-id="'+x.id+'">برگشت</button></div>':"<p>فقط مدیر می‌تواند تصمیم بگیرد.</p>")+'</div>').join("")||"<p>پروژه‌ای در انتظار تأیید نیست.</p>";
 $("#publishDetails").innerHTML=p?'<strong>'+safe(p.name)+'</strong><p>وضعیت: '+status[st]+'</p>':"پروژه‌ای انتخاب نشده است.";
 $("#projectPermissionNotice").style.display=canEdit()?"none":"block";
 $("#requestApproval").disabled=!editable(p);
-$("#publishProject").disabled=!(canApprove()&&st==="approved");
-document.querySelectorAll("#charterForm button,#phaseForm button,#projectForm button").forEach(b=>b.disabled=!canEdit()||(b.closest("#projectForm")?false:!editable(p)));
+$("#publishProject").hidden=!canPublish();$("#publishProject").disabled=!(canPublish()&&st==="approved");
+document.querySelectorAll("#charterForm button,#phaseForm button,#projectForm button").forEach(b=>{const key=b.closest("#projectForm")?"create":b.closest("#phaseForm")?"schedule":"charter";b.hidden=!(canEdit()&&hasPermission(key));b.disabled=!canEdit()||!hasPermission(key)||(key==="create"?false:!editable(p))});
 $("#usersList").textContent=profile?(profile.is_approved?"حساب شما تأیید شده است.":"حساب شما هنوز توسط مدیر تأیید نشده است."):"برای مشاهده پروژه‌ها وارد شوید.";
 renderGantt(p?phases.filter(x=>x.project_id===p.id):[]);
 }
@@ -64,14 +71,18 @@ async function adminRequest(body){
  return result;
 }
 async function refreshAdminUsers(){
- const box=$("#adminUsers"),list=$("#usersList");
+ const box=$("#adminUsers"),list=$("#usersList"),loading=$("#usersLoading");
  box.style.display=canApprove()?"block":"none";
  if(!canApprove()){list.textContent=user?"فقط مدیر سامانه امکان مدیریت کاربران را دارد.":"ابتدا وارد شوید.";return}
- list.textContent="";
+ list.textContent="";loading.style.display="block";$("#usersTable").innerHTML="";
  try{
  const result=await adminRequest({action:"list"});
- $("#usersTable").innerHTML=result.users.map(u=>'<tr><td>'+safe(u.full_name||u.id)+'</td><td><select data-user-role="'+safe(u.id)+'" '+(u.is_admin?"disabled":"")+'><option value="responsible" '+(u.role==="responsible"?"selected":"")+'>کاربر عادی</option><option value="manager" '+(u.role==="manager"?"selected":"")+'>مدیر پروژه</option><option value="support" '+(u.role==="support"?"selected":"")+'>پشتیبان</option></select></td><td><input type="checkbox" data-user-approved="'+safe(u.id)+'" '+(u.is_approved?"checked":"")+' '+(u.is_admin?"disabled":"")+'></td><td>'+(u.is_admin?"مدیر سامانه":'<button type="button" data-save-user="'+safe(u.id)+'">ذخیره</button>')+'</td></tr>').join("");
- }catch(e){$("#userAdminStatus").textContent="خطا در دریافت کاربران: "+e.message}
+ $("#usersTable").innerHTML=result.users.map(u=>{
+ const defaults=k=>["home","center","charter","schedule","list"].includes(k)||(k==="create"&&u.role==="support");
+ const options=Object.entries(permissionLabels).filter(([k])=>k!=="users").map(([k,label])=>'<label><input type="checkbox" data-permission-user="'+safe(u.id)+'" data-permission-key="'+k+'" '+((u.permissions?.[k]??defaults(k))?"checked":"")+'>'+safe(label)+'</label>').join("");
+ return '<tr><td>'+safe(u.full_name?.trim()||"کاربر")+'</td><td>'+(u.is_admin?'مدیر سامانه':'<select data-user-role="'+safe(u.id)+'"><option value="responsible" '+(u.role==="responsible"?"selected":"")+'>کاربر عادی</option><option value="employer" '+(u.role==="employer"?"selected":"")+'>کارفرما</option><option value="support" '+(u.role==="support"?"selected":"")+'>پشتیبان</option></select>')+'</td><td><input type="checkbox" data-user-approved="'+safe(u.id)+'" '+(u.is_approved?"checked":"")+' '+(u.is_admin?"disabled":"")+'></td><td>'+(u.is_admin?'دسترسی کامل':'<details class="permissions-detail"><summary>تنظیم دسترسی‌ها</summary><div class="permission-grid">'+options+'</div></details>')+'</td><td>'+(u.is_admin?"مدیر سامانه":'<button type="button" data-save-user="'+safe(u.id)+'">ذخیره</button>')+'</td></tr>'
+ }).join("");
+ }catch(e){$("#userAdminStatus").textContent="خطا در دریافت کاربران: "+e.message}finally{loading.style.display="none"}
 }
 
 let jalaliTarget=null;
@@ -106,12 +117,12 @@ function initJalaliPicker(){
 document.addEventListener("DOMContentLoaded",async()=>{
 initJalaliPicker();
 document.addEventListener("click",async e=>{
-const nav=e.target.closest("[data-page],[data-jump]");if(nav){if(!user||!profile?.is_approved)return;show(nav.dataset.page||nav.dataset.jump);return}
+const nav=e.target.closest("[data-page],[data-jump]");if(nav){if(!user||!profile?.is_approved||!hasPermission(nav.dataset.page||nav.dataset.jump))return;show(nav.dataset.page||nav.dataset.jump);return}
 const open=e.target.closest("[data-open]");if(open){selected=Number(open.dataset.open);show("center");return}
-const dec=e.target.closest("[data-decision]");if(dec&&canApprove())await action(async()=>{await run(sb.from("projects").update({workflow_status:dec.dataset.decision}).eq("id",Number(dec.dataset.id)).eq("workflow_status","pending").select())});
+const dec=e.target.closest("[data-decision]");if(dec&&canDecide())await action(async()=>{await run(sb.from("projects").update({workflow_status:dec.dataset.decision}).eq("id",Number(dec.dataset.id)).eq("workflow_status","pending").select())});
 });
 $("#newUserForm").addEventListener("submit",async e=>{e.preventDefault();const msg=$("#userAdminStatus");msg.textContent="در حال ایجاد کاربر...";try{const v=Object.fromEntries(new FormData(e.target));await adminRequest({action:"create",...v});e.target.reset();msg.textContent="✓ کاربر با موفقیت ایجاد شد";await refreshAdminUsers()}catch(err){msg.textContent="خطا: "+err.message}});
-document.addEventListener("click",async e=>{const btn=e.target.closest("[data-save-user]");if(!btn)return;const id=btn.dataset.saveUser;const msg=$("#userAdminStatus");try{await adminRequest({action:"update",id,role:document.querySelector('[data-user-role="'+id+'"]').value,is_approved:document.querySelector('[data-user-approved="'+id+'"]').checked});msg.textContent="✓ دسترسی کاربر ذخیره شد";await refreshAdminUsers()}catch(err){msg.textContent="خطا: "+err.message}});
+document.addEventListener("click",async e=>{const btn=e.target.closest("[data-save-user]");if(!btn)return;const id=btn.dataset.saveUser;const msg=$("#userAdminStatus");try{await adminRequest({action:"update",id,role:document.querySelector('[data-user-role="'+id+'"]').value,is_approved:document.querySelector('[data-user-approved="'+id+'"]').checked});const permissions=Object.fromEntries([...document.querySelectorAll('[data-permission-user="'+id+'"]')].map(x=>[x.dataset.permissionKey,x.checked]));permissions.users=false;await adminRequest({action:"permissions",id,permissions});msg.textContent="✓ دسترسی کاربر ذخیره شد";await refreshAdminUsers()}catch(err){msg.textContent="خطا: "+err.message}});
 document.addEventListener("click",async e=>{
  const archive=e.target.closest("[data-archive-project]"),restore=e.target.closest("[data-restore-project]");
  if(!archive&&!restore)return;
@@ -152,13 +163,13 @@ $("#recoveryForm").addEventListener("submit",async e=>{
 });
 $("#loginForm").addEventListener("submit",async e=>{e.preventDefault();const f=e.target,msg=$("#authMessage"),button=f.querySelector('button[type="submit"]');if(button.disabled)return;msg.textContent="در حال بررسی اطلاعات ورود...";button.disabled=true;try{const {data,error}=await sb.auth.signInWithPassword({email:f.elements.username.value.trim(),password:f.elements.password.value});if(error)throw error;user=data.user;await load();if(!profile?.is_approved){msg.textContent="حساب شما هنوز توسط مدیر تأیید نشده است.";return}msg.textContent="";f.reset();show("home")}catch(err){fail(err)}finally{button.disabled=false}});
 $("#headerLogout").addEventListener("click",()=>action(async()=>{await run(sb.auth.signOut());user=null;selected=null;show("home")}));$("#headerLogin").addEventListener("click",()=>setAuthView("login"));
-$("#projectForm").addEventListener("submit",e=>{e.preventDefault();action(async()=>{if(!canEdit())throw Error("دسترسی ایجاد پروژه ندارید");const v=Object.fromEntries(new FormData(e.target));v.startDate=gregorianDate(v.startDate);v.endDate=gregorianDate(v.endDate);if(v.endDate<v.startDate)throw Error("تاریخ پایان نامعتبر است");const data=await run(sb.from("projects").insert({name:v.name,manager:v.manager,description:v.description,start_date:v.startDate,end_date:v.endDate,workflow_status:"draft"}).select("id").single());selected=data.id;e.target.reset();show("center")})});
+$("#projectForm").addEventListener("submit",e=>{e.preventDefault();action(async()=>{if(!canEdit()||!hasPermission("create"))throw Error("دسترسی ایجاد پروژه ندارید");const v=Object.fromEntries(new FormData(e.target));v.startDate=gregorianDate(v.startDate);v.endDate=gregorianDate(v.endDate);if(v.endDate<v.startDate)throw Error("تاریخ پایان نامعتبر است");const data=await run(sb.from("projects").insert({name:v.name,manager:v.manager,description:v.description,start_date:v.startDate,end_date:v.endDate,workflow_status:"draft"}).select("id").single());selected=data.id;e.target.reset();show("center")})});
 async function saveCharter(e){if(e)e.preventDefault();const notice=$("#charterStatus");notice.textContent="در حال ذخیره منشور...";try{const p=current();if(!p)throw Error("پروژه انتخاب نشده است");if(!editable(p))throw Error("برای ویرایش این پروژه دسترسی ندارید");const v=Object.fromEntries(new FormData($("#charterForm")));const saved=await run(sb.from("projects").update(v).eq("id",p.id).select("id"));if(!saved?.length)throw Error("سرور تغییر را ثبت نکرد");notice.textContent="✓ منشور با موفقیت در دیتابیس ذخیره شد";await load()}catch(err){notice.textContent="خطا در ذخیره: "+(err?.message||err);fail(err)}}
 $("#charterForm").addEventListener("submit",saveCharter);
 $("#saveCharterButton").addEventListener("click",saveCharter);
-$("#phaseForm").addEventListener("submit",e=>{e.preventDefault();action(async()=>{if(!editable(current()))throw Error("امکان ثبت مرحله وجود ندارد");const v=Object.fromEntries(new FormData(e.target));v.start=gregorianDate(v.start);v.end=gregorianDate(v.end);if(v.end<v.start)throw Error("تاریخ پایان نامعتبر است");await run(sb.from("project_phases").insert({project_id:selected,title:v.title,start_date:v.start,end_date:v.end}));e.target.reset()})});
-$("#requestApproval").addEventListener("click",()=>action(async()=>{const p=current();if(!editable(p)||!p.objective?.trim())throw Error("ابتدا منشور را ذخیره کنید");await run(sb.from("projects").update({workflow_status:"pending"}).eq("id",p.id).select())}));
-$("#publishProject").addEventListener("click",()=>action(async()=>{const p=current();if(!canApprove()||p?.workflow_status!=="approved")throw Error("تأیید مدیر لازم است");await run(sb.from("projects").update({workflow_status:"published"}).eq("id",p.id).select())}));
+$("#phaseForm").addEventListener("submit",e=>{e.preventDefault();action(async()=>{if(!editable(current())||!hasPermission("schedule"))throw Error("امکان ثبت مرحله وجود ندارد");const v=Object.fromEntries(new FormData(e.target));v.start=gregorianDate(v.start);v.end=gregorianDate(v.end);if(v.end<v.start)throw Error("تاریخ پایان نامعتبر است");await run(sb.from("project_phases").insert({project_id:selected,title:v.title,start_date:v.start,end_date:v.end}));e.target.reset()})});
+$("#requestApproval").addEventListener("click",()=>action(async()=>{const p=current();if(!hasPermission("charter")||!editable(p)||!p.objective?.trim())throw Error("ابتدا منشور را ذخیره کنید");await run(sb.from("projects").update({workflow_status:"pending"}).eq("id",p.id).select())}));
+$("#publishProject").addEventListener("click",()=>action(async()=>{const p=current();if(!canPublish()||p?.workflow_status!=="approved")throw Error("تأیید مدیر لازم است");await run(sb.from("projects").update({workflow_status:"published"}).eq("id",p.id).select())}));
 const banner=new Image();banner.onload=()=>document.querySelector(".auth-backdrop")?.classList.add("image-ready");banner.src="home-banner.png";try{const {data,error}=await sb.auth.getUser();if(error&&/invalid.*token|session.*missing/i.test(error.message||""))await sb.auth.signOut();user=data?.user||null;if(recoveryMode||new URLSearchParams(location.search).get("auth")==="recovery"){showRecovery();return}await load()}catch(e){user=null;profile=null;render();fail(e)}
 sb.auth.onAuthStateChange((event,session)=>{user=session?.user||null;if(event==="PASSWORD_RECOVERY"||new URLSearchParams(location.search).get("auth")==="recovery"){showRecovery();return}if(recoveryMode)return;setTimeout(()=>load().catch(fail),0)});
 });
