@@ -1,7 +1,7 @@
 (()=>{
 "use strict";
 const sb=window.supabase.createClient("https://xgrtcsudpqcznhlkberz.supabase.co","sb_publishable_kyEmcxiKYeNFgnPTBqnjqw_BxrCP7hu");
-let projects=[],archivedProjects=[],phases=[],profile=null,user=null,selected=null;
+let projects=[],archivedProjects=[],phases=[],profile=null,user=null,selected=null;let recoveryMode=false;
 const $=s=>document.querySelector(s),safe=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const faDigits=s=>String(s??"").replace(/[۰-۹]/g,x=>String("۰۱۲۳۴۵۶۷۸۹".indexOf(x))).replace(/[٠-٩]/g,x=>String("٠١٢٣٤٥٦٧٨٩".indexOf(x)));
 const fmt=new Intl.DateTimeFormat("en-US-u-ca-persian",{year:"numeric",month:"2-digit",day:"2-digit",timeZone:"UTC"});
@@ -30,7 +30,7 @@ function show(page){if(!user||!profile?.is_approved){document.getElementById("au
 function render(){
 if(!projects.some(p=>String(p.id)===String(selected)))selected=projects[0]?.id??null;
 const p=current(),st=p?.workflow_status||"draft";
-const authorized=!!(user&&profile?.is_approved);$("#userLabel").textContent=authorized?(profile.full_name||user.email):"";$("#adminNav").style.display=canApprove()?"block":"none";$("#headerLogout").style.display=authorized?"inline-block":"none";$("#headerLogin").style.display=authorized?"none":"inline-block";$("#authScreen").hidden=authorized;document.querySelector(".layout").style.visibility=authorized?"visible":"hidden";document.querySelector("header").style.visibility=authorized?"visible":"hidden";if(user&&!authorized)$("#authMessage").textContent="حساب شما هنوز تأیید نشده است.";else if(!user)$("#authMessage").textContent="";if(!authorized){document.querySelectorAll(".page").forEach(x=>x.classList.toggle("active",x.id==="home"));document.querySelectorAll(".nav").forEach(x=>x.classList.toggle("active",x.dataset.page==="home"))}
+const authorized=!!(!recoveryMode&&user&&profile?.is_approved);$("#userLabel").textContent=authorized?(profile.full_name||user.email):"";$("#adminNav").style.display=canApprove()?"block":"none";$("#headerLogout").style.display=authorized?"inline-block":"none";$("#headerLogin").style.display=authorized?"none":"inline-block";$("#authScreen").hidden=authorized;document.querySelector(".layout").style.visibility=authorized?"visible":"hidden";document.querySelector("header").style.visibility=authorized?"visible":"hidden";if(user&&!authorized&&!recoveryMode)$("#authMessage").textContent="حساب شما هنوز تأیید نشده است.";else if(!user&&!recoveryMode)$("#authMessage").textContent="";if(!authorized){document.querySelectorAll(".page").forEach(x=>x.classList.toggle("active",x.id==="home"));document.querySelectorAll(".nav").forEach(x=>x.classList.toggle("active",x.dataset.page==="home"))}
 $("#selectedProject").innerHTML=projects.map(x=>'<option value="'+x.id+'">'+safe(x.name)+'</option>').join("");
 if(p)$("#selectedProject").value=String(p.id);
 $("#stats").innerHTML=[["کل پروژه‌ها",projects.length],["منتشرشده",projects.filter(x=>x.workflow_status==="published").length],["در انتظار تأیید",projects.filter(x=>x.workflow_status==="pending").length],["پیش‌نویس",projects.filter(x=>x.workflow_status==="draft").length]].map(([a,b])=>'<div class="metric"><span>'+a+'</span><strong>'+b+'</strong></div>').join("");
@@ -128,48 +128,30 @@ document.addEventListener("click",async e=>{
  }catch(err){fail(err)}
 });
 $("#selectedProject").addEventListener("change",e=>{selected=Number(e.target.value);render()});
-let recoveryMode=false;
-function showRecovery(){
- recoveryMode=true;
- $("#recoveryPanel").style.display="block";
- $("#authScreen").hidden=false;
- $("#recoveryPanel").scrollIntoView({behavior:"smooth",block:"start"});
-}
-const recoveryLink=location.hash.includes("type=recovery")||new URLSearchParams(location.search).get("type")==="recovery";
+function setAuthView(view){for(const [name,id] of Object.entries({login:"authLoginView",forgot:"authForgotView",reset:"authResetView"}))$("#"+id).hidden=name!==view;$("#authScreen").hidden=false;document.querySelector("header").style.visibility="hidden";document.querySelector(".layout").style.visibility="hidden";document.documentElement.style.overflow="hidden";window.scrollTo(0,0)}
+function showRecovery(){recoveryMode=true;setAuthView("reset");$("#recoveryStatus").textContent=""}
+const recoveryLink=location.hash.includes("type=recovery")||new URLSearchParams(location.search).get("type")==="recovery"||location.hash.includes("access_token=")&&location.hash.includes("recovery");
 if(recoveryLink)showRecovery();
+$("#forgotToggle").addEventListener("click",()=>setAuthView("forgot"));
+document.querySelectorAll("[data-auth-back]").forEach(x=>x.addEventListener("click",()=>setAuthView("login")));
+$("#resetCancel").addEventListener("click",async()=>{recoveryMode=false;await sb.auth.signOut();user=null;profile=null;history.replaceState(null,"",location.pathname);setAuthView("login");render()});
 $("#forgotPasswordForm").addEventListener("submit",async e=>{
  e.preventDefault();const status=$("#forgotPasswordStatus");status.textContent="در حال ارسال...";
- try{
-  const email=e.target.elements.email.value.trim();
-  const {error}=await sb.auth.resetPasswordForEmail(email,{redirectTo:location.origin+location.pathname});
-  if(error)throw error;
-  status.textContent="اگر ایمیل در سامانه ثبت شده باشد، لینک بازیابی ارسال می‌شود. پوشه Spam را هم بررسی کنید.";
- }catch(err){status.textContent="خطا: "+(err.message||err)}
+ try{const email=e.target.elements.email.value.trim();const {error}=await sb.auth.resetPasswordForEmail(email,{redirectTo:location.origin+location.pathname+"?auth=recovery"});if(error)throw error;status.textContent="اگر ایمیل در سامانه ثبت شده باشد، لینک بازیابی ارسال می‌شود. پوشه Spam را هم بررسی کنید."}catch(err){status.textContent="خطا: "+(err.message||err)}
 });
 $("#recoveryForm").addEventListener("submit",async e=>{
- e.preventDefault();const status=$("#recoveryStatus");
+ e.preventDefault();const status=$("#recoveryStatus"),button=e.target.querySelector('button[type="submit"]');
  const p=e.target.elements.newPassword.value,confirm=e.target.elements.confirmPassword.value;
  if(p!==confirm){status.textContent="رمزها یکسان نیستند.";return}
  if(p.length<8){status.textContent="رمز باید حداقل ۸ کاراکتر باشد.";return}
- status.textContent="در حال ذخیره رمز...";
- try{
-  const {data:{session},error:sessionError}=await sb.auth.getSession();
-  if(sessionError)throw sessionError;
-  if(!session)throw Error("لینک بازیابی معتبر نیست یا منقضی شده. لینک جدید دریافت کنید.");
-  const {error}=await sb.auth.updateUser({password:p});
-  if(error)throw error;
-  status.textContent="رمز جدید با موفقیت ثبت شد. حالا می‌توانید با آن وارد شوید.";
-  recoveryMode=false;
-  e.target.reset();
-  await sb.auth.signOut();
-  user=null;await load();
-  location.hash="";
-  $("#recoveryPanel").style.display="none";
-  alert("رمز جدید ثبت شد. اکنون با ایمیل و رمز جدید وارد شوید.");
- }catch(err){status.textContent="خطا: "+(err.message||err)}
+ status.textContent="در حال ذخیره رمز...";button.disabled=true;
+ try{const {data:{session},error:sessionError}=await sb.auth.getSession();if(sessionError)throw sessionError;if(!session)throw Error("لینک بازیابی معتبر نیست یا منقضی شده. لینک جدید دریافت کنید.");
+ const {error}=await sb.auth.updateUser({password:p});if(error)throw error;
+ e.target.reset();recoveryMode=false;await sb.auth.signOut();user=null;profile=null;history.replaceState(null,"",location.pathname);setAuthView("login");$("#authMessage").textContent="رمز جدید ثبت شد. حالا با رمز جدید وارد شوید.";render();
+ }catch(err){status.textContent="خطا: "+(err.message||err)}finally{button.disabled=false}
 });
 $("#loginForm").addEventListener("submit",async e=>{e.preventDefault();const f=e.target,msg=$("#authMessage"),button=f.querySelector('button[type="submit"]');if(button.disabled)return;msg.textContent="در حال بررسی اطلاعات ورود...";button.disabled=true;try{const {data,error}=await sb.auth.signInWithPassword({email:f.elements.username.value.trim(),password:f.elements.password.value});if(error)throw error;user=data.user;await load();if(!profile?.is_approved){msg.textContent="حساب شما هنوز توسط مدیر تأیید نشده است.";return}msg.textContent="";f.reset();show("home")}catch(err){fail(err)}finally{button.disabled=false}});
-$("#headerLogout").addEventListener("click",()=>action(async()=>{await run(sb.auth.signOut());user=null;selected=null;show("home")}));$("#headerLogin").addEventListener("click",()=>{$("#authScreen").hidden=false});$("#forgotToggle").addEventListener("click",()=>{$("#authRecovery").classList.toggle("show-forgot")});
+$("#headerLogout").addEventListener("click",()=>action(async()=>{await run(sb.auth.signOut());user=null;selected=null;show("home")}));$("#headerLogin").addEventListener("click",()=>setAuthView("login"));
 $("#projectForm").addEventListener("submit",e=>{e.preventDefault();action(async()=>{if(!canEdit())throw Error("دسترسی ایجاد پروژه ندارید");const v=Object.fromEntries(new FormData(e.target));v.startDate=gregorianDate(v.startDate);v.endDate=gregorianDate(v.endDate);if(v.endDate<v.startDate)throw Error("تاریخ پایان نامعتبر است");const data=await run(sb.from("projects").insert({name:v.name,manager:v.manager,description:v.description,start_date:v.startDate,end_date:v.endDate,workflow_status:"draft"}).select("id").single());selected=data.id;e.target.reset();show("center")})});
 async function saveCharter(e){if(e)e.preventDefault();const notice=$("#charterStatus");notice.textContent="در حال ذخیره منشور...";try{const p=current();if(!p)throw Error("پروژه انتخاب نشده است");if(!editable(p))throw Error("برای ویرایش این پروژه دسترسی ندارید");const v=Object.fromEntries(new FormData($("#charterForm")));const saved=await run(sb.from("projects").update(v).eq("id",p.id).select("id"));if(!saved?.length)throw Error("سرور تغییر را ثبت نکرد");notice.textContent="✓ منشور با موفقیت در دیتابیس ذخیره شد";await load()}catch(err){notice.textContent="خطا در ذخیره: "+(err?.message||err);fail(err)}}
 $("#charterForm").addEventListener("submit",saveCharter);
@@ -177,7 +159,7 @@ $("#saveCharterButton").addEventListener("click",saveCharter);
 $("#phaseForm").addEventListener("submit",e=>{e.preventDefault();action(async()=>{if(!editable(current()))throw Error("امکان ثبت مرحله وجود ندارد");const v=Object.fromEntries(new FormData(e.target));v.start=gregorianDate(v.start);v.end=gregorianDate(v.end);if(v.end<v.start)throw Error("تاریخ پایان نامعتبر است");await run(sb.from("project_phases").insert({project_id:selected,title:v.title,start_date:v.start,end_date:v.end}));e.target.reset()})});
 $("#requestApproval").addEventListener("click",()=>action(async()=>{const p=current();if(!editable(p)||!p.objective?.trim())throw Error("ابتدا منشور را ذخیره کنید");await run(sb.from("projects").update({workflow_status:"pending"}).eq("id",p.id).select())}));
 $("#publishProject").addEventListener("click",()=>action(async()=>{const p=current();if(!canApprove()||p?.workflow_status!=="approved")throw Error("تأیید مدیر لازم است");await run(sb.from("projects").update({workflow_status:"published"}).eq("id",p.id).select())}));
-const banner=new Image();banner.onload=()=>document.querySelector(".auth-backdrop")?.classList.add("image-ready");banner.src="home-banner.png";try{const {data,error}=await sb.auth.getUser();if(error&&/invalid.*token|session.*missing/i.test(error.message||""))await sb.auth.signOut();user=data?.user||null;await load()}catch(e){user=null;profile=null;render();fail(e)}
-sb.auth.onAuthStateChange((event,session)=>{user=session?.user||null;if(event==="PASSWORD_RECOVERY"){setTimeout(showRecovery,0)}setTimeout(()=>load().catch(fail),0)});
+const banner=new Image();banner.onload=()=>document.querySelector(".auth-backdrop")?.classList.add("image-ready");banner.src="home-banner.png";try{const {data,error}=await sb.auth.getUser();if(error&&/invalid.*token|session.*missing/i.test(error.message||""))await sb.auth.signOut();user=data?.user||null;if(recoveryMode||new URLSearchParams(location.search).get("auth")==="recovery"){showRecovery();return}await load()}catch(e){user=null;profile=null;render();fail(e)}
+sb.auth.onAuthStateChange((event,session)=>{user=session?.user||null;if(event==="PASSWORD_RECOVERY"||new URLSearchParams(location.search).get("auth")==="recovery"){showRecovery();return}if(recoveryMode)return;setTimeout(()=>load().catch(fail),0)});
 });
 })();
