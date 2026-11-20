@@ -16,9 +16,9 @@ const canApprove=()=>profile?.is_approved&&profile.is_admin;
 function fail(e){alert("خطا: "+(e?.message||String(e)))}
 async function run(promise){const {data,error}=await promise;if(error)throw error;return data}
 async function load(){
-if(!user){projects=[];phases=[];profile=null;render();return}
+if(!user){projects=[];archivedProjects=[];phases=[];profile=null;render();return}
 profile=await run(sb.from("user_profiles").select("id,full_name,role,is_approved,is_admin").eq("id",user.id).maybeSingle());
-if(!profile?.is_approved){projects=[];phases=[];render();return}
+if(!profile?.is_approved){projects=[];archivedProjects=[];phases=[];render();return}
 const allProjects=await run(sb.from("projects").select("*").order("id",{ascending:false}));
 projects=allProjects.filter(p=>!p.deleted_at);
 archivedProjects=canApprove()?allProjects.filter(p=>!!p.deleted_at):[];
@@ -26,15 +26,15 @@ phases=await run(sb.from("project_phases").select("*"));
 render();
 if(document.querySelector(".page#users.active"))refreshAdminUsers();
 }
-function show(page){document.querySelectorAll(".page").forEach(e=>e.classList.toggle("active",e.id===page));document.querySelectorAll(".nav").forEach(e=>e.classList.toggle("active",e.dataset.page===page));render();if(page==="users")refreshAdminUsers();window.scrollTo(0,0)}
+function show(page){if(!user||!profile?.is_approved){document.getElementById("authScreen").hidden=false;return}if(page==="users"&&!canApprove())page="home";document.querySelectorAll(".page").forEach(e=>e.classList.toggle("active",e.id===page));document.querySelectorAll(".nav").forEach(e=>e.classList.toggle("active",e.dataset.page===page));render();if(page==="users")refreshAdminUsers();window.scrollTo(0,0)}
 function render(){
 if(!projects.some(p=>String(p.id)===String(selected)))selected=projects[0]?.id??null;
 const p=current(),st=p?.workflow_status||"draft";
-$("#userLabel").textContent=user?(profile?.is_approved?(profile.full_name||user.email):"در انتظار تأیید حساب"):"وارد نشده‌اید";
+const authorized=!!(user&&profile?.is_approved);$("#userLabel").textContent=authorized?(profile.full_name||user.email):"";$("#adminNav").style.display=canApprove()?"block":"none";$("#headerLogout").style.display=authorized?"inline-block":"none";$("#headerLogin").style.display=authorized?"none":"inline-block";$("#authScreen").hidden=authorized;document.querySelector(".layout").style.visibility=authorized?"visible":"hidden";document.querySelector("header").style.visibility=authorized?"visible":"hidden";if(user&&!authorized)$("#authMessage").textContent="حساب شما هنوز تأیید نشده است.";else if(!user)$("#authMessage").textContent="";if(!authorized){document.querySelectorAll(".page").forEach(x=>x.classList.toggle("active",x.id==="home"));document.querySelectorAll(".nav").forEach(x=>x.classList.toggle("active",x.dataset.page==="home"))}
 $("#selectedProject").innerHTML=projects.map(x=>'<option value="'+x.id+'">'+safe(x.name)+'</option>').join("");
 if(p)$("#selectedProject").value=String(p.id);
 $("#stats").innerHTML=[["کل پروژه‌ها",projects.length],["منتشرشده",projects.filter(x=>x.workflow_status==="published").length],["در انتظار تأیید",projects.filter(x=>x.workflow_status==="pending").length],["پیش‌نویس",projects.filter(x=>x.workflow_status==="draft").length]].map(([a,b])=>'<div class="metric"><span>'+a+'</span><strong>'+b+'</strong></div>').join("");
-$("#projectDetails").innerHTML=p?'<h3>'+safe(p.name)+'</h3><p>مدیر: '+safe(p.manager||"—")+'</p><p>شرح: '+safe(p.description||"—")+'</p><p>شروع: '+displayDate(p.start_date)+' | پایان: '+displayDate(p.end_date)+'</p><span class="badge">'+status[st]+'</span><div class="actions"><button class="primary" data-jump="charter">منشور</button><button class="secondary" data-jump="schedule">گانت</button><button class="secondary" data-jump="publish">انتشار</button></div>':"<p>پروژه‌ای وجود ندارد یا هنوز وارد نشده‌اید.</p>";
+const recent=$("#recentProjects");if(recent)recent.innerHTML=projects.slice(0,5).map(x=>'<tr><td>'+safe(x.name)+'</td><td><span class="badge">'+safe(status[x.workflow_status]||x.workflow_status)+'</span></td><td>'+safe(x.manager||"—")+'</td><td>'+displayDate(x.start_date)+'</td><td><button data-open="'+x.id+'">مشاهده</button></td></tr>').join("")||'<tr><td colspan="5">هنوز پروژه‌ای ثبت نشده است.</td></tr>';const total=projects.length;const breakdown=[["منتشرشده",projects.filter(x=>x.workflow_status==="published").length,"#28734f"],["در انتظار تأیید",projects.filter(x=>x.workflow_status==="pending").length,"#d6a83a"],["در حال اجرا",projects.filter(x=>["draft","approved"].includes(x.workflow_status)).length,"#4c876e"],["برگشت‌خورده",projects.filter(x=>x.workflow_status==="rejected").length,"#c4654c"]];$("#statusTotal").textContent=total.toLocaleString("fa-IR");$("#statusLegend").innerHTML=breakdown.map(([name,count,color])=>'<div><span class="status-dot" style="background:'+color+'"></span>'+name+': '+count.toLocaleString("fa-IR")+'</div>').join("");let angle=0;const segments=breakdown.map(([name,count,color])=>{const from=angle;angle+=total?count/total*360:0;return color+" "+from+"deg "+angle+"deg"});$("#statusRing").style.background=total?"conic-gradient("+segments.join(",")+")":"#e5e0d9";$("#projectDetails").innerHTML=p?'<h3>'+safe(p.name)+'</h3><p>مدیر: '+safe(p.manager||"—")+'</p><p>شرح: '+safe(p.description||"—")+'</p><p>شروع: '+displayDate(p.start_date)+' | پایان: '+displayDate(p.end_date)+'</p><span class="badge">'+status[st]+'</span><div class="actions"><button class="primary" data-jump="charter">منشور</button><button class="secondary" data-jump="schedule">گانت</button><button class="secondary" data-jump="publish">انتشار</button></div>':"<p>پروژه‌ای وجود ندارد یا هنوز وارد نشده‌اید.</p>";
 const cf=$("#charterForm");["objective","scope","deliverables","stakeholders","approver"].forEach(k=>cf.elements[k].value=p?.[k]||"");
 $("#trashList").innerHTML=canApprove()?(archivedProjects.map(x=>'<tr><td>'+safe(x.name)+'</td><td>'+safe(new Date(x.deleted_at).toLocaleDateString("fa-IR"))+'</td><td><button data-restore-project="'+x.id+'">بازیابی</button></td></tr>').join("")||'<tr><td colspan="3">پروژه حذف‌شده‌ای وجود ندارد.</td></tr>'):'<tr><td colspan="3">فقط مدیر سامانه دسترسی دارد.</td></tr>';
 $("#projectList").innerHTML=projects.map(x=>'<tr><td>'+safe(x.name)+'</td><td>'+safe(x.manager||"—")+'</td><td>'+displayDate(x.start_date)+'</td><td>'+displayDate(x.end_date)+'</td><td><span class="badge">'+status[x.workflow_status]+'</span></td><td><button data-open="'+x.id+'">مشاهده</button>'+(canApprove()?'<button class="danger" type="button" data-archive-project="'+x.id+'" style="margin-inline-start:8px">حذف</button>':'')+'</td></tr>').join("")||'<tr><td colspan="6">پروژه‌ای وجود ندارد.</td></tr>';
@@ -106,7 +106,7 @@ function initJalaliPicker(){
 document.addEventListener("DOMContentLoaded",async()=>{
 initJalaliPicker();
 document.addEventListener("click",async e=>{
-const nav=e.target.closest("[data-page],[data-jump]");if(nav){show(nav.dataset.page||nav.dataset.jump);return}
+const nav=e.target.closest("[data-page],[data-jump]");if(nav){if(!user||!profile?.is_approved)return;show(nav.dataset.page||nav.dataset.jump);return}
 const open=e.target.closest("[data-open]");if(open){selected=Number(open.dataset.open);show("center");return}
 const dec=e.target.closest("[data-decision]");if(dec&&canApprove())await action(async()=>{await run(sb.from("projects").update({workflow_status:dec.dataset.decision}).eq("id",Number(dec.dataset.id)).eq("workflow_status","pending").select())});
 });
@@ -132,7 +132,7 @@ let recoveryMode=false;
 function showRecovery(){
  recoveryMode=true;
  $("#recoveryPanel").style.display="block";
- show("users");
+ $("#authScreen").hidden=false;
  $("#recoveryPanel").scrollIntoView({behavior:"smooth",block:"start"});
 }
 const recoveryLink=location.hash.includes("type=recovery")||new URLSearchParams(location.search).get("type")==="recovery";
@@ -168,8 +168,8 @@ $("#recoveryForm").addEventListener("submit",async e=>{
   alert("رمز جدید ثبت شد. اکنون با ایمیل و رمز جدید وارد شوید.");
  }catch(err){status.textContent="خطا: "+(err.message||err)}
 });
-$("#loginForm").addEventListener("submit",e=>{e.preventDefault();action(async()=>{const f=e.target;const {data,error}=await sb.auth.signInWithPassword({email:f.elements.username.value.trim(),password:f.elements.password.value});if(error)throw error;user=data.user})});
-$("#logout").addEventListener("click",()=>action(async()=>{await run(sb.auth.signOut());user=null;selected=null}));
+$("#loginForm").addEventListener("submit",e=>{e.preventDefault();const f=e.target;const msg=$("#authMessage");msg.textContent="در حال ورود...";action(async()=>{const {data,error}=await sb.auth.signInWithPassword({email:f.elements.username.value.trim(),password:f.elements.password.value});if(error)throw error;user=data.user;msg.textContent="";f.reset()})});
+$("#headerLogout").addEventListener("click",()=>action(async()=>{await run(sb.auth.signOut());user=null;selected=null;show("home")}));$("#headerLogin").addEventListener("click",()=>{$("#authScreen").hidden=false});$("#forgotToggle").addEventListener("click",()=>{$("#authRecovery").classList.toggle("show-forgot")});
 $("#projectForm").addEventListener("submit",e=>{e.preventDefault();action(async()=>{if(!canEdit())throw Error("دسترسی ایجاد پروژه ندارید");const v=Object.fromEntries(new FormData(e.target));v.startDate=gregorianDate(v.startDate);v.endDate=gregorianDate(v.endDate);if(v.endDate<v.startDate)throw Error("تاریخ پایان نامعتبر است");const data=await run(sb.from("projects").insert({name:v.name,manager:v.manager,description:v.description,start_date:v.startDate,end_date:v.endDate,workflow_status:"draft"}).select("id").single());selected=data.id;e.target.reset();show("center")})});
 async function saveCharter(e){if(e)e.preventDefault();const notice=$("#charterStatus");notice.textContent="در حال ذخیره منشور...";try{const p=current();if(!p)throw Error("پروژه انتخاب نشده است");if(!editable(p))throw Error("برای ویرایش این پروژه دسترسی ندارید");const v=Object.fromEntries(new FormData($("#charterForm")));const saved=await run(sb.from("projects").update(v).eq("id",p.id).select("id"));if(!saved?.length)throw Error("سرور تغییر را ثبت نکرد");notice.textContent="✓ منشور با موفقیت در دیتابیس ذخیره شد";await load()}catch(err){notice.textContent="خطا در ذخیره: "+(err?.message||err);fail(err)}}
 $("#charterForm").addEventListener("submit",saveCharter);
