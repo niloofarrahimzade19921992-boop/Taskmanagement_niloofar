@@ -83,6 +83,10 @@
                 داشبورد و گزارشات
             </button>
 
+            <button class="menu-item" data-section="project-center"><span>▣</span> مرکز پروژه</button>
+            <button class="menu-item" data-section="project-list"><span>☷</span> فهرست پروژه‌ها</button>
+            <button class="menu-item" data-section="project-approvals"><span>◎</span> تأیید و انتشار پروژه</button>
+            <button class="menu-item" data-section="project-users"><span>♙</span> ورود و کاربران</button>
             <button class="menu-item" data-section="projects">
                 <span>▣</span>
                 ایجاد پروژه
@@ -1463,7 +1467,10 @@
 
 
 
-<section id="workflow" class="page-section">
+<section id="project-center" class="page-section"><div class="page-title"><div><span class="eyebrow">PROJECT WORKSPACE</span><h2>مرکز پروژه</h2><p>منشور، زمان‌بندی، تأیید و انتشار در یک نمای پروژه‌محور</p></div></div><div class="panel hub-toolbar"><label>پروژه <select id="hubProject"></select></label><button id="hubRefresh" class="outline-btn">به‌روزرسانی فهرست</button><button class="primary-btn" data-go="projects" onclick="document.querySelector('[data-section=projects]').click()">+ ایجاد پروژه</button></div><div id="hubDetails"></div><div class="panel"><h3>منشور پروژه</h3><form id="hubCharter" class="hub-form"><label>هدف پروژه<textarea name="objective" required></textarea></label><label>محدوده پروژه<textarea name="scope"></textarea></label><label>اقلام تحویلی<textarea name="deliverables"></textarea></label><label>مدیر تأییدکننده<input name="managerApproval" placeholder="نام مدیر"></label><button class="primary-btn" type="submit">ذخیره منشور</button></form></div><div class="panel hub-actions"><h3>گردش تأیید و انتشار</h3><button id="hubRequestApproval" class="outline-btn">ارسال برای تأیید مدیر</button><button id="hubPublish" class="primary-btn">انتشار پروژه تأییدشده</button><p id="hubNotice"></p></div><div class="panel"><h3>زمان‌بندی پروژه (نمای گانت وظایف)</h3><div id="hubGantt"></div></div></section>
+<section id="project-list" class="page-section"><div class="page-title"><h2>فهرست پروژه‌ها</h2></div><div class="panel hub-overflow"><table class="hub-table"><thead><tr><th>پروژه</th><th>مدیر</th><th>وضعیت</th><th>جزئیات</th></tr></thead><tbody id="hubList"></tbody></table></div></section>
+<section id="project-approvals" class="page-section"><div class="page-title"><h2>کارتابل تأیید پروژه‌ها</h2></div><div class="panel" id="hubProjectApprovals"></div></section>
+<section id="project-users" class="page-section"><div class="page-title"><h2>کاربران و ورود نمایشی</h2></div><div class="panel"><h3>ورود نمایشی</h3><form id="hubLogin" class="hub-inline"><input name="username" placeholder="نام کاربری نمایشی" required><button class="primary-btn">ورود</button></form><p id="hubCurrentUser"></p><p>برای استفاده سازمانی، احراز هویت و مجوزها باید در سرور پیاده‌سازی شوند.</p></div><div class="panel"><h3>فهرست کاربران نمایشی</h3><form id="hubUsers" class="hub-inline"><input name="person" placeholder="نام کاربر" required><button class="primary-btn">افزودن</button></form><p id="hubUsersList"></p></div></section>\n<section id="workflow" class="page-section">
  <div class="page-title"><div><span class="eyebrow">TASK WORKFLOW · DEMO</span><h2>کارتابل‌های گردش وظیفه</h2><p>مراحل فرآیند وظیفه، از تعریف تا تأیید و خاتمه — نسخه نمایشی برای تست مدیر</p></div></div>
  <div class="wf-toolbar panel"><label>نقش آزمایشی <select id="wfRole"><option value="support">پشتیبان</option><option value="executor">متولی</option><option value="owner">کارفرما</option></select></label><span>نقش فعال: <strong id="wfRoleLabel">پشتیبان</strong></span><button class="outline-btn" id="wfExport">خروجی JSON</button><label class="wf-upload">بازیابی JSON <input id="wfImport" type="file" accept=".json,application/json" hidden></label></div>
  <div id="wfStats" class="wf-stats"></div>
@@ -1490,7 +1497,7 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="script.js"></script>
 <script src="workflow.js"></script>
-<script src="reminders.js"></script>
+<script src="reminders.js"></script>\n<script src="project-hub.js"></script>
 
 </body>
 </html>
