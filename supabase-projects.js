@@ -54,12 +54,32 @@ document.querySelectorAll("#charterForm button,#phaseForm button,#projectForm bu
 $("#usersList").textContent=profile?(profile.is_approved?"حساب شما تأیید شده است.":"حساب شما هنوز توسط مدیر تأیید نشده است."):"برای مشاهده پروژه‌ها وارد شوید.";
 renderGantt(p?phases.filter(x=>x.project_id===p.id):[]);
 }
+let ganttCurrentItems=[],ganttScale="week";
+function ganttUtcDay(value){return Math.floor(Date.parse(String(value).slice(0,10)+"T00:00:00Z")/86400000)}
+function ganttDayLabel(day){return displayDate(new Date(day*86400000).toISOString().slice(0,10))}
 function renderGantt(items){
-if(!items.length){$("#gantt").innerHTML="<p>مرحله‌ای ثبت نشده است.</p>";return}
-const times=items.flatMap(x=>[Date.parse(x.start_date),Date.parse(x.end_date)]).filter(Number.isFinite);
-const min=Math.min(...times),max=Math.max(...times),span=Math.max(86400000,max-min);
-$("#gantt").innerHTML=items.map(x=>{const left=Math.max(0,(Date.parse(x.start_date)-min)/span*100),width=Math.max(1,(Date.parse(x.end_date)-Date.parse(x.start_date))/span*100);return '<div class="gantt-row"><div>'+safe(x.title)+'<br><small>'+displayDate(x.start_date)+' تا '+displayDate(x.end_date)+'</small></div><div class="track"><div class="bar" style="right:'+left+'%;width:'+Math.min(width,100-left)+'%"></div></div></div>'}).join("");
+ ganttCurrentItems=items;
+ const valid=items.filter(x=>Number.isFinite(ganttUtcDay(x.start_date))&&Number.isFinite(ganttUtcDay(x.end_date))).sort((a,b)=>ganttUtcDay(a.start_date)-ganttUtcDay(b.start_date));
+ const start=valid.length?Math.min(...valid.map(x=>ganttUtcDay(x.start_date))):null;
+ const end=valid.length?Math.max(...valid.map(x=>ganttUtcDay(x.end_date))):null;
+ $("#ganttCount").textContent=valid.length.toLocaleString("fa-IR");
+ $("#ganttStart").textContent=start===null?"—":ganttDayLabel(start);
+ $("#ganttEnd").textContent=end===null?"—":ganttDayLabel(end);
+ $("#ganttDuration").textContent=start===null?"—":(end-start+1).toLocaleString("fa-IR")+" روز";
+ $("#ganttToggleForm").hidden=!(canEdit()&&hasPermission("schedule"));
+ if(!valid.length){$("#gantt").innerHTML='<div class="gantt-empty"><div class="gantt-empty-icon">▥</div><strong>هنوز مرحله‌ای برای این پروژه ثبت نشده است</strong><span>برای ساخت زمان‌بندی، یک مرحله با تاریخ شروع و پایان اضافه کنید.</span></div>';$("#ganttDetail").hidden=true;return}
+ const today=Math.floor(Date.now()/86400000),step=ganttScale==="month"?30:7;
+ const low=Math.floor((Math.min(start,today)-step)/step)*step,high=Math.ceil((Math.max(end,today)+step)/step)*step;
+ const days=high-low,pxPerDay=ganttScale==="month"?6:16,trackWidth=Math.max(620,days*pxPerDay);
+ const tickCount=Math.ceil(days/step),tickWidth=trackWidth*step/days;
+ const todayLeft=(today-low)/days*100;
+ const tickLabels=Array.from({length:tickCount},(_,i)=>'<div class="gantt-axis-tick" style="width:'+tickWidth+'px;flex:none">'+safe(ganttDayLabel(low+i*step))+'</div>').join("");
+ const axis='<div class="gantt-axis"><div class="gantt-stage-label">مراحل پروژه</div><div class="gantt-axis-track" style="width:'+trackWidth+'px">'+tickLabels+'<div class="gantt-today-line" style="right:'+todayLeft+'%"></div></div></div>';
+ const rows=valid.map((x,i)=>{const s=ganttUtcDay(x.start_date),e=ganttUtcDay(x.end_date),left=(s-low)/days*100,width=Math.max(.4,(e-s+1)/days*100),color=e<today?"#b56e4d":s<=today?"#b18a42":"#31745d";return '<div class="gantt-stage-row"><div class="gantt-stage-label"><strong>'+safe(x.title)+'</strong><small>'+safe(displayDate(x.start_date))+' — '+safe(displayDate(x.end_date))+'</small></div><div class="gantt-stage-track" style="width:'+trackWidth+'px;--gantt-tick-size:'+tickWidth+'px"><button type="button" class="gantt-task-bar" data-gantt-index="'+i+'" title="'+safe(x.title)+' | '+safe(displayDate(x.start_date))+' تا '+safe(displayDate(x.end_date))+'" style="right:'+left+'%;width:'+width+'%;background:'+color+'">'+safe(x.title)+'</button><div class="gantt-today-line" style="right:'+todayLeft+'%"></div></div></div>'}).join("");
+ $("#gantt").innerHTML=axis+rows;$("#gantt").dataset.sorted="1";$("#ganttDetail").hidden=true;
+ $("#gantt")._sortedItems=valid;
 }
+
 async function action(fn,successMessage){try{await fn();await load();if(successMessage)alert(successMessage)}catch(e){fail(e)}}
 
 async function adminRequest(body){
@@ -195,6 +215,11 @@ $("#projectForm").addEventListener("submit",e=>{e.preventDefault();action(async(
 async function saveCharter(e){if(e)e.preventDefault();const notice=$("#charterStatus");notice.textContent="در حال ذخیره منشور...";try{const p=current();if(!p)throw Error("پروژه انتخاب نشده است");if(!editable(p))throw Error("برای ویرایش این پروژه دسترسی ندارید");const v=Object.fromEntries(new FormData($("#charterForm")));const saved=await run(sb.from("projects").update(v).eq("id",p.id).select("id"));if(!saved?.length)throw Error("سرور تغییر را ثبت نکرد");notice.textContent="✓ منشور با موفقیت در دیتابیس ذخیره شد";await load()}catch(err){notice.textContent="خطا در ذخیره: "+(err?.message||err);fail(err)}}
 $("#charterForm").addEventListener("submit",saveCharter);
 $("#saveCharterButton").addEventListener("click",saveCharter);
+$("#ganttToggleForm").addEventListener("click",()=>{$("#ganttEditor").hidden=!$("#ganttEditor").hidden;if(!$("#ganttEditor").hidden)$("#ganttEditor").scrollIntoView({behavior:"smooth",block:"nearest"})});
+$("#ganttCloseForm").addEventListener("click",()=>$("#ganttEditor").hidden=true);
+$("#ganttScale").addEventListener("change",e=>{ganttScale=e.target.value;renderGantt(ganttCurrentItems)});
+$("#ganttToday").addEventListener("click",()=>{const scroller=$("#ganttScroll"),line=$("#gantt .gantt-today-line");if(line){const x=line.getBoundingClientRect().left-scroller.getBoundingClientRect().left+scroller.scrollLeft;scroller.scrollTo({left:Math.max(0,x-scroller.clientWidth/2),behavior:"smooth"})}});
+$("#gantt").addEventListener("click",e=>{const btn=e.target.closest("[data-gantt-index]");if(!btn)return;const x=$("#gantt")._sortedItems?.[Number(btn.dataset.ganttIndex)];if(!x)return;const s=ganttUtcDay(x.start_date),en=ganttUtcDay(x.end_date),today=Math.floor(Date.now()/86400000);$("#ganttDetail").hidden=false;$("#ganttDetail").innerHTML='<h4>'+safe(x.title)+'</h4><p>شروع: '+safe(displayDate(x.start_date))+' | پایان: '+safe(displayDate(x.end_date))+'</p><p>مدت برنامه‌ریزی‌شده: '+(en-s+1).toLocaleString("fa-IR")+' روز</p><p>وضعیت زمانی: '+(en<today?"تاریخ پایان گذشته":s>today?"هنوز شروع نشده":"در بازه برنامه‌ریزی‌شده")+'</p>';});
 $("#phaseForm").addEventListener("submit",e=>{e.preventDefault();action(async()=>{if(!editable(current())||!hasPermission("schedule"))throw Error("امکان ثبت مرحله وجود ندارد");const v=Object.fromEntries(new FormData(e.target));v.start=gregorianDate(v.start);v.end=gregorianDate(v.end);if(v.end<v.start)throw Error("تاریخ پایان نامعتبر است");await run(sb.from("project_phases").insert({project_id:selected,title:v.title,start_date:v.start,end_date:v.end}));e.target.reset()})});
 $("#requestApproval").addEventListener("click",()=>action(async()=>{const p=current();if(!hasPermission("charter")||!editable(p)||!p.objective?.trim())throw Error("ابتدا منشور را ذخیره کنید");await run(sb.from("projects").update({workflow_status:"pending"}).eq("id",p.id).select())}));
 $("#publishProject").addEventListener("click",()=>action(async()=>{const p=current();if(!canPublish()||p?.workflow_status!=="approved")throw Error("تأیید مدیر لازم است");await run(sb.from("projects").update({workflow_status:"published"}).eq("id",p.id).select())}));
