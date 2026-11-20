@@ -128,7 +128,7 @@ document.addEventListener("click",async e=>{
  }catch(err){fail(err)}
 });
 $("#selectedProject").addEventListener("change",e=>{selected=Number(e.target.value);render()});
-function setAuthView(view){for(const [name,id] of Object.entries({login:"authLoginView",forgot:"authForgotView",reset:"authResetView"}))$("#"+id).hidden=name!==view;$("#authScreen").hidden=false;document.querySelector("header").style.visibility="hidden";document.querySelector(".layout").style.visibility="hidden";document.documentElement.style.overflow="hidden";window.scrollTo(0,0)}
+function setAuthView(view){for(const [name,id] of Object.entries({login:"authLoginView",forgot:"authForgotView",reset:"authResetView"}))$("#"+id).hidden=name!==view;$("#authScreen").hidden=false;document.querySelector("header").style.visibility="hidden";document.querySelector(".layout").style.visibility="hidden";window.scrollTo(0,0)}
 function showRecovery(){recoveryMode=true;setAuthView("reset");$("#recoveryStatus").textContent=""}
 const recoveryLink=location.hash.includes("type=recovery")||new URLSearchParams(location.search).get("type")==="recovery"||location.hash.includes("access_token=")&&location.hash.includes("recovery");
 if(recoveryLink)showRecovery();
