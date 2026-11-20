@@ -173,6 +173,13 @@ const themeToggle=$("#themeToggle");
 const syncThemeButton=()=>{const dark=document.documentElement.dataset.theme==="dark";themeToggle.setAttribute("aria-pressed",String(dark));themeToggle.setAttribute("aria-label",dark?"فعال‌سازی حالت روشن":"فعال‌سازی حالت تاریک");themeToggle.title=dark?"حالت روشن":"حالت تاریک"};
 themeToggle.addEventListener("click",()=>{const next=document.documentElement.dataset.theme==="dark"?"light":"dark";document.documentElement.dataset.theme=next;try{localStorage.setItem("project-app-theme",next)}catch(e){}syncThemeButton()});
 syncThemeButton();
+const appLayout=$("#appLayout"),sidebarToggle=$("#sidebarToggle");
+const navIcons={home:"⌂",center:"▣",create:"＋",charter:"▤",schedule:"▥",approvals:"◉",publish:"⇧",list:"☷",trash:"▢",users:"♙"};
+document.querySelectorAll("#sidebarNav .nav").forEach(btn=>{const label=btn.textContent.trim().replace(/^[⌂▣＋▤▥◉⇧☷▢♙]\s*/u,"");const icon=navIcons[btn.dataset.page]||"•";btn.textContent="";const i=document.createElement("span");i.className="sidebar-nav-icon";i.setAttribute("aria-hidden","true");i.textContent=icon;const t=document.createElement("span");t.className="sidebar-nav-label";t.textContent=label;btn.append(i,t);btn.title=label;btn.setAttribute("aria-label",label)});
+const syncSidebar=()=>{const collapsed=appLayout.classList.contains("sidebar-collapsed");sidebarToggle.setAttribute("aria-expanded",String(!collapsed));sidebarToggle.setAttribute("aria-label",collapsed?"باز کردن منوی کناری":"بستن منوی کناری");sidebarToggle.title=collapsed?"باز کردن منو":"بستن منو"};
+try{if(localStorage.getItem("project-app-sidebar")==="collapsed")appLayout.classList.add("sidebar-collapsed")}catch(e){}
+sidebarToggle.addEventListener("click",()=>{appLayout.classList.toggle("sidebar-collapsed");try{localStorage.setItem("project-app-sidebar",appLayout.classList.contains("sidebar-collapsed")?"collapsed":"expanded")}catch(e){}syncSidebar()});
+syncSidebar();
 initJalaliPicker();
 document.addEventListener("click",async e=>{
 const nav=e.target.closest("[data-page],[data-jump]");if(nav){if(!user||!profile?.is_approved||!hasPermission(nav.dataset.page||nav.dataset.jump))return;show(nav.dataset.page||nav.dataset.jump);return}
