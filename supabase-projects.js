@@ -128,6 +128,46 @@ document.addEventListener("click",async e=>{
  }catch(err){fail(err)}
 });
 $("#selectedProject").addEventListener("change",e=>{selected=Number(e.target.value);render()});
+let recoveryMode=false;
+function showRecovery(){
+ recoveryMode=true;
+ $("#recoveryPanel").style.display="block";
+ show("users");
+ $("#recoveryPanel").scrollIntoView({behavior:"smooth",block:"start"});
+}
+const recoveryLink=location.hash.includes("type=recovery")||new URLSearchParams(location.search).get("type")==="recovery";
+if(recoveryLink)showRecovery();
+$("#forgotPasswordForm").addEventListener("submit",async e=>{
+ e.preventDefault();const status=$("#forgotPasswordStatus");status.textContent="در حال ارسال...";
+ try{
+  const email=e.target.elements.email.value.trim();
+  const {error}=await sb.auth.resetPasswordForEmail(email,{redirectTo:location.origin+location.pathname});
+  if(error)throw error;
+  status.textContent="اگر ایمیل در سامانه ثبت شده باشد، لینک بازیابی ارسال می‌شود. پوشه Spam را هم بررسی کنید.";
+ }catch(err){status.textContent="خطا: "+(err.message||err)}
+});
+$("#recoveryForm").addEventListener("submit",async e=>{
+ e.preventDefault();const status=$("#recoveryStatus");
+ const p=e.target.elements.newPassword.value,confirm=e.target.elements.confirmPassword.value;
+ if(p!==confirm){status.textContent="رمزها یکسان نیستند.";return}
+ if(p.length<8){status.textContent="رمز باید حداقل ۸ کاراکتر باشد.";return}
+ status.textContent="در حال ذخیره رمز...";
+ try{
+  const {data:{session},error:sessionError}=await sb.auth.getSession();
+  if(sessionError)throw sessionError;
+  if(!session)throw Error("لینک بازیابی معتبر نیست یا منقضی شده. لینک جدید دریافت کنید.");
+  const {error}=await sb.auth.updateUser({password:p});
+  if(error)throw error;
+  status.textContent="رمز جدید با موفقیت ثبت شد. حالا می‌توانید با آن وارد شوید.";
+  recoveryMode=false;
+  e.target.reset();
+  await sb.auth.signOut();
+  user=null;await load();
+  location.hash="";
+  $("#recoveryPanel").style.display="none";
+  alert("رمز جدید ثبت شد. اکنون با ایمیل و رمز جدید وارد شوید.");
+ }catch(err){status.textContent="خطا: "+(err.message||err)}
+});
 $("#loginForm").addEventListener("submit",e=>{e.preventDefault();action(async()=>{const f=e.target;const {data,error}=await sb.auth.signInWithPassword({email:f.elements.username.value.trim(),password:f.elements.password.value});if(error)throw error;user=data.user})});
 $("#logout").addEventListener("click",()=>action(async()=>{await run(sb.auth.signOut());user=null;selected=null}));
 $("#projectForm").addEventListener("submit",e=>{e.preventDefault();action(async()=>{if(!canEdit())throw Error("دسترسی ایجاد پروژه ندارید");const v=Object.fromEntries(new FormData(e.target));v.startDate=gregorianDate(v.startDate);v.endDate=gregorianDate(v.endDate);if(v.endDate<v.startDate)throw Error("تاریخ پایان نامعتبر است");const data=await run(sb.from("projects").insert({name:v.name,manager:v.manager,description:v.description,start_date:v.startDate,end_date:v.endDate,workflow_status:"draft"}).select("id").single());selected=data.id;e.target.reset();show("center")})});
@@ -138,6 +178,6 @@ $("#phaseForm").addEventListener("submit",e=>{e.preventDefault();action(async()=
 $("#requestApproval").addEventListener("click",()=>action(async()=>{const p=current();if(!editable(p)||!p.objective?.trim())throw Error("ابتدا منشور را ذخیره کنید");await run(sb.from("projects").update({workflow_status:"pending"}).eq("id",p.id).select())}));
 $("#publishProject").addEventListener("click",()=>action(async()=>{const p=current();if(!canApprove()||p?.workflow_status!=="approved")throw Error("تأیید مدیر لازم است");await run(sb.from("projects").update({workflow_status:"published"}).eq("id",p.id).select())}));
 const {data}=await sb.auth.getUser();user=data?.user||null;await action(async()=>{});
-sb.auth.onAuthStateChange((_event,session)=>{user=session?.user||null;setTimeout(()=>load().catch(fail),0)});
+sb.auth.onAuthStateChange((event,session)=>{user=session?.user||null;if(event==="PASSWORD_RECOVERY"){setTimeout(showRecovery,0)}setTimeout(()=>load().catch(fail),0)});
 });
 })();
