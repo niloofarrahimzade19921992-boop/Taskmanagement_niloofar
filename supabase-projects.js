@@ -22,8 +22,9 @@ if(!profile?.is_approved){projects=[];phases=[];render();return}
 projects=await run(sb.from("projects").select("*").order("id",{ascending:false}));
 phases=await run(sb.from("project_phases").select("*"));
 render();
+if(document.querySelector(".page#users.active"))refreshAdminUsers();
 }
-function show(page){document.querySelectorAll(".page").forEach(e=>e.classList.toggle("active",e.id===page));document.querySelectorAll(".nav").forEach(e=>e.classList.toggle("active",e.dataset.page===page));render();window.scrollTo(0,0)}
+function show(page){document.querySelectorAll(".page").forEach(e=>e.classList.toggle("active",e.id===page));document.querySelectorAll(".nav").forEach(e=>e.classList.toggle("active",e.dataset.page===page));render();if(page==="users")refreshAdminUsers();window.scrollTo(0,0)}
 function render(){
 if(!projects.some(p=>String(p.id)===String(selected)))selected=projects[0]?.id??null;
 const p=current(),st=p?.workflow_status||"draft";
@@ -49,12 +50,33 @@ const min=Math.min(...times),max=Math.max(...times),span=Math.max(86400000,max-m
 $("#gantt").innerHTML=items.map(x=>{const left=Math.max(0,(Date.parse(x.start_date)-min)/span*100),width=Math.max(1,(Date.parse(x.end_date)-Date.parse(x.start_date))/span*100);return '<div class="gantt-row"><div>'+safe(x.title)+'<br><small>'+displayDate(x.start_date)+' تا '+displayDate(x.end_date)+'</small></div><div class="track"><div class="bar" style="right:'+left+'%;width:'+Math.min(width,100-left)+'%"></div></div></div>'}).join("");
 }
 async function action(fn,successMessage){try{await fn();await load();if(successMessage)alert(successMessage)}catch(e){fail(e)}}
+
+async function adminRequest(body){
+ const {data:{session}}=await sb.auth.getSession();
+ if(!session?.access_token)throw Error("ابتدا وارد سامانه شوید");
+ const response=await fetch("https://xgrtcsudpqcznhlkberz.supabase.co/functions/v1/manage-users",{method:"POST",headers:{"Content-Type":"application/json","Authorization":"Bearer "+session.access_token,"apikey":"sb_publishable_kyEmcxiKYeNFgnPTBqnjqw_BxrCP7hu"},body:JSON.stringify(body)});
+ const result=await response.json().catch(()=>({error:"پاسخ نامعتبر از سرور"}));
+ if(!response.ok||result.error)throw Error(result.error||"خطای سرور");
+ return result;
+}
+async function refreshAdminUsers(){
+ const box=$("#adminUsers"),list=$("#usersList");
+ box.style.display=canApprove()?"block":"none";
+ if(!canApprove()){list.textContent=user?"فقط مدیر سامانه امکان مدیریت کاربران را دارد.":"ابتدا وارد شوید.";return}
+ list.textContent="";
+ try{
+ const result=await adminRequest({action:"list"});
+ $("#usersTable").innerHTML=result.users.map(u=>'<tr><td>'+safe(u.full_name||u.id)+'</td><td><select data-user-role="'+safe(u.id)+'" '+(u.is_admin?"disabled":"")+'><option value="responsible" '+(u.role==="responsible"?"selected":"")+'>کاربر عادی</option><option value="manager" '+(u.role==="manager"?"selected":"")+'>مدیر پروژه</option><option value="support" '+(u.role==="support"?"selected":"")+'>پشتیبان</option></select></td><td><input type="checkbox" data-user-approved="'+safe(u.id)+'" '+(u.is_approved?"checked":"")+' '+(u.is_admin?"disabled":"")+'></td><td>'+(u.is_admin?"مدیر سامانه":'<button type="button" data-save-user="'+safe(u.id)+'">ذخیره</button>')+'</td></tr>').join("");
+ }catch(e){$("#userAdminStatus").textContent="خطا در دریافت کاربران: "+e.message}
+}
 document.addEventListener("DOMContentLoaded",async()=>{
 document.addEventListener("click",async e=>{
 const nav=e.target.closest("[data-page],[data-jump]");if(nav){show(nav.dataset.page||nav.dataset.jump);return}
 const open=e.target.closest("[data-open]");if(open){selected=Number(open.dataset.open);show("center");return}
 const dec=e.target.closest("[data-decision]");if(dec&&canApprove())await action(async()=>{await run(sb.from("projects").update({workflow_status:dec.dataset.decision}).eq("id",Number(dec.dataset.id)).eq("workflow_status","pending").select())});
 });
+$("#newUserForm").addEventListener("submit",async e=>{e.preventDefault();const msg=$("#userAdminStatus");msg.textContent="در حال ایجاد کاربر...";try{const v=Object.fromEntries(new FormData(e.target));await adminRequest({action:"create",...v});e.target.reset();msg.textContent="✓ کاربر با موفقیت ایجاد شد";await refreshAdminUsers()}catch(err){msg.textContent="خطا: "+err.message}});
+document.addEventListener("click",async e=>{const btn=e.target.closest("[data-save-user]");if(!btn)return;const id=btn.dataset.saveUser;const msg=$("#userAdminStatus");try{await adminRequest({action:"update",id,role:document.querySelector('[data-user-role="'+id+'"]').value,is_approved:document.querySelector('[data-user-approved="'+id+'"]').checked});msg.textContent="✓ دسترسی کاربر ذخیره شد";await refreshAdminUsers()}catch(err){msg.textContent="خطا: "+err.message}});
 $("#selectedProject").addEventListener("change",e=>{selected=Number(e.target.value);render()});
 $("#loginForm").addEventListener("submit",e=>{e.preventDefault();action(async()=>{const f=e.target;const {data,error}=await sb.auth.signInWithPassword({email:f.elements.username.value.trim(),password:f.elements.password.value});if(error)throw error;user=data.user})});
 $("#logout").addEventListener("click",()=>action(async()=>{await run(sb.auth.signOut());user=null;selected=null}));
