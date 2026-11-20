@@ -169,6 +169,10 @@ function initJalaliPicker(){
  });
 }
 document.addEventListener("DOMContentLoaded",async()=>{
+const themeToggle=$("#themeToggle");
+const syncThemeButton=()=>{const dark=document.documentElement.dataset.theme==="dark";themeToggle.setAttribute("aria-pressed",String(dark));themeToggle.setAttribute("aria-label",dark?"فعال‌سازی حالت روشن":"فعال‌سازی حالت تاریک");themeToggle.title=dark?"حالت روشن":"حالت تاریک"};
+themeToggle.addEventListener("click",()=>{const next=document.documentElement.dataset.theme==="dark"?"light":"dark";document.documentElement.dataset.theme=next;try{localStorage.setItem("project-app-theme",next)}catch(e){}syncThemeButton()});
+syncThemeButton();
 initJalaliPicker();
 document.addEventListener("click",async e=>{
 const nav=e.target.closest("[data-page],[data-jump]");if(nav){if(!user||!profile?.is_approved||!hasPermission(nav.dataset.page||nav.dataset.jump))return;show(nav.dataset.page||nav.dataset.jump);return}
