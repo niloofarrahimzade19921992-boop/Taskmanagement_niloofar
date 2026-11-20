@@ -70,7 +70,38 @@ async function refreshAdminUsers(){
  $("#usersTable").innerHTML=result.users.map(u=>'<tr><td>'+safe(u.full_name||u.id)+'</td><td><select data-user-role="'+safe(u.id)+'" '+(u.is_admin?"disabled":"")+'><option value="responsible" '+(u.role==="responsible"?"selected":"")+'>کاربر عادی</option><option value="manager" '+(u.role==="manager"?"selected":"")+'>مدیر پروژه</option><option value="support" '+(u.role==="support"?"selected":"")+'>پشتیبان</option></select></td><td><input type="checkbox" data-user-approved="'+safe(u.id)+'" '+(u.is_approved?"checked":"")+' '+(u.is_admin?"disabled":"")+'></td><td>'+(u.is_admin?"مدیر سامانه":'<button type="button" data-save-user="'+safe(u.id)+'">ذخیره</button>')+'</td></tr>').join("");
  }catch(e){$("#userAdminStatus").textContent="خطا در دریافت کاربران: "+e.message}
 }
+
+let jalaliTarget=null;
+const jpMonths=["فروردین","اردیبهشت","خرداد","تیر","مرداد","شهریور","مهر","آبان","آذر","دی","بهمن","اسفند"];
+function initJalaliPicker(){
+ const modal=$("#jalaliPicker"),year=$("#jpYear"),month=$("#jpMonth"),day=$("#jpDay");
+ const now=jalaliParts(new Date());
+ year.innerHTML=Array.from({length:31},(_,i)=>'<option value="'+(now.year-15+i)+'">'+(now.year-15+i)+'</option>').join("");
+ month.innerHTML=jpMonths.map((m,i)=>'<option value="'+(i+1)+'">'+m+'</option>').join("");
+ function fillDays(){const y=Number(year.value),m=Number(month.value),prev=Number(day.value)||1;const max=m<=6?31:m<=11?30:30;day.innerHTML=Array.from({length:max},(_,i)=>'<option value="'+(i+1)+'">'+(i+1)+'</option>').join("");day.value=String(Math.min(prev,max))}
+ year.addEventListener("change",fillDays);month.addEventListener("change",fillDays);
+ function close(){modal.style.display="none";jalaliTarget=null}
+ $("#jpCancel").addEventListener("click",close);
+ modal.addEventListener("click",e=>{if(e.target===modal)close()});
+ document.addEventListener("click",e=>{
+  const input=e.target.closest('input[data-jalali-picker]');
+  if(!input)return;
+  jalaliTarget=input;
+  const parts=faDigits(input.value).match(/^(\d{4})\/(\d{1,2})\/(\d{1,2})$/);
+  const y=parts?Number(parts[1]):now.year,m=parts?Number(parts[2]):now.month,d=parts?Number(parts[3]):now.day;
+  year.value=String(y);if(!year.value)year.value=String(now.year);
+  month.value=String(m);fillDays();day.value=String(d);
+  $("#jpError").textContent="";modal.style.display="flex";
+ });
+ $("#jpConfirm").addEventListener("click",()=>{
+  if(!jalaliTarget)return;
+  const val=year.value+"/"+month.value.padStart(2,"0")+"/"+day.value.padStart(2,"0");
+  try{gregorianDate(val);jalaliTarget.value=val;jalaliTarget.dispatchEvent(new Event("change",{bubbles:true}));close()}
+  catch(e){$("#jpError").textContent=e.message}
+ });
+}
 document.addEventListener("DOMContentLoaded",async()=>{
+initJalaliPicker();
 document.addEventListener("click",async e=>{
 const nav=e.target.closest("[data-page],[data-jump]");if(nav){show(nav.dataset.page||nav.dataset.jump);return}
 const open=e.target.closest("[data-open]");if(open){selected=Number(open.dataset.open);show("center");return}
