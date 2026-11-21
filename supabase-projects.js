@@ -156,7 +156,14 @@ function initJalaliPicker(){
  const now=jalaliParts(new Date());
  year.innerHTML=Array.from({length:31},(_,i)=>'<option value="'+(now.year-15+i)+'">'+(now.year-15+i)+'</option>').join("");
  month.innerHTML=jpMonths.map((m,i)=>'<option value="'+(i+1)+'">'+m+'</option>').join("");
- function fillDays(){const y=Number(year.value),m=Number(month.value),prev=Number(day.value)||1;const max=m<=6?31:m<=11?30:30;day.innerHTML=Array.from({length:max},(_,i)=>'<option value="'+(i+1)+'">'+(i+1)+'</option>').join("");day.value=String(Math.min(prev,max))}
+ function fillDays(){
+  const y=Number(year.value),m=Number(month.value),prev=Number(day.value)||1;
+  let max=m<=6?31:m<=11?30:29;
+  if(m===12){try{gregorianDate(y+"/12/30");max=30}catch(e){max=29}}
+  day.innerHTML=Array.from({length:max},(_,i)=>'<option value="'+(i+1)+'">'+(i+1)+'</option>').join("");
+  day.value=String(Math.min(prev,max));
+  $("#jpError").textContent="";
+ }
  year.addEventListener("change",fillDays);month.addEventListener("change",fillDays);
  function close(){modal.style.display="none";jalaliTarget=null}
  $("#jpCancel").addEventListener("click",close);
@@ -168,7 +175,7 @@ function initJalaliPicker(){
   const parts=faDigits(input.value).match(/^(\d{4})\/(\d{1,2})\/(\d{1,2})$/);
   const y=parts?Number(parts[1]):now.year,m=parts?Number(parts[2]):now.month,d=parts?Number(parts[3]):now.day;
   year.value=String(y);if(!year.value)year.value=String(now.year);
-  month.value=String(m);fillDays();day.value=String(d);
+  month.value=String(m);fillDays();day.value=String(Math.min(d,day.options.length));
   $("#jpError").textContent="";modal.style.display="flex";
  });
  $("#jpConfirm").addEventListener("click",()=>{
