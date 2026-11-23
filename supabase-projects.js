@@ -210,7 +210,7 @@ initJalaliPicker();
 document.addEventListener("click",async e=>{
 const dashboardCard=e.target.closest("[data-dashboard-filter]");if(dashboardCard){dashboardStatusFilter=dashboardCard.dataset.dashboardFilter;if(hasPermission("center"))show("center");return}
 const nav=e.target.closest("[data-page],[data-jump]");if(nav){if(!user||!profile?.is_approved||!hasPermission(nav.dataset.page||nav.dataset.jump))return;show(nav.dataset.page||nav.dataset.jump);return}
-const open=e.target.closest("[data-open]");if(open){selected=Number(open.dataset.open);show("center");return}
+const open=e.target.closest("[data-open]");if(open){const id=Number(open.dataset.open);if(!projects.some(p=>Number(p.id)===id))return;selected=id;dashboardStatusFilter="all";show("center");const details=$("#projectDetails");if(details){details.scrollIntoView({behavior:"smooth",block:"start"});details.setAttribute("tabindex","-1");details.focus({preventScroll:true});}return}
 const dec=e.target.closest("[data-decision]");if(dec&&canDecide())await action(async()=>{await run(sb.from("projects").update({workflow_status:dec.dataset.decision}).eq("id",Number(dec.dataset.id)).eq("workflow_status","pending").select())});
 });
 $("#newUserForm").addEventListener("submit",async e=>{e.preventDefault();const msg=$("#userAdminStatus");msg.textContent="در حال ایجاد کاربر...";try{const v=Object.fromEntries(new FormData(e.target));await adminRequest({action:"create",...v});e.target.reset();msg.textContent="✓ کاربر با موفقیت ایجاد شد";await refreshAdminUsers()}catch(err){msg.textContent="خطا: "+err.message}});
