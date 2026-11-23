@@ -1,7 +1,7 @@
 (()=>{
 "use strict";
 const sb=window.supabase.createClient("https://xgrtcsudpqcznhlkberz.supabase.co","sb_publishable_kyEmcxiKYeNFgnPTBqnjqw_BxrCP7hu");
-let projects=[],archivedProjects=[],phases=[],profile=null,user=null,selected=null,permissionOverrides={};let recoveryMode=false;let dashboardStatusFilter="all";
+let tasks=[],projects=[],archivedProjects=[],phases=[],profile=null,user=null,selected=null,permissionOverrides={};let recoveryMode=false;let dashboardStatusFilter="all";
 const $=s=>document.querySelector(s),safe=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const faDigits=s=>String(s??"").replace(/[۰-۹]/g,x=>String("۰۱۲۳۴۵۶۷۸۹".indexOf(x))).replace(/[٠-٩]/g,x=>String("٠١٢٣٤٥٦٧٨٩".indexOf(x)));
 const fmt=new Intl.DateTimeFormat("en-US-u-ca-persian",{year:"numeric",month:"2-digit",day:"2-digit",timeZone:"UTC"});
@@ -31,15 +31,15 @@ const canPublish=()=>canEdit()&&hasPermission("publish");
 function fail(e){const message=e?.message||String(e);const auth=$("#authScreen");if(auth&&!auth.hidden){const status=$("#authMessage");if(status)status.textContent=/invalid login credentials/i.test(message)?"ایمیل یا رمز عبور صحیح نیست. در صورت فراموشی رمز، از بازیابی رمز عبور استفاده کنید.":/email not confirmed/i.test(message)?"ایمیل حساب هنوز تأیید نشده است.":/failed to fetch|network/i.test(message)?"ارتباط با سرور برقرار نشد. اتصال اینترنت را بررسی کنید.":"ورود ناموفق بود: "+message;return}alert("خطا: "+message)}
 async function run(promise){const {data,error}=await promise;if(error)throw error;return data}
 async function load(){
-if(!user){projects=[];archivedProjects=[];phases=[];profile=null;permissionOverrides={};render();return}
+if(!user){tasks=[];projects=[];archivedProjects=[];phases=[];profile=null;permissionOverrides={};render();return}
 profile=await run(sb.from("user_profiles").select("id,full_name,role,is_approved,is_admin").eq("id",user.id).maybeSingle());
-if(!profile?.is_approved){projects=[];archivedProjects=[];phases=[];permissionOverrides={};render();return}
+if(!profile?.is_approved){tasks=[];projects=[];archivedProjects=[];phases=[];permissionOverrides={};render();return}
 const permResult=await sb.from("user_permissions").select("permission_key,allowed").eq("user_id",user.id);if(permResult.error)throw permResult.error;
 permissionOverrides=Object.fromEntries((permResult.data||[]).map(p=>[p.permission_key,p.allowed]));
 const allProjects=await run(sb.from("projects").select("*").order("id",{ascending:false}));
 projects=allProjects.filter(p=>!p.deleted_at);
 archivedProjects=hasPermission("trash")?allProjects.filter(p=>!!p.deleted_at):[];
-phases=await run(sb.from("project_phases").select("*"));
+phases=await run(sb.from("project_phases").select("*"));tasks=await run(sb.from("tasks").select("*").order("id",{ascending:false}));
 render();
 if(document.querySelector(".page#users.active"))refreshAdminUsers();
 }
@@ -68,7 +68,16 @@ $("#requestApproval").disabled=!editable(p);
 $("#publishProject").hidden=!canPublish();$("#publishProject").disabled=!(canPublish()&&st==="approved");
 document.querySelectorAll("#charterForm button,#phaseForm button,#projectForm button").forEach(b=>{const key=b.closest("#projectForm")?"create":b.closest("#phaseForm")?"schedule":"charter";b.hidden=!(canEdit()&&hasPermission(key));b.disabled=!canEdit()||!hasPermission(key)||(key==="create"?false:!editable(p))});
 $("#usersList").textContent=profile?(profile.is_approved?"حساب شما تأیید شده است.":"حساب شما هنوز توسط مدیر تأیید نشده است."):"برای مشاهده پروژه‌ها وارد شوید.";
-renderGantt(p?phases.filter(x=>x.project_id===p.id):[]);
+renderGantt(p?phases.filter(x=>x.project_id===p.id):[]);renderTaskInbox(p);
+}
+
+function renderTaskInbox(p){
+ const rows=$("#tasksRows");if(!rows)return;
+ $("#tasksProjectLabel").textContent=p?"وظایف پروژه: "+p.name:"ابتدا یک پروژه انتخاب کنید";
+ const editableTasks=!!(p&&editable(p)&&hasPermission("tasks"));
+ $("#taskCreatePanel").hidden=!editableTasks;
+ const list=p?tasks.filter(t=>Number(t.project_id)===Number(p.id)):[];
+ rows.innerHTML=list.map(t=>'<tr><td>'+safe(t.title)+'</td><td>'+safe(t.responsible_name||"—")+'</td><td>'+displayDate(t.start_date)+'</td><td>'+displayDate(t.end_date)+'</td><td>'+Number(t.progress_percent||0).toLocaleString("fa-IR")+'٪</td><td>'+(editableTasks?'<form data-task-progress="'+t.id+'" style="display:flex;gap:6px;align-items:center"><input aria-label="درصد پیشرفت" type="number" min="0" max="100" name="progress" value="'+Number(t.progress_percent||0)+'" style="width:75px"><button class="secondary" type="submit">ذخیره</button></form>':"فقط مشاهده")+'</td></tr>').join("")||'<tr><td colspan="6">برای این پروژه هنوز وظیفه‌ای ثبت نشده است.</td></tr>';
 }
 let ganttCurrentItems=[],ganttScale="week";
 function ganttUtcDay(value){return Math.floor(Date.parse(String(value).slice(0,10)+"T00:00:00Z")/86400000)}
@@ -246,6 +255,24 @@ $("#recoveryForm").addEventListener("submit",async e=>{
 });
 $("#loginForm").addEventListener("submit",async e=>{e.preventDefault();const f=e.target,msg=$("#authMessage"),button=f.querySelector('button[type="submit"]');if(button.disabled)return;msg.textContent="در حال بررسی اطلاعات ورود...";button.disabled=true;try{const {data,error}=await sb.auth.signInWithPassword({email:f.elements.username.value.trim(),password:f.elements.password.value});if(error)throw error;user=data.user;await load();if(!profile?.is_approved){msg.textContent="حساب شما هنوز توسط مدیر تأیید نشده است.";return}msg.textContent="";f.reset();show("home")}catch(err){fail(err)}finally{button.disabled=false}});
 $("#headerLogout").addEventListener("click",()=>action(async()=>{await run(sb.auth.signOut());user=null;selected=null;show("home")}));$("#headerLogin").addEventListener("click",()=>setAuthView("login"));
+
+$("#taskCreateForm").addEventListener("submit",e=>{e.preventDefault();action(async()=>{
+ const p=current();if(!p||!editable(p)||!hasPermission("tasks"))throw Error("مجوز ایجاد وظیفه ندارید");
+ const v=Object.fromEntries(new FormData(e.target));
+ if(!v.title?.trim())throw Error("عنوان وظیفه الزامی است");
+ const start=v.start_date?gregorianDate(v.start_date):null,end=v.end_date?gregorianDate(v.end_date):null;
+ if(start&&end&&end<start)throw Error("پایان قبل از شروع است");
+ const saved=await run(sb.from("tasks").insert({project_id:p.id,title:v.title.trim(),responsible_name:v.responsible_name||null,description:v.description||null,start_date:start,end_date:end,status:"draft",progress_percent:0}).select("id"));
+ if(!saved?.length)throw Error("وظیفه ذخیره نشد");e.target.reset();$("#tasksStatus").textContent="✓ وظیفه ثبت شد";
+})});
+document.addEventListener("submit",e=>{const form=e.target.closest("[data-task-progress]");if(!form)return;e.preventDefault();action(async()=>{
+ const p=current();if(!p||!editable(p)||!hasPermission("tasks"))throw Error("مجوز ثبت پیشرفت ندارید");
+ const id=Number(form.dataset.taskProgress),task=tasks.find(t=>t.id===id&&Number(t.project_id)===Number(p.id));
+ if(!task)throw Error("وظیفه در پروژه انتخاب‌شده پیدا نشد");
+ const value=Number(form.elements.progress.value);if(!Number.isInteger(value)||value<0||value>100)throw Error("درصد باید بین صفر و صد باشد");
+ const updated=await run(sb.from("tasks").update({progress_percent:value}).eq("id",id).eq("project_id",p.id).select("id"));
+ if(!updated?.length)throw Error("ثبت پیشرفت مجاز نبود");$("#tasksStatus").textContent="✓ پیشرفت واقعی ذخیره شد";
+})});
 $("#projectForm").addEventListener("submit",e=>{e.preventDefault();action(async()=>{if(!canEdit()||!hasPermission("create"))throw Error("دسترسی ایجاد پروژه ندارید");const v=Object.fromEntries(new FormData(e.target));v.startDate=gregorianDate(v.startDate);v.endDate=gregorianDate(v.endDate);if(v.endDate<v.startDate)throw Error("تاریخ پایان نامعتبر است");const data=await run(sb.from("projects").insert({name:v.name,manager:v.manager,sponsor:v.owner,approver:v.approver,objective:v.objective,description:v.description,start_date:v.startDate,end_date:v.endDate,workflow_status:"draft"}).select("id").single());selected=data.id;e.target.reset();show("center")})});
 async function saveCharter(e){if(e)e.preventDefault();const notice=$("#charterStatus");notice.textContent="در حال ذخیره منشور...";try{const p=current();if(!p)throw Error("پروژه انتخاب نشده است");if(!editable(p)||!hasPermission("charter"))throw Error("برای ویرایش این پروژه دسترسی ندارید");const v=Object.fromEntries(new FormData($("#charterForm")));if(!String(v.objective||"").trim())throw Error("هدف پروژه الزامی است");v.estimated_budget=v.estimated_budget===""?null:Number(v.estimated_budget);if(v.estimated_budget!==null&&(!Number.isFinite(v.estimated_budget)||v.estimated_budget<0))throw Error("بودجه نامعتبر است");v.charter_updated_at=new Date().toISOString();const saved=await run(sb.from("projects").update(v).eq("id",p.id).select("id"));if(!saved?.length)throw Error("سرور تغییر را ثبت نکرد");notice.textContent="✓ منشور با موفقیت در دیتابیس ذخیره شد";await load()}catch(err){notice.textContent="خطا در ذخیره: "+(err?.message||err);fail(err)}}
 $("#charterForm").addEventListener("submit",saveCharter);
@@ -258,7 +285,7 @@ $("#ganttToday").addEventListener("click",()=>{const scroller=$("#ganttScroll"),
 $("#gantt").addEventListener("click",e=>{const btn=e.target.closest("[data-gantt-index]");if(!btn)return;const x=$("#gantt")._sortedItems?.[Number(btn.dataset.ganttIndex)];if(!x)return;const s=ganttUtcDay(x.start_date),en=ganttUtcDay(x.end_date),today=Math.floor(Date.now()/86400000);$("#ganttDetail").hidden=false;$("#ganttDetail").innerHTML='<h4>'+safe(x.title)+'</h4><p>شروع: '+safe(displayDate(x.start_date))+' | پایان: '+safe(displayDate(x.end_date))+'</p><p>مدت برنامه‌ریزی‌شده: '+(en-s+1).toLocaleString("fa-IR")+' روز</p><p>وضعیت زمانی: '+(en<today?"تاریخ پایان گذشته":s>today?"هنوز شروع نشده":"در بازه برنامه‌ریزی‌شده")+'</p>';});
 $("#phaseForm").addEventListener("submit",e=>{e.preventDefault();action(async()=>{if(!editable(current())||!hasPermission("schedule"))throw Error("امکان ثبت مرحله وجود ندارد");const v=Object.fromEntries(new FormData(e.target));v.start=gregorianDate(v.start);v.end=gregorianDate(v.end);if(v.end<v.start)throw Error("تاریخ پایان نامعتبر است");await run(sb.from("project_phases").insert({project_id:selected,title:v.title,start_date:v.start,end_date:v.end}));e.target.reset()})});
 $("#requestApproval").addEventListener("click",()=>action(async()=>{const p=current();if(!hasPermission("charter")||!editable(p)||!p.objective?.trim())throw Error("ابتدا منشور را ذخیره کنید");await run(sb.from("projects").update({workflow_status:"pending"}).eq("id",p.id).select())}));
-["publishScheduleButton","publishApprovalsButton","publishTasksButton"].forEach(id=>document.getElementById(id)?.addEventListener("click",()=>{if(!canPublish())return alert("مجوز انتشار ندارید");alert("انتشار این بخش پس از تکمیل ذخیره‌سازی و گردش کار آن در دیتابیس فعال می‌شود.")}));$("#publishProject").addEventListener("click",()=>action(async()=>{const p=current();if(!canPublish()||p?.workflow_status!=="approved")throw Error("تأیید مدیر لازم است");await run(sb.from("projects").update({workflow_status:"published"}).eq("id",p.id).select())}));
+["publishScheduleButton","publishApprovalsButton"].forEach(id=>document.getElementById(id)?.addEventListener("click",()=>{if(!canPublish())return alert("مجوز انتشار ندارید");alert("انتشار این بخش پس از تکمیل ذخیره‌سازی و گردش کار آن در دیتابیس فعال می‌شود.")}));$("#publishProject").addEventListener("click",()=>action(async()=>{const p=current();if(!canPublish()||p?.workflow_status!=="approved")throw Error("تأیید مدیر لازم است");await run(sb.from("projects").update({workflow_status:"published"}).eq("id",p.id).select())}));
 let authInitialized=false;
 const finishAuthBoot=()=>{$("#authBoot").hidden=true;authInitialized=true};
 const banner=new Image();banner.onload=()=>document.querySelector(".auth-backdrop")?.classList.add("image-ready");banner.src="home-banner.png";try{const {data,error}=await sb.auth.getUser();if(error&&/invalid.*token|session.*missing/i.test(error.message||""))await sb.auth.signOut();user=data?.user||null;if(recoveryMode||new URLSearchParams(location.search).get("auth")==="recovery"){showRecovery();return}await load()}catch(e){user=null;profile=null;render();fail(e)}finally{finishAuthBoot()}
