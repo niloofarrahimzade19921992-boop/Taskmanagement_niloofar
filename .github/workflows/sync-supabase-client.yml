@@ -1,0 +1,38 @@
+name: Sync Supabase client archive
+on:
+  push:
+    branches: [main]
+    paths:
+      - index.html
+      - supabase-projects.js
+      - .github/workflows/sync-supabase-client.yml
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: sync-supabase-client-main
+  cancel-in-progress: false
+jobs:
+  sync:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - name: Copy current production client
+        run: |
+          mkdir -p supabase/client
+          cp index.html supabase/client/index.html
+          cp supabase-projects.js supabase/client/supabase-projects.js
+      - name: Commit only changed archive files
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -- supabase/client/index.html supabase/client/supabase-projects.js
+          if git diff --cached --quiet; then
+            echo "Archive already up to date"
+            exit 0
+          fi
+          git commit -m "Sync Supabase client archive"
+          git push origin HEAD:main
