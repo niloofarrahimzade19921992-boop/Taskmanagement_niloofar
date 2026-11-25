@@ -75,8 +75,8 @@ renderGantt(p?phases.filter(x=>x.project_id===p.id):[]);renderTaskInbox(p);
 function renderTaskInbox(p){
  const rows=$("#tasksRows");if(!rows)return;for(const id of ["tasksProjectSelect","publishProjectSelect"]){const el=document.getElementById(id);if(el){el.innerHTML='<option value="">انتخاب پروژه</option>'+projects.map(x=>'<option value="'+safe(x.id)+'">'+safe(x.name)+'</option>').join("");el.value=p?.id??"";}}
  $("#tasksProjectLabel").textContent=p?"وظایف پروژه: "+p.name:"ابتدا یک پروژه انتخاب کنید";
- const editableTasks=!!(p&&editable(p)&&hasPermission("tasks"));
- $("#taskCreatePanel").hidden=!editableTasks;
+ const editableTasks=!!(p&&canEdit()&&hasPermission("tasks")&&["draft","rejected","approved","published"].includes(p.workflow_status));
+ $("#taskCreatePanel").hidden=!(editableTasks&&editable(p));
  const list=p?tasks.filter(t=>Number(t.project_id)===Number(p.id)):[];
  rows.innerHTML=list.map(t=>'<tr><td>'+safe(t.title)+'</td><td>'+safe(t.responsible_name||"—")+'</td><td>'+displayDate(t.start_date)+'</td><td>'+displayDate(t.end_date)+'</td><td>'+Number(t.progress_percent||0).toLocaleString("fa-IR")+'٪</td><td>'+(editableTasks?'<form data-task-progress="'+t.id+'" style="display:flex;gap:6px;align-items:center"><input aria-label="درصد پیشرفت" type="number" min="0" max="100" name="progress" value="'+Number(t.progress_percent||0)+'" style="width:75px"><button class="secondary" type="submit">ذخیره</button></form>':"فقط مشاهده")+'</td></tr>').join("")||'<tr><td colspan="6">برای این پروژه هنوز وظیفه‌ای ثبت نشده است.</td></tr>';
 }
@@ -268,7 +268,7 @@ $("#taskCreateForm").addEventListener("submit",e=>{e.preventDefault();action(asy
  if(!saved?.length)throw Error("وظیفه ذخیره نشد");e.target.reset();$("#tasksStatus").textContent="✓ وظیفه ثبت شد";
 })});
 document.addEventListener("submit",e=>{const form=e.target.closest("[data-task-progress]");if(!form)return;e.preventDefault();action(async()=>{
- const p=current();if(!p||!editable(p)||!hasPermission("tasks"))throw Error("مجوز ثبت پیشرفت ندارید");
+ const p=current();if(!p||!canEdit()||!hasPermission("tasks")||!["draft","rejected","approved","published"].includes(p.workflow_status))throw Error("مجوز ثبت پیشرفت ندارید");
  const id=Number(form.dataset.taskProgress),task=tasks.find(t=>t.id===id&&Number(t.project_id)===Number(p.id));
  if(!task)throw Error("وظیفه در پروژه انتخاب‌شده پیدا نشد");
  const value=Number(form.elements.progress.value);if(!Number.isInteger(value)||value<0||value>100)throw Error("درصد باید بین صفر و صد باشد");
