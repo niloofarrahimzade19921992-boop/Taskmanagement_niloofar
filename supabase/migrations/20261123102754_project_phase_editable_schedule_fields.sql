@@ -1,0 +1,1 @@
+ALTER TABLE public.project_phases ADD COLUMN IF NOT EXISTS deviation numeric, ADD COLUMN IF NOT EXISTS weight numeric, ADD COLUMN IF NOT EXISTS planned numeric, ADD COLUMN IF NOT EXISTS actual numeric, ADD COLUMN IF NOT EXISTS supplementary text, ADD COLUMN IF NOT EXISTS approver text;;
